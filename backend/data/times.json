@@ -1,6 +1,1 @@
-[
-  {
-    "id": "1772209308214",
-    "nome": "Time teste"
-  }
-]
+[{"id":"1","nome":"Time teste"},{"id":"2","nome":"Squad Alpha"},{"id":"3","nome":"Squad Beta"},{"id":"4","nome":"Squad Gamma"},{"id":"5","nome":"DevOps"},{"id":"6","nome":"Frontend"},{"id":"7","nome":"Backend"},{"id":"8","nome":"Dados"},{"id":"9","nome":"Segurança"},{"id":"10","nome":"Infraestrutura"},{"id":"11","nome":"Suporte N1"},{"id":"12","nome":"Suporte N2"},{"id":"13","nome":"Product Owners"},{"id":"14","nome":"Scrum Masters"},{"id":"15","nome":"QA"},{"id":"16","nome":"UX/UI"},{"id":"17","nome":"Mobile"},{"id":"18","nome":"Integrações"},{"id":"19","nome":"ERP"},{"id":"20","nome":"CRM"},{"id":"21","nome":"BI"},{"id":"22","nome":"Compliance Tech"},{"id":"23","nome":"Innovation"},{"id":"24","nome":"Sustentação"},{"id":"25","nome":"Projetos Especiais"},{"id":"26","nome":"Arquitetura"},{"id":"27","nome":"Platform Team"},{"id":"28","nome":"SRE"},{"id":"29","nome":"Cloud Team"},{"id":"30","nome":"Full Stack"}]

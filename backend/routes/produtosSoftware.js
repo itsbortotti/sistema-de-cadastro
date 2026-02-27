@@ -198,7 +198,7 @@ router.post('/', (req, res) => {
  *             properties:
  *               items: { type: array, items: { type: object } }
  *     responses:
- *       200: { description: { criados: number, erros: string[] } }
+ *       200: { description: "Bulk create result: criados (number), erros (array)" }
  */
 router.post('/bulk', (req, res) => {
   const items = Array.isArray(req.body?.items) ? req.body.items : [];

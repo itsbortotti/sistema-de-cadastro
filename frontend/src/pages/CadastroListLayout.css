@@ -1,4 +1,4 @@
-/* Listagem compartilhada (grid ocupa a tela como Produtos de Software) */
+/* Listagem igual ao design de Fornecedores */
 .cadastro-list-page {
   max-width: none;
   width: 100%;
@@ -7,39 +7,36 @@
   min-height: 0;
 }
 
-.cadastro-list-page .table-wrap-scroll {
-  flex: 1;
-  width: 100%;
-  min-height: calc(100vh - 12rem);
-  overflow: auto;
+.cadastro-list-page .table-wrap {
+  overflow-x: auto;
 }
 
-.cadastro-list-page .table {
-  min-width: 800px;
+.cadastro-list-page .table-cadastro {
   width: 100%;
+  min-width: 600px;
 }
 
-.cadastro-list-page .th-acoes,
-.cadastro-list-page .td-acoes {
+.cadastro-list-page .table-cadastro .th-acoes,
+.cadastro-list-page .table-cadastro .td-acoes {
   white-space: nowrap;
   width: 140px;
 }
 
-.cadastro-list-page .td-acoes .btn {
+.cadastro-list-page .table-cadastro .td-acoes .btn {
   margin-right: 0.35rem;
 }
 
-.cadastro-list-page .td-acoes .btn:last-child {
+.cadastro-list-page .table-cadastro .td-acoes .btn:last-child {
   margin-right: 0;
 }
 
-.cadastro-list-page .td-texto {
+.cadastro-list-page .table-cadastro .td-texto {
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.cadastro-list-page .td-texto[title] {
+.cadastro-list-page .table-cadastro .td-texto[title] {
   cursor: help;
 }

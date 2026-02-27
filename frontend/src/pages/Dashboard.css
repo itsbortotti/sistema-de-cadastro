@@ -1,0 +1,210 @@
+.dashboard {
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.dashboard-subtitle {
+  margin: 0.35rem 0 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.dashboard-header-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.dashboard-periodo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dashboard-periodo-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dashboard-periodo-btns {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.dashboard-periodo-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #475569;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.dashboard-periodo-btn:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.dashboard-periodo-btn.ativo {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.dashboard-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  min-width: 200px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-card-label {
+  display: block;
+  font-size: 0.8rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.35rem;
+}
+
+.dashboard-card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.dashboard-card-moeda {
+  font-size: 1.35rem;
+}
+
+.dashboard-card.dashboard-card-destaque {
+  border-color: #3b82f6;
+  background: #f8fafc;
+}
+
+.dashboard-secao {
+  margin-bottom: 2.5rem;
+}
+
+.dashboard-secao-titulo {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #334155;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.dashboard-grafico-vazio {
+  margin: 0;
+  padding: 2rem;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.dashboard-vazio {
+  color: #64748b;
+  padding: 2rem;
+  text-align: center;
+}
+
+.dashboard-graficos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.dashboard-grafico-box {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-grafico-box.dashboard-grafico-full {
+  grid-column: 1 / -1;
+}
+
+.dashboard-grafico-titulo {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.dashboard-grafico-container {
+  width: 100%;
+  min-height: 260px;
+}
+
+.dashboard-grafico-container.dashboard-grafico-pie {
+  min-height: 280px;
+}
+
+/* Recharts tooltip/legend legibilidade */
+.dashboard .recharts-default-tooltip {
+  padding: 8px 12px !important;
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-radius: 6px;
+  font-size: 13px;
+  border: none;
+}
+
+.dashboard .recharts-legend-item-text {
+  font-size: 12px;
+  color: #475569;
+}
+
+.dashboard .recharts-cartesian-axis-tick-value {
+  fill: #64748b;
+  font-size: 11px;
+}
+
+/* Rótulos do eixo Y (nomes) — evita overflow */
+.dashboard .recharts-yAxis .recharts-cartesian-axis-tick-value {
+  textAnchor: start;
+}
+
+.dashboard .recharts-legend-wrapper {
+  overflow: visible;
+}
+
+.dashboard .recharts-legend-item-text {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -36,8 +36,8 @@ export default function AreasList() {
         <h1>Áreas</h1>
         <Link to="/areas/novo" className="btn btn-primary">Nova área</Link>
       </div>
-      <div className="table-wrap-scroll">
-        <table className="table">
+      <div className="table-wrap">
+        <table className="table table-cadastro">
           <thead>
             <tr>
               <th>Nome</th>

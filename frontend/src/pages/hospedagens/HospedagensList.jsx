@@ -36,8 +36,8 @@ export default function HospedagensList() {
         <h1>Hospedagens</h1>
         <Link to="/hospedagens/novo" className="btn btn-primary">Nova hospedagem</Link>
       </div>
-      <div className="table-wrap-scroll">
-        <table className="table">
+      <div className="table-wrap">
+        <table className="table table-cadastro">
           <thead>
             <tr>
               <th>Nome</th>

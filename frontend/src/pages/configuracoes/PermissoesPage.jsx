@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { permissoesApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
+import '../CadastroFormLayout.css';
 import './PermissoesPage.css';
 
 const TIPOS_ORDEM = ['admin', 'membro', 'visualizacao'];
@@ -137,7 +138,7 @@ export default function PermissoesPage() {
   if (carregando) return <p className="page-loading">Carregando permissões...</p>;
   if (acessoNegado) {
     return (
-      <div className="permissoes-page">
+      <div className="usuarios-page permissoes-page">
         <div className="page-header">
           <h1>Configurações — Permissões</h1>
           <Link to="/" className="btn btn-secondary">Voltar ao início</Link>
@@ -151,7 +152,7 @@ export default function PermissoesPage() {
   }
   if (erro && regras.length === 0) {
     return (
-      <div className="permissoes-page">
+      <div className="usuarios-page permissoes-page">
         <div className="page-header">
           <h1>Configurações — Permissões</h1>
           <Link to="/" className="btn btn-secondary">Voltar ao início</Link>
@@ -162,7 +163,7 @@ export default function PermissoesPage() {
   }
 
   return (
-    <div className="permissoes-page">
+    <div className="usuarios-page permissoes-page">
       <div className="page-header">
         <h1>Configurações — Permissões</h1>
         <Link to="/" className="btn btn-secondary">Voltar ao início</Link>
@@ -221,7 +222,7 @@ export default function PermissoesPage() {
           </section>
         ))}
 
-        <div className="permissoes-actions">
+        <div className="form-actions permissoes-actions">
           <button type="submit" className="btn btn-primary" disabled={salvando}>
             {salvando ? 'Salvando...' : 'Salvar permissões'}
           </button>

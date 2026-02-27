@@ -371,12 +371,12 @@ export default function ProdutoSoftwareForm() {
         <section className="form-secao">
           <h2 className="form-secao-titulo">Custos e time</h2>
           <label className="form-group">
-            <span className="form-label">Custo mensal Sistema</span>
-            <input type="number" step="0.01" min={0} value={custoMensalSistema} onChange={(e) => setCustoMensalSistema(e.target.value)} placeholder="R$" />
+            <span className="form-label">Custo mensal Sistema (R$)</span>
+            <input type="number" step="0.01" min={0} value={custoMensalSistema} onChange={(e) => setCustoMensalSistema(e.target.value)} placeholder="0,00" />
           </label>
           <label className="form-group">
-            <span className="form-label">Custo mensal Infraestrutura</span>
-            <input type="number" step="0.01" min={0} value={custoMensalInfraestrutura} onChange={(e) => setCustoMensalInfraestrutura(e.target.value)} placeholder="R$" />
+            <span className="form-label">Custo mensal Infraestrutura (R$)</span>
+            <input type="number" step="0.01" min={0} value={custoMensalInfraestrutura} onChange={(e) => setCustoMensalInfraestrutura(e.target.value)} placeholder="0,00" />
           </label>
           <SelectComNovo
             label="TIME"

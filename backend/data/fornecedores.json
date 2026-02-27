@@ -1,6 +1,1 @@
-[
-  {
-    "id": "1772209281714",
-    "nome": "Fornecedor teste"
-  }
-]
+[{"id":"1","nome":"Fornecedor teste"},{"id":"2","nome":"Microsoft Brasil"},{"id":"3","nome":"Oracle do Brasil"},{"id":"4","nome":"SAP América Latina"},{"id":"5","nome":"Salesforce"},{"id":"6","nome":"Amazon Web Services"},{"id":"7","nome":"Google Cloud Brasil"},{"id":"8","nome":"IBM Brasil"},{"id":"9","nome":"TOTVS"},{"id":"10","nome":"Dell Technologies"},{"id":"11","nome":"Cisco Brasil"},{"id":"12","nome":"VMware"},{"id":"13","nome":"Red Hat"},{"id":"14","nome":"Adobe Brasil"},{"id":"15","nome":"ServiceNow"},{"id":"16","nome":"Zendesk"},{"id":"17","nome":"Atlassian"},{"id":"18","nome":"Slack Technologies"},{"id":"19","nome":"Zoom Video"},{"id":"20","nome":"DocuSign"},{"id":"21","nome":"Sage"},{"id":"22","nome":"Infor"},{"id":"23","nome":"Unit4"},{"id":"24","nome":"Workday"},{"id":"25","nome":"Splunk"},{"id":"26","nome":"Datadog"},{"id":"27","nome":"New Relic"},{"id":"28","nome":"MongoDB"},{"id":"29","nome":"Cloudera"},{"id":"30","nome":"Snowflake"}]

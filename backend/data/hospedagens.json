@@ -1,14 +1,1 @@
-[
-  {
-    "id": "1",
-    "nome": "Cloud"
-  },
-  {
-    "id": "2",
-    "nome": "On Premises"
-  },
-  {
-    "id": "3",
-    "nome": "Híbrido"
-  }
-]
+[{"id":"1","nome":"Cloud"},{"id":"2","nome":"On Premises"},{"id":"3","nome":"Híbrido"},{"id":"4","nome":"AWS"},{"id":"5","nome":"Azure"},{"id":"6","nome":"Google Cloud"},{"id":"7","nome":"Oracle Cloud"},{"id":"8","nome":"IBM Cloud"},{"id":"9","nome":"Datacenter Próprio"},{"id":"10","nome":"Colocation"},{"id":"11","nome":"SaaS Multi-tenant"},{"id":"12","nome":"SaaS Dedicado"},{"id":"13","nome":"IaaS"},{"id":"14","nome":"PaaS"},{"id":"15","nome":"Serverless"},{"id":"16","nome":"Edge Computing"},{"id":"17","nome":"Private Cloud"},{"id":"18","nome":"Public Cloud"},{"id":"19","nome":"Community Cloud"},{"id":"20","nome":"Managed Hosting"},{"id":"21","nome":"VPS"},{"id":"22","nome":"Docker/Kubernetes"},{"id":"23","nome":"VMware"},{"id":"24","nome":"Hyper-V"},{"id":"25","nome":"OpenStack"},{"id":"26","nome":"Rack dedicado"},{"id":"27","nome":"Cloud Governamental"},{"id":"28","nome":"Multi-Cloud"},{"id":"29","nome":"On-Premises Virtualizado"},{"id":"30","nome":"Serverless + On-Prem"}]

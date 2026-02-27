@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { usuariosApi } from '../../api/client';
 import './Usuarios.css';
+import '../CadastroListLayout.css';
+
+const v = (x) => (x != null && x !== '' ? String(x) : '—');
 
 export default function UsuariosList() {
   const [lista, setLista] = useState([]);
@@ -31,11 +34,11 @@ export default function UsuariosList() {
       .finally(() => setExcluindo(null));
   };
 
-  if (carregando) return <p>Carregando usuários...</p>;
+  if (carregando) return <p className="page-loading">Carregando...</p>;
   if (erro) return <p className="erro-msg">{erro}</p>;
 
   return (
-    <div className="usuarios-page">
+    <div className="usuarios-page cadastro-list-page">
       <div className="page-header">
         <h1>Cadastro de Usuários</h1>
         <Link to="/usuarios/novo" className="btn btn-primary">
@@ -43,14 +46,14 @@ export default function UsuariosList() {
         </Link>
       </div>
       <div className="table-wrap">
-        <table className="table">
+        <table className="table table-cadastro">
           <thead>
             <tr>
               <th>Nome</th>
               <th>Login</th>
               <th>E-mail</th>
               <th>Tipo</th>
-              <th width="140">Ações</th>
+              <th className="th-acoes">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -61,16 +64,16 @@ export default function UsuariosList() {
             ) : (
               lista.map((u) => (
                 <tr key={u.id}>
-                  <td>{u.nome}</td>
-                  <td>{u.login}</td>
-                  <td>{u.email || '—'}</td>
+                  <td className="td-texto" title={u.nome}>{v(u.nome)}</td>
+                  <td>{v(u.login)}</td>
+                  <td className="td-texto" title={u.email}>{v(u.email)}</td>
                   <td>
                     {u.tipo === 'admin' && 'Administrador'}
                     {u.tipo === 'membro' && 'Membro'}
                     {u.tipo === 'visualizacao' && 'Apenas visualização'}
                     {!['admin', 'membro', 'visualizacao'].includes(u.tipo) && (u.tipo || 'Membro')}
                   </td>
-                  <td className="acoes-cell">
+                  <td className="td-acoes">
                     <Link to={`/usuarios/editar/${u.id}`} className="btn btn-sm">
                       Editar
                     </Link>

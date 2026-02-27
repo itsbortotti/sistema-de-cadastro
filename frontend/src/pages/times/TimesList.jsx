@@ -36,8 +36,8 @@ export default function TimesList() {
         <h1>Times</h1>
         <Link to="/times/novo" className="btn btn-primary">Novo time</Link>
       </div>
-      <div className="table-wrap-scroll">
-        <table className="table">
+      <div className="table-wrap">
+        <table className="table table-cadastro">
           <thead>
             <tr>
               <th>Nome</th>

@@ -20,6 +20,11 @@
   font-size: 0.9rem;
 }
 
+.page-loading {
+  padding: 1rem 0;
+  color: #64748b;
+}
+
 .sucesso-msg {
   color: #059669;
   margin-bottom: 1rem;

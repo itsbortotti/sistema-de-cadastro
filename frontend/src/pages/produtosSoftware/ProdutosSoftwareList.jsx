@@ -40,6 +40,14 @@ function parseCSV(texto) {
   return { headers, rows };
 }
 
+// Formata valor numérico como moeda BRL
+function formatarMoeda(valor) {
+  if (valor == null || valor === '') return '—';
+  const n = Number(valor);
+  if (Number.isNaN(n)) return '—';
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n);
+}
+
 // Mapeia nome do cabeçalho (normalizado) para chave do payload
 const MAPEAMENTO_CSV = {
   'nome do sistema': 'nomeSistema',
@@ -301,8 +309,8 @@ export default function ProdutosSoftwareList() {
                   <td>{simNao(p.autenticacaoAdSso)}</td>
                   <td>{v(p.grauSatisfacao)}</td>
                   <td className="td-texto" title={p.problemasEnfrentados}>{v(p.problemasEnfrentados)}</td>
-                  <td className="td-numero">{p.custoMensalSistema != null ? p.custoMensalSistema : '—'}</td>
-                  <td className="td-numero">{p.custoMensalInfraestrutura != null ? p.custoMensalInfraestrutura : '—'}</td>
+                  <td className="td-numero">{p.custoMensalSistema != null ? formatarMoeda(p.custoMensalSistema) : '—'}</td>
+                  <td className="td-numero">{p.custoMensalInfraestrutura != null ? formatarMoeda(p.custoMensalInfraestrutura) : '—'}</td>
                   <td>{v(p.timeNome)}</td>
                   <td className="td-acoes">
                     <Link to={`/produtos-software/editar/${p.id}`} className="btn btn-sm">Editar</Link>

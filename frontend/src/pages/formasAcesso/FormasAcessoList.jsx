@@ -36,8 +36,8 @@ export default function FormasAcessoList() {
         <h1>Formas de Acesso ao Sistema</h1>
         <Link to="/formas-acesso/novo" className="btn btn-primary">Nova forma de acesso</Link>
       </div>
-      <div className="table-wrap-scroll">
-        <table className="table">
+      <div className="table-wrap">
+        <table className="table table-cadastro">
           <thead>
             <tr>
               <th>Nome</th>

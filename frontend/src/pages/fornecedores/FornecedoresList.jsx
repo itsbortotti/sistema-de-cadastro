@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { fornecedoresApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
-import './FornecedoresList.css';
+import '../CadastroListLayout.css';
 
 const v = (x) => (x != null && x !== '' ? String(x) : '—');
 
@@ -29,13 +29,13 @@ export default function FornecedoresList() {
   if (erro) return <p className="erro-msg">{erro}</p>;
 
   return (
-    <div className="usuarios-page fornecedores-list-page">
+    <div className="usuarios-page cadastro-list-page">
       <div className="page-header">
         <h1>Fornecedores / Desenvolvedores</h1>
         <Link to="/fornecedores/novo" className="btn btn-primary">Novo fornecedor</Link>
       </div>
       <div className="table-wrap">
-        <table className="table table-fornecedores">
+        <table className="table table-cadastro">
           <thead>
             <tr>
               <th>Nome / Razão Social</th>
@@ -56,10 +56,10 @@ export default function FornecedoresList() {
             ) : (
               lista.map((f) => (
                 <tr key={f.id}>
-                  <td>{v(f.nome)}</td>
-                  <td>{v(f.nomeFantasia)}</td>
+                  <td className="td-texto" title={f.nome}>{v(f.nome)}</td>
+                  <td className="td-texto" title={f.nomeFantasia}>{v(f.nomeFantasia)}</td>
                   <td>{v(f.cnpj)}</td>
-                  <td>{v(f.email)}</td>
+                  <td className="td-texto" title={f.email}>{v(f.email)}</td>
                   <td>{v(f.telefone)}</td>
                   <td>{v(f.cidade)}</td>
                   <td>{v(f.estado)}</td>

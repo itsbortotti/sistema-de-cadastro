@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { fornecedoresApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
-import './FornecedorForm.css';
+import '../CadastroFormLayout.css';
 
 export default function FornecedorForm() {
   const { id } = useParams();
@@ -95,12 +95,12 @@ export default function FornecedorForm() {
   };
 
   return (
-    <div className="usuarios-page fornecedor-form-page">
+    <div className="usuarios-page form-cadastro-page">
       <div className="page-header">
         <h1>{isEdicao ? 'Editar fornecedor' : 'Novo fornecedor'}</h1>
         <Link to="/fornecedores" className="btn btn-secondary">Voltar</Link>
       </div>
-      <form className="form-card form-fornecedor" onSubmit={handleSubmit}>
+      <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
 
         <section className="form-secao">

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { usuariosApi } from '../../api/client';
 import './Usuarios.css';
+import '../CadastroFormLayout.css';
 
 export default function UsuarioForm() {
   const { id } = useParams();
@@ -63,74 +64,83 @@ export default function UsuarioForm() {
   };
 
   return (
-    <div className="usuarios-page">
+    <div className="usuarios-page form-cadastro-page">
       <div className="page-header">
         <h1>{isEdicao ? 'Editar usuário' : 'Novo usuário'}</h1>
         <Link to="/usuarios" className="btn btn-secondary">
           Voltar
         </Link>
       </div>
-      <form className="form-card" onSubmit={handleSubmit}>
+      <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
-        <label>
-          Nome
-          <input
-            type="text"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            required
-            placeholder="Nome completo"
-          />
-        </label>
-        <label>
-          Login
-          <input
-            type="text"
-            value={login}
-            onChange={(e) => setLogin(e.target.value)}
-            required
-            placeholder="Login de acesso"
-          />
-        </label>
-        <label>
-          E-mail
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="exemplo@email.com"
-          />
-        </label>
-        <label>
-          Tipo
-          <select value={tipo} onChange={(e) => setTipo(e.target.value)}>
-            <option value="admin">Administrador</option>
-            <option value="membro">Membro</option>
-            <option value="visualizacao">Apenas visualização</option>
-          </select>
-        </label>
-        <label>
-          Senha {isEdicao && '(deixe em branco para não alterar)'}
-          <input
-            type="password"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            required={!isEdicao}
-            placeholder={isEdicao ? 'Nova senha (opcional)' : 'Senha'}
-            minLength={4}
-          />
-        </label>
-        {isEdicao && senha && (
-          <label>
-            Confirmar nova senha
+
+        <section className="form-secao">
+          <h2 className="form-secao-titulo">Identificação</h2>
+          <label className="form-group">
+            <span className="form-label">Nome *</span>
             <input
-              type="password"
-              value={senhaConfirma}
-              onChange={(e) => setSenhaConfirma(e.target.value)}
-              placeholder="Repita a senha"
+              type="text"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              required
+              placeholder="Nome completo"
             />
           </label>
-        )}
+          <label className="form-group">
+            <span className="form-label">Login *</span>
+            <input
+              type="text"
+              value={login}
+              onChange={(e) => setLogin(e.target.value)}
+              required
+              placeholder="Login de acesso"
+            />
+          </label>
+          <label className="form-group">
+            <span className="form-label">E-mail</span>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="exemplo@email.com"
+            />
+          </label>
+          <label className="form-group">
+            <span className="form-label">Tipo</span>
+            <select value={tipo} onChange={(e) => setTipo(e.target.value)}>
+              <option value="admin">Administrador</option>
+              <option value="membro">Membro</option>
+              <option value="visualizacao">Apenas visualização</option>
+            </select>
+          </label>
+        </section>
+
+        <section className="form-secao">
+          <h2 className="form-secao-titulo">Senha</h2>
+          <label className="form-group">
+            <span className="form-label">Senha {isEdicao && '(deixe em branco para não alterar)'}</span>
+            <input
+              type="password"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              required={!isEdicao}
+              placeholder={isEdicao ? 'Nova senha (opcional)' : 'Senha'}
+              minLength={4}
+            />
+          </label>
+          {isEdicao && senha && (
+            <label className="form-group">
+              <span className="form-label">Confirmar nova senha</span>
+              <input
+                type="password"
+                value={senhaConfirma}
+                onChange={(e) => setSenhaConfirma(e.target.value)}
+                placeholder="Repita a senha"
+              />
+            </label>
+          )}
+        </section>
+
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={enviando}>
             {enviando ? 'Salvando...' : isEdicao ? 'Salvar' : 'Cadastrar'}

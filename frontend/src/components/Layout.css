@@ -4,7 +4,12 @@
 }
 
 .sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
   width: 260px;
+  z-index: 100;
   background: #1a1a2e;
   color: #e2e8f0;
   display: flex;
@@ -84,6 +89,8 @@
 
 .sidebar-nav {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   padding: 1rem 0;
 }
 
@@ -219,12 +226,15 @@
 
 .main-content {
   flex: 1;
+  margin-left: 260px;
   padding: 1.5rem 2rem;
   background: #f0f2f5;
   overflow: auto;
+  min-height: 100vh;
 }
 
 /* Quando o menu está recolhido, afastar o conteúdo do botão para abrir o menu */
 .layout.menu-recolhido .main-content {
+  margin-left: 0;
   padding-left: 3.25rem;
 }
