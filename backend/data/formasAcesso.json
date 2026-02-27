@@ -1,0 +1,18 @@
+[
+  {
+    "id": "1",
+    "nome": "Web"
+  },
+  {
+    "id": "2",
+    "nome": "Desktop"
+  },
+  {
+    "id": "3",
+    "nome": "Mobile"
+  },
+  {
+    "id": "4",
+    "nome": "API"
+  }
+]

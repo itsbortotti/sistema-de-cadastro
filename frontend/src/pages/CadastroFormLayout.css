@@ -1,0 +1,101 @@
+/* Layout compartilhado dos cadastros (mesmo do Produtos de Software) */
+.form-cadastro-page {
+  max-width: none;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 6rem);
+}
+
+.form-cadastro {
+  flex: 1;
+  width: 100%;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem 2rem;
+  border: 1px solid #e2e8f0;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.form-cadastro .form-secao {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 2rem;
+}
+
+@media (min-width: 900px) {
+  .form-cadastro .form-secao {
+    grid-template-columns: 1fr 1fr;
+  }
+  .form-cadastro .form-secao-titulo {
+    grid-column: 1 / -1;
+  }
+}
+
+.form-cadastro .form-secao:last-of-type {
+  margin-bottom: 1rem;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.form-cadastro .form-secao-titulo {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #334155;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #2563eb;
+  display: block;
+  grid-column: 1 / -1;
+}
+
+.form-cadastro .form-group {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.form-cadastro .form-label {
+  display: block;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+}
+
+.form-cadastro .form-group input,
+.form-cadastro .form-group select,
+.form-cadastro .form-group textarea {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #fff;
+}
+
+.form-cadastro .form-group input:focus,
+.form-cadastro .form-group select:focus,
+.form-cadastro .form-group textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.form-cadastro .form-group textarea {
+  font-family: inherit;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.form-cadastro .form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+}

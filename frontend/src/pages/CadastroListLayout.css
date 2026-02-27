@@ -1,0 +1,45 @@
+/* Listagem compartilhada (grid ocupa a tela como Produtos de Software) */
+.cadastro-list-page {
+  max-width: none;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.cadastro-list-page .table-wrap-scroll {
+  flex: 1;
+  width: 100%;
+  min-height: calc(100vh - 12rem);
+  overflow: auto;
+}
+
+.cadastro-list-page .table {
+  min-width: 800px;
+  width: 100%;
+}
+
+.cadastro-list-page .th-acoes,
+.cadastro-list-page .td-acoes {
+  white-space: nowrap;
+  width: 140px;
+}
+
+.cadastro-list-page .td-acoes .btn {
+  margin-right: 0.35rem;
+}
+
+.cadastro-list-page .td-acoes .btn:last-child {
+  margin-right: 0;
+}
+
+.cadastro-list-page .td-texto {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cadastro-list-page .td-texto[title] {
+  cursor: help;
+}

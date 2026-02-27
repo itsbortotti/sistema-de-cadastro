@@ -1,0 +1,24 @@
+[
+  {
+    "id": "1",
+    "nome": "Administrador",
+    "login": "admin",
+    "email": "",
+    "senhaHash": "$2a$10$x0ZrpJrwMGPJ2/vzHtSg0ucAGFLzDOErmOmmvRubgo0Ws/ooTstaS",
+    "tipo": "admin"
+  },
+  {
+    "id": "1772204135046",
+    "nome": "Membro",
+    "login": "membro",
+    "senhaHash": "$2a$10$Sokvvz1t9iNd7ZKlVkvoAOoe94/sEY7ljrsfJVqxkIshZs24CsaHC"
+  },
+  {
+    "id": "1772204166294",
+    "nome": "Visualizador",
+    "login": "visualizador",
+    "senhaHash": "$2a$10$/vxNg2ho.qtF.rBrkLl/juBsQGrVHrt6IxRTIXOWxfUkoOqtbRPGO",
+    "email": "",
+    "tipo": "visualizacao"
+  }
+]

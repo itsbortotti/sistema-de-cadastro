@@ -1,0 +1,25 @@
+[
+  {
+    "id": "1772209380748",
+    "nomeSistema": "Oracle",
+    "fornecedorId": "1772209281714",
+    "finalidadePrincipal": "",
+    "breveDescritivo": "",
+    "marcasAtendidas": "",
+    "usuariosQtdAproximada": 11,
+    "areaId": "1772209295410",
+    "responsavelTiId": "1",
+    "usuarioNegocioId": "1",
+    "hospedagemId": "1",
+    "onPremisesSites": "",
+    "formaAcessoId": "1",
+    "integracoes": "",
+    "controleAcessoPorUsuario": true,
+    "autenticacaoAdSso": true,
+    "grauSatisfacao": "5",
+    "problemasEnfrentados": "",
+    "custoMensalSistema": null,
+    "custoMensalInfraestrutura": null,
+    "timeId": "1772209308214"
+  }
+]

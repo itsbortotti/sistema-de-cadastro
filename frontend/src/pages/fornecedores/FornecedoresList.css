@@ -1,0 +1,17 @@
+.fornecedores-list-page .table-wrap {
+  overflow-x: auto;
+}
+
+.table-fornecedores .th-acoes,
+.table-fornecedores .td-acoes {
+  white-space: nowrap;
+  width: 140px;
+}
+
+.table-fornecedores .td-acoes .btn {
+  margin-right: 0.35rem;
+}
+
+.table-fornecedores .td-acoes .btn:last-child {
+  margin-right: 0;
+}

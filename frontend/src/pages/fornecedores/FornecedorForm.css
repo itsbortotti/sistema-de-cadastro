@@ -1,0 +1,66 @@
+.form-fornecedor .form-secao {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.form-fornecedor .form-secao-titulo {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #334155;
+  margin: 0 0 0.75rem 0;
+  padding-bottom: 0.35rem;
+  border-bottom: 2px solid #2563eb;
+  display: block;
+}
+
+.form-fornecedor .form-group {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.form-fornecedor .form-label {
+  display: block;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.form-fornecedor .form-group input,
+.form-fornecedor .form-group textarea {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.form-fornecedor .form-group input:focus,
+.form-fornecedor .form-group textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.form-fornecedor .form-group textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.form-fornecedor .form-group-inline {
+  display: inline-block;
+  margin-right: 1rem;
+  vertical-align: top;
+}
+
+.form-fornecedor .form-group-inline input {
+  width: 120px;
+}
+
+.form-fornecedor .form-group-uf input {
+  width: 4rem;
+}
+
+.fornecedor-form-page .form-card {
+  max-width: 640px;
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "id": "1",
+    "nome": "Cloud"
+  },
+  {
+    "id": "2",
+    "nome": "On Premises"
+  },
+  {
+    "id": "3",
+    "nome": "Híbrido"
+  }
+]
