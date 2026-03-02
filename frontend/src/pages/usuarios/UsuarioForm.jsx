@@ -90,7 +90,7 @@ export default function UsuarioForm({ somenteLeitura = false }) {
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="exemplo@email.com" readOnly={readOnly} disabled={readOnly} />
           </label>
           <label className="form-group">
-            <span className="form-label">Tipo</span>
+            <span className="form-label">Perfil</span>
             <select value={tipo} onChange={(e) => setTipo(e.target.value)} disabled={readOnly}>
               <option value="admin">Administrador</option>
               <option value="membro">Membro</option>

@@ -80,7 +80,7 @@ export default function UsuariosList() {
               <th>Nome</th>
               <th>Login</th>
               <th>E-mail</th>
-              <th>Tipo</th>
+              <th>Perfil</th>
               <th className="th-acoes">Ações</th>
             </tr>
           </thead>
