@@ -14,8 +14,6 @@ import HospedagensList from './pages/hospedagens/HospedagensList';
 import HospedagemForm from './pages/hospedagens/HospedagemForm';
 import FormasAcessoList from './pages/formasAcesso/FormasAcessoList';
 import FormaAcessoForm from './pages/formasAcesso/FormaAcessoForm';
-import TimesList from './pages/times/TimesList';
-import TimeForm from './pages/times/TimeForm';
 import ProdutosSoftwareList from './pages/produtosSoftware/ProdutosSoftwareList';
 import ProdutoSoftwareForm from './pages/produtosSoftware/ProdutoSoftwareForm';
 import ProjetosList from './pages/projetos/ProjetosList';
@@ -53,39 +51,46 @@ function AppRoutes() {
         <Route index element={<Dashboard />} />
         <Route path="usuarios" element={<UsuariosList />} />
         <Route path="usuarios/novo" element={<UsuarioForm />} />
+        <Route path="usuarios/ver/:id" element={<UsuarioForm somenteLeitura />} />
         <Route path="usuarios/editar/:id" element={<UsuarioForm />} />
         <Route path="fornecedores" element={<FornecedoresList />} />
         <Route path="fornecedores/novo" element={<FornecedorForm />} />
+        <Route path="fornecedores/ver/:id" element={<FornecedorForm somenteLeitura />} />
         <Route path="fornecedores/editar/:id" element={<FornecedorForm />} />
         <Route path="areas" element={<AreasList />} />
         <Route path="areas/novo" element={<AreaForm />} />
+        <Route path="areas/ver/:id" element={<AreaForm somenteLeitura />} />
         <Route path="areas/editar/:id" element={<AreaForm />} />
         <Route path="hospedagens" element={<HospedagensList />} />
         <Route path="hospedagens/novo" element={<HospedagemForm />} />
+        <Route path="hospedagens/ver/:id" element={<HospedagemForm somenteLeitura />} />
         <Route path="hospedagens/editar/:id" element={<HospedagemForm />} />
         <Route path="formas-acesso" element={<FormasAcessoList />} />
         <Route path="formas-acesso/novo" element={<FormaAcessoForm />} />
+        <Route path="formas-acesso/ver/:id" element={<FormaAcessoForm somenteLeitura />} />
         <Route path="formas-acesso/editar/:id" element={<FormaAcessoForm />} />
-        <Route path="times" element={<TimesList />} />
-        <Route path="times/novo" element={<TimeForm />} />
-        <Route path="times/editar/:id" element={<TimeForm />} />
         <Route path="sistemas" element={<ProdutosSoftwareList />} />
         <Route path="sistemas/novo" element={<ProdutoSoftwareForm />} />
+        <Route path="sistemas/ver/:id" element={<ProdutoSoftwareForm somenteLeitura />} />
         <Route path="sistemas/editar/:id" element={<ProdutoSoftwareForm />} />
         <Route path="projetos" element={<ProjetosList />} />
         <Route path="projetos/novo" element={<ProjetoForm />} />
+        <Route path="projetos/ver/:id" element={<ProjetoForm somenteLeitura />} />
         <Route path="projetos/editar/:id" element={<ProjetoForm />} />
         <Route path="produtos-software" element={<Navigate to="/sistemas" replace />} />
         <Route path="produtos-software/novo" element={<Navigate to="/sistemas/novo" replace />} />
         <Route path="produtos-software/editar/:id" element={<RedirectProjetoEditar />} />
         <Route path="capex" element={<CapexList tipo="capex" />} />
         <Route path="capex/novo" element={<CapexForm tipo="capex" />} />
+        <Route path="capex/ver/:id" element={<CapexForm tipo="capex" somenteLeitura />} />
         <Route path="capex/editar/:id" element={<CapexForm tipo="capex" />} />
         <Route path="opex" element={<CapexList tipo="opex" />} />
         <Route path="opex/novo" element={<CapexForm tipo="opex" />} />
+        <Route path="opex/ver/:id" element={<CapexForm tipo="opex" somenteLeitura />} />
         <Route path="opex/editar/:id" element={<CapexForm tipo="opex" />} />
         <Route path="empresas" element={<EmpresasList />} />
         <Route path="empresas/novo" element={<EmpresaForm />} />
+        <Route path="empresas/ver/:id" element={<EmpresaForm somenteLeitura />} />
         <Route path="empresas/editar/:id" element={<EmpresaForm />} />
         <Route path="configuracoes" element={<PermissoesPage />} />
       </Route>

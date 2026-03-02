@@ -1,16 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { usuariosApi } from '../../api/client';
+import AcoesListagem from '../../components/AcoesListagem';
 import './Usuarios.css';
 import '../CadastroListLayout.css';
 
 const v = (x) => (x != null && x !== '' ? String(x) : '—');
+
+function normalizarTexto(str) {
+  return String(str ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
 
 export default function UsuariosList() {
   const [lista, setLista] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [excluindo, setExcluindo] = useState(null);
+  const [busca, setBusca] = useState('');
 
   const carregar = () => {
     setCarregando(true);
@@ -34,17 +40,39 @@ export default function UsuariosList() {
       .finally(() => setExcluindo(null));
   };
 
+  const termoBusca = normalizarTexto(busca).trim();
+  const listaFiltrada = termoBusca
+    ? lista.filter((u) => {
+        const tipoStr = u.tipo === 'admin' ? 'administrador' : u.tipo === 'membro' ? 'membro' : u.tipo === 'visualizacao' ? 'visualizacao' : String(u.tipo || '');
+        const texto = [u.nome, u.login, u.email, tipoStr].join(' ');
+        return normalizarTexto(texto).includes(termoBusca);
+      })
+    : lista;
+
   if (carregando) return <p className="page-loading">Carregando...</p>;
   if (erro) return <p className="erro-msg">{erro}</p>;
 
   return (
-    <div className="usuarios-page cadastro-list-page">
+    <div className="cadastro-page cadastro-list-page">
       <div className="page-header">
         <h1>Cadastro de Usuários</h1>
-        <Link to="/usuarios/novo" className="btn btn-primary">
-          Novo usuário
-        </Link>
+        <div className="page-header-actions">
+          <input
+            type="search"
+            className="input-busca"
+            placeholder="Buscar por nome, login, e-mail..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            aria-label="Buscar"
+          />
+          <Link to="/usuarios/novo" className="btn btn-primary">Novo usuário</Link>
+        </div>
       </div>
+      {termoBusca && (
+        <p className="busca-resultado">
+          {listaFiltrada.length} de {lista.length} registro(s)
+        </p>
+      )}
       <div className="table-wrap">
         <table className="table table-cadastro">
           <thead>
@@ -57,12 +85,12 @@ export default function UsuariosList() {
             </tr>
           </thead>
           <tbody>
-            {lista.length === 0 ? (
+            {listaFiltrada.length === 0 ? (
               <tr>
-                <td colSpan={5}>Nenhum usuário cadastrado.</td>
+                <td colSpan={5}>{lista.length === 0 ? 'Nenhum usuário cadastrado.' : 'Nenhum resultado para a busca.'}</td>
               </tr>
             ) : (
-              lista.map((u) => (
+              listaFiltrada.map((u) => (
                 <tr key={u.id}>
                   <td className="td-texto" title={u.nome}>{v(u.nome)}</td>
                   <td>{v(u.login)}</td>
@@ -74,17 +102,7 @@ export default function UsuariosList() {
                     {!['admin', 'membro', 'visualizacao'].includes(u.tipo) && (u.tipo || 'Membro')}
                   </td>
                   <td className="td-acoes">
-                    <Link to={`/usuarios/editar/${u.id}`} className="btn btn-sm">
-                      Editar
-                    </Link>
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-danger"
-                      onClick={() => handleExcluir(u.id, u.nome)}
-                      disabled={excluindo === u.id}
-                    >
-                      {excluindo === u.id ? '...' : 'Excluir'}
-                    </button>
+                    <AcoesListagem basePath="/usuarios" id={u.id} onExcluir={() => handleExcluir(u.id, u.nome)} excluindo={excluindo === u.id} />
                   </td>
                 </tr>
               ))

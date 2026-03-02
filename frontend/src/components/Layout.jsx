@@ -51,11 +51,6 @@ const iconFormasAcesso = (
     <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" />
   </svg>
 );
-const iconTimes = (
-  <svg className="nav-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.86.05.64.11 1.26.27 1.84.49 1.02.45 1.76 1.06 2.02 1.96V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-  </svg>
-);
 const iconProdutosSoftware = (
   <svg className="nav-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
     <path d="M20 5H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3H9v2H7V8H5v6h2v-2h2v2h2V8h-2zm6 4h-4v-2h4v2zm2-4h-2V8h2v2z" />
@@ -175,10 +170,6 @@ export default function Layout() {
               <NavLink to="/formas-acesso" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
                 {iconFormasAcesso}
                 <span>Formas de Acesso</span>
-              </NavLink>
-              <NavLink to="/times" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
-                {iconTimes}
-                <span>Times</span>
               </NavLink>
               <NavLink to="/sistemas" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
                 {iconProdutosSoftware}

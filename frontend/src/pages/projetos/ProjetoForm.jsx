@@ -12,10 +12,11 @@ const STATUS_OPCOES = [
   { value: 'Cancelado', label: 'Cancelado' },
 ];
 
-export default function ProjetoForm() {
+export default function ProjetoForm({ somenteLeitura = false }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdicao = Boolean(id);
+  const readOnly = somenteLeitura;
 
   const [empresas, setEmpresas] = useState([]);
   const [nome, setNome] = useState('');
@@ -84,14 +85,16 @@ export default function ProjetoForm() {
   };
 
   return (
-    <div className="usuarios-page form-cadastro-page">
+    <div className="cadastro-page form-cadastro-page">
       <div className="page-header">
-        <h1>{isEdicao ? 'Editar projeto' : 'Novo projeto'}</h1>
-        <Link to="/projetos" className="btn btn-secondary">Voltar</Link>
+        <h1>{readOnly ? 'Ver projeto' : isEdicao ? 'Editar projeto' : 'Novo projeto'}</h1>
+        <div className="page-header-actions">
+          <Link to="/projetos" className="btn btn-secondary">Voltar</Link>
+        </div>
       </div>
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
-
+        <fieldset disabled={readOnly} style={{ border: 'none', margin: 0, padding: 0 }}>
         <section className="form-secao">
           <h2 className="form-secao-titulo">Identificação</h2>
           <label className="form-group">
@@ -142,13 +145,16 @@ export default function ProjetoForm() {
             <textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} placeholder="Anotações sobre o projeto" rows={3} />
           </label>
         </section>
+        </fieldset>
 
+        {!readOnly && (
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={enviando}>
             {enviando ? 'Salvando...' : isEdicao ? 'Salvar alterações' : 'Cadastrar projeto'}
           </button>
           <Link to="/projetos" className="btn btn-secondary">Cancelar</Link>
         </div>
+        )}
       </form>
     </div>
   );

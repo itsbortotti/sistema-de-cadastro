@@ -4,10 +4,11 @@ import { hospedagensApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
 import '../CadastroFormLayout.css';
 
-export default function HospedagemForm() {
+export default function HospedagemForm({ somenteLeitura = false }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdicao = Boolean(id);
+  const readOnly = somenteLeitura;
 
   const [nome, setNome] = useState('');
   const [tipo, setTipo] = useState('');
@@ -49,14 +50,16 @@ export default function HospedagemForm() {
   };
 
   return (
-    <div className="usuarios-page form-cadastro-page">
+    <div className="cadastro-page form-cadastro-page">
       <div className="page-header">
-        <h1>{isEdicao ? 'Editar hospedagem' : 'Nova hospedagem'}</h1>
-        <Link to="/hospedagens" className="btn btn-secondary">Voltar</Link>
+        <h1>{readOnly ? 'Ver hospedagem' : isEdicao ? 'Editar hospedagem' : 'Nova hospedagem'}</h1>
+        <div className="page-header-actions">
+          <Link to="/hospedagens" className="btn btn-secondary">Voltar</Link>
+        </div>
       </div>
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
-
+        <fieldset disabled={readOnly} style={{ border: 'none', margin: 0, padding: 0 }}>
         <section className="form-secao">
           <h2 className="form-secao-titulo">Identificação</h2>
           <label className="form-group">
@@ -84,13 +87,16 @@ export default function HospedagemForm() {
             <textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} placeholder="Anotações sobre a hospedagem" rows={3} />
           </label>
         </section>
+        </fieldset>
 
+        {!readOnly && (
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={enviando}>
             {enviando ? 'Salvando...' : isEdicao ? 'Salvar alterações' : 'Cadastrar hospedagem'}
           </button>
           <Link to="/hospedagens" className="btn btn-secondary">Cancelar</Link>
         </div>
+        )}
       </form>
     </div>
   );

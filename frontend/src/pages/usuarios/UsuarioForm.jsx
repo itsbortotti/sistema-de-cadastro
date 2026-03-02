@@ -4,7 +4,7 @@ import { usuariosApi } from '../../api/client';
 import './Usuarios.css';
 import '../CadastroFormLayout.css';
 
-export default function UsuarioForm() {
+export default function UsuarioForm({ somenteLeitura = false }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdicao = Boolean(id);
@@ -63,13 +63,14 @@ export default function UsuarioForm() {
     }
   };
 
+  const readOnly = somenteLeitura;
   return (
-    <div className="usuarios-page form-cadastro-page">
+    <div className="cadastro-page form-cadastro-page">
       <div className="page-header">
-        <h1>{isEdicao ? 'Editar usuário' : 'Novo usuário'}</h1>
-        <Link to="/usuarios" className="btn btn-secondary">
-          Voltar
-        </Link>
+        <h1>{readOnly ? 'Ver usuário' : isEdicao ? 'Editar usuário' : 'Novo usuário'}</h1>
+        <div className="page-header-actions">
+          <Link to="/usuarios" className="btn btn-secondary">Voltar</Link>
+        </div>
       </div>
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
@@ -78,36 +79,19 @@ export default function UsuarioForm() {
           <h2 className="form-secao-titulo">Identificação</h2>
           <label className="form-group">
             <span className="form-label">Nome *</span>
-            <input
-              type="text"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              required
-              placeholder="Nome completo"
-            />
+            <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} required placeholder="Nome completo" readOnly={readOnly} disabled={readOnly} />
           </label>
           <label className="form-group">
             <span className="form-label">Login *</span>
-            <input
-              type="text"
-              value={login}
-              onChange={(e) => setLogin(e.target.value)}
-              required
-              placeholder="Login de acesso"
-            />
+            <input type="text" value={login} onChange={(e) => setLogin(e.target.value)} required placeholder="Login de acesso" readOnly={readOnly} disabled={readOnly} />
           </label>
           <label className="form-group">
             <span className="form-label">E-mail</span>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="exemplo@email.com"
-            />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="exemplo@email.com" readOnly={readOnly} disabled={readOnly} />
           </label>
           <label className="form-group">
             <span className="form-label">Tipo</span>
-            <select value={tipo} onChange={(e) => setTipo(e.target.value)}>
+            <select value={tipo} onChange={(e) => setTipo(e.target.value)} disabled={readOnly}>
               <option value="admin">Administrador</option>
               <option value="membro">Membro</option>
               <option value="visualizacao">Apenas visualização</option>
@@ -115,40 +99,30 @@ export default function UsuarioForm() {
           </label>
         </section>
 
-        <section className="form-secao">
-          <h2 className="form-secao-titulo">Senha</h2>
-          <label className="form-group">
-            <span className="form-label">Senha {isEdicao && '(deixe em branco para não alterar)'}</span>
-            <input
-              type="password"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              required={!isEdicao}
-              placeholder={isEdicao ? 'Nova senha (opcional)' : 'Senha'}
-              minLength={4}
-            />
-          </label>
-          {isEdicao && senha && (
+        {!readOnly && (
+          <section className="form-secao">
+            <h2 className="form-secao-titulo">Senha</h2>
             <label className="form-group">
-              <span className="form-label">Confirmar nova senha</span>
-              <input
-                type="password"
-                value={senhaConfirma}
-                onChange={(e) => setSenhaConfirma(e.target.value)}
-                placeholder="Repita a senha"
-              />
+              <span className="form-label">Senha {isEdicao && '(deixe em branco para não alterar)'}</span>
+              <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required={!isEdicao} placeholder={isEdicao ? 'Nova senha (opcional)' : 'Senha'} minLength={4} />
             </label>
-          )}
-        </section>
+            {isEdicao && senha && (
+              <label className="form-group">
+                <span className="form-label">Confirmar nova senha</span>
+                <input type="password" value={senhaConfirma} onChange={(e) => setSenhaConfirma(e.target.value)} placeholder="Repita a senha" />
+              </label>
+            )}
+          </section>
+        )}
 
-        <div className="form-actions">
-          <button type="submit" className="btn btn-primary" disabled={enviando}>
-            {enviando ? 'Salvando...' : isEdicao ? 'Salvar' : 'Cadastrar'}
-          </button>
-          <Link to="/usuarios" className="btn btn-secondary">
-            Cancelar
-          </Link>
-        </div>
+        {!readOnly && (
+          <div className="form-actions">
+            <button type="submit" className="btn btn-primary" disabled={enviando}>
+              {enviando ? 'Salvando...' : isEdicao ? 'Salvar' : 'Cadastrar'}
+            </button>
+            <Link to="/usuarios" className="btn btn-secondary">Cancelar</Link>
+          </div>
+        )}
       </form>
     </div>
   );

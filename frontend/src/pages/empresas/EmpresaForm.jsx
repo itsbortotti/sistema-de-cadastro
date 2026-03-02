@@ -8,10 +8,11 @@ import './Empresas.css';
 const PORTES = ['', 'MEI', 'ME', 'EPP', 'Demais'];
 const SITUACOES = ['', 'Ativa', 'Baixada', 'Inapta', 'Nula', 'Suspensa', 'Inconsistente'];
 
-export default function EmpresaForm() {
+export default function EmpresaForm({ somenteLeitura = false }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdicao = Boolean(id);
+  const readOnly = somenteLeitura;
 
   const [cnpj, setCnpj] = useState('');
   const [razaoSocial, setRazaoSocial] = useState('');
@@ -130,14 +131,16 @@ export default function EmpresaForm() {
   };
 
   return (
-    <div className="usuarios-page form-cadastro-page empresas-form-page">
+    <div className="cadastro-page form-cadastro-page empresas-form-page">
       <div className="page-header">
-        <h1>{isEdicao ? 'Editar empresa' : 'Nova empresa'}</h1>
-        <Link to="/empresas" className="btn btn-secondary">Voltar</Link>
+        <h1>{readOnly ? 'Ver empresa' : isEdicao ? 'Editar empresa' : 'Nova empresa'}</h1>
+        <div className="page-header-actions">
+          <Link to="/empresas" className="btn btn-secondary">Voltar</Link>
+        </div>
       </div>
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
-
+        <fieldset disabled={readOnly} style={{ border: 'none', margin: 0, padding: 0 }}>
         <section className="form-secao form-secao-identificacao">
           <h2 className="form-secao-titulo">Identificação e CNPJ</h2>
           <label className="form-group form-group-cnpj">
@@ -281,13 +284,16 @@ export default function EmpresaForm() {
             <textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} placeholder="Anotações sobre a empresa" rows={3} />
           </label>
         </section>
+        </fieldset>
 
+        {!readOnly && (
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={enviando}>
             {enviando ? 'Salvando...' : isEdicao ? 'Salvar' : 'Cadastrar'}
           </button>
           <Link to="/empresas" className="btn btn-secondary">Cancelar</Link>
         </div>
+        )}
       </form>
     </div>
   );

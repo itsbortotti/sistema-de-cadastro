@@ -1,4 +1,6 @@
-.usuarios-page {
+/* Layout unificado: listagem, criação, edição e visualização */
+.usuarios-page,
+.cadastro-page {
   width: 100%;
   max-width: 100%;
   flex: 1;
@@ -145,10 +147,62 @@
   background: #b91c1c;
 }
 
+/* Ações em ícones (Ver, Editar, Excluir) - usado em listagens */
+.acoes-listagem {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fff;
+  color: #475569;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn-icone:hover {
+  background: #f1f5f9;
+  color: #2563eb;
+  border-color: #cbd5e1;
+}
+
+.btn-icone:disabled,
+.btn-icone.btn-icone-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-icone-danger {
+  color: #64748b;
+  border-color: #e2e8f0;
+}
+
+.btn-icone-danger:hover:not(:disabled) {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.btn-icone-loading {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 .table-wrap {
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
   overflow: hidden;
 }
 

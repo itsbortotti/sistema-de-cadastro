@@ -7,10 +7,10 @@ import {
   usuariosApi,
   hospedagensApi,
   formasAcessoApi,
-  timesApi,
   empresasApi,
 } from '../../api/client';
 import '../usuarios/Usuarios.css';
+import '../CadastroFormLayout.css';
 import './ProdutoSoftwareForm.css';
 
 const GRAUS = [
@@ -83,10 +83,11 @@ function SelectComNovo({ label, value, onChange, opcoes, onAbrirNovo, placeholde
   );
 }
 
-export default function ProdutoSoftwareForm() {
+export default function ProdutoSoftwareForm({ somenteLeitura = false }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdicao = Boolean(id);
+  const readOnly = somenteLeitura;
 
   const [fornecedores, setFornecedores] = useState([]);
   const [areas, setAreas] = useState([]);
@@ -94,7 +95,6 @@ export default function ProdutoSoftwareForm() {
   const [usuarios, setUsuarios] = useState([]);
   const [hospedagens, setHospedagens] = useState([]);
   const [formasAcesso, setFormasAcesso] = useState([]);
-  const [times, setTimes] = useState([]);
 
   const [nomeSistema, setNomeSistema] = useState('');
   const [empresaId, setEmpresaId] = useState('');
@@ -116,7 +116,6 @@ export default function ProdutoSoftwareForm() {
   const [problemasEnfrentados, setProblemasEnfrentados] = useState('');
   const [custoMensalSistema, setCustoMensalSistema] = useState('');
   const [custoMensalInfraestrutura, setCustoMensalInfraestrutura] = useState('');
-  const [timeId, setTimeId] = useState('');
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
 
@@ -133,16 +132,14 @@ export default function ProdutoSoftwareForm() {
       usuariosApi.listar(),
       hospedagensApi.listar(),
       formasAcessoApi.listar(),
-      timesApi.listar(),
     ])
-      .then(([f, a, emp, u, h, fa, t]) => {
+      .then(([f, a, emp, u, h, fa]) => {
         setFornecedores(f);
         setAreas(a);
         setEmpresas(Array.isArray(emp) ? emp : []);
         setUsuarios(u);
         setHospedagens(h);
         setFormasAcesso(fa);
-        setTimes(t);
       })
       .catch((e) => setErro(e.message));
   };
@@ -174,7 +171,6 @@ export default function ProdutoSoftwareForm() {
           setProblemasEnfrentados(p.problemasEnfrentados || '');
           setCustoMensalSistema(p.custoMensalSistema != null ? String(p.custoMensalSistema) : '');
           setCustoMensalInfraestrutura(p.custoMensalInfraestrutura != null ? String(p.custoMensalInfraestrutura) : '');
-          setTimeId(p.timeId || '');
           setDataInicio(p.dataInicio ?? (p.ano ? `${p.ano}-01-01` : ''));
           setDataFim(p.dataFim ?? (p.ano ? `${p.ano}-12-31` : ''));
         })
@@ -207,10 +203,6 @@ export default function ProdutoSoftwareForm() {
         const novo = await formasAcessoApi.criar({ nome: nome.trim() });
         setFormasAcesso((prev) => [...prev, novo]);
         setFormaAcessoId(novo.id);
-      } else if (popupTipo === 'time') {
-        const novo = await timesApi.criar({ nome: nome.trim() });
-        setTimes((prev) => [...prev, novo]);
-        setTimeId(novo.id);
       }
     } catch (e) {
       setErro(e.message);
@@ -244,7 +236,6 @@ export default function ProdutoSoftwareForm() {
       problemasEnfrentados,
       custoMensalSistema: custoMensalSistema === '' ? null : Number(custoMensalSistema),
       custoMensalInfraestrutura: custoMensalInfraestrutura === '' ? null : Number(custoMensalInfraestrutura),
-      timeId: timeId || null,
       dataInicio: dataInicio.trim() || null,
       dataFim: dataFim.trim() || null,
     };
@@ -265,19 +256,20 @@ export default function ProdutoSoftwareForm() {
     area: 'Nova Área',
     hospedagem: 'Nova Hospedagem',
     formaAcesso: 'Nova Forma de Acesso',
-    time: 'Novo Time',
   };
 
   return (
-    <div className="form-produto-page">
+    <div className="cadastro-page form-cadastro-page">
       <div className="page-header">
-        <h1>{isEdicao ? 'Editar Sistema' : 'Novo Sistema'}</h1>
-        <Link to="/sistemas" className="btn btn-secondary">Voltar</Link>
+        <h1>{readOnly ? 'Ver Sistema' : isEdicao ? 'Editar Sistema' : 'Novo Sistema'}</h1>
+        <div className="page-header-actions">
+          <Link to="/sistemas" className="btn btn-secondary">Voltar</Link>
+        </div>
       </div>
 
-      <form className="form-produto" onSubmit={handleSubmit}>
+      <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
-
+        <fieldset disabled={readOnly} style={{ border: 'none', margin: 0, padding: 0 }}>
         <section className="form-secao">
           <h2 className="form-secao-titulo">Identificação do sistema</h2>
           <label className="form-group">
@@ -397,7 +389,7 @@ export default function ProdutoSoftwareForm() {
         </section>
 
         <section className="form-secao">
-          <h2 className="form-secao-titulo">Custos e time</h2>
+          <h2 className="form-secao-titulo">Custos</h2>
           <label className="form-group">
             <span className="form-label">Capex (R$)</span>
             <input type="number" step="0.01" min={0} value={custoMensalSistema} onChange={(e) => setCustoMensalSistema(e.target.value)} placeholder="0,00" />
@@ -406,13 +398,6 @@ export default function ProdutoSoftwareForm() {
             <span className="form-label">Opex (R$)</span>
             <input type="number" step="0.01" min={0} value={custoMensalInfraestrutura} onChange={(e) => setCustoMensalInfraestrutura(e.target.value)} placeholder="0,00" />
           </label>
-          <SelectComNovo
-            label="TIME"
-            value={timeId}
-            onChange={setTimeId}
-            opcoes={times}
-            onAbrirNovo={() => setPopupTipo('time')}
-          />
           <label className="form-group">
             <span className="form-label">Período inicial</span>
             <input
@@ -430,13 +415,16 @@ export default function ProdutoSoftwareForm() {
             />
           </label>
         </section>
+        </fieldset>
 
+        {!readOnly && (
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={enviando}>
             {enviando ? 'Salvando...' : isEdicao ? 'Salvar alterações' : 'Cadastrar sistema'}
           </button>
           <Link to="/sistemas" className="btn btn-secondary">Cancelar</Link>
         </div>
+        )}
       </form>
 
       <ModalNovo

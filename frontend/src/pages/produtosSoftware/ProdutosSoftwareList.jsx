@@ -7,9 +7,9 @@ import {
   usuariosApi,
   hospedagensApi,
   formasAcessoApi,
-  timesApi,
   empresasApi,
 } from '../../api/client';
+import AcoesListagem from '../../components/AcoesListagem';
 import '../usuarios/Usuarios.css';
 import './ProdutosSoftwareList.css';
 
@@ -98,7 +98,6 @@ const MAPEAMENTO_CSV = {
   'custo mensal infraestrutura': 'custoMensalInfraestrutura',
   'capex': 'custoMensalSistema',
   'opex': 'custoMensalInfraestrutura',
-  'time': 'timeNome',
   'ano': 'ano',
   'ano referencia': 'ano',
   'ano (referência)': 'ano',
@@ -137,7 +136,7 @@ export default function ProdutosSoftwareList() {
   const [arquivoPreview, setArquivoPreview] = useState(null);
   const [importando, setImportando] = useState(false);
   const [resultadoImportacao, setResultadoImportacao] = useState(null);
-  const [listasAux, setListasAux] = useState({ fornecedores: [], areas: [], empresas: [], usuarios: [], hospedagens: [], formasAcesso: [], times: [] });
+  const [listasAux, setListasAux] = useState({ fornecedores: [], areas: [], empresas: [], usuarios: [], hospedagens: [], formasAcesso: [] });
   const [busca, setBusca] = useState('');
   const inputFileRef = useRef(null);
 
@@ -157,9 +156,8 @@ export default function ProdutosSoftwareList() {
         usuariosApi.listar(),
         hospedagensApi.listar(),
         formasAcessoApi.listar(),
-        timesApi.listar(),
       ])
-        .then(([f, a, emp, u, h, fa, t]) => setListasAux({ fornecedores: f, areas: a, empresas: Array.isArray(emp) ? emp : [], usuarios: u, hospedagens: h, formasAcesso: fa, times: t }))
+        .then(([f, a, emp, u, h, fa]) => setListasAux({ fornecedores: f, areas: a, empresas: Array.isArray(emp) ? emp : [], usuarios: u, hospedagens: h, formasAcesso: fa }))
         .catch(() => {});
     }
   }, [modalImportarAberto]);
@@ -219,7 +217,6 @@ export default function ProdutosSoftwareList() {
       else if (key === 'usuarioNegocioNome') obj.usuarioNegocioId = buscarPorNome(listas.usuarios, valor) || null;
       else if (key === 'hospedagemNome') obj.hospedagemId = buscarPorNome(listas.hospedagens, valor) || null;
       else if (key === 'formaAcessoNome') obj.formaAcessoId = buscarPorNome(listas.formasAcesso, valor) || null;
-      else if (key === 'timeNome') obj.timeId = buscarPorNome(listas.times, valor) || null;
       else if (key === 'controleAcessoPorUsuario') obj.controleAcessoPorUsuario = simNaoValor(valor);
       else if (key === 'autenticacaoAdSso') obj.autenticacaoAdSso = simNaoValor(valor);
       else if (key === 'usuariosQtdAproximada') obj.usuariosQtdAproximada = valor === '' ? null : Number(valor);
@@ -252,7 +249,6 @@ export default function ProdutosSoftwareList() {
       problemasEnfrentados: obj.problemasEnfrentados || '',
       custoMensalSistema: obj.custoMensalSistema ?? null,
       custoMensalInfraestrutura: obj.custoMensalInfraestrutura ?? null,
-      timeId: obj.timeId ?? null,
       dataInicio: obj.dataInicio ?? null,
       dataFim: obj.dataFim ?? null,
     };
@@ -308,7 +304,6 @@ export default function ProdutosSoftwareList() {
             p.formaAcessoNome,
             p.integracoes,
             p.problemasEnfrentados,
-            p.timeNome,
           ].join(' ') || '';
         return normalizarTexto(texto).includes(termoBusca);
       })
@@ -318,7 +313,7 @@ export default function ProdutosSoftwareList() {
   if (erro) return <p className="erro-msg">{erro}</p>;
 
   return (
-    <div className="usuarios-page produtos-software-list-page">
+    <div className="cadastro-page cadastro-list-page produtos-software-list-page">
       <div className="page-header">
         <h1>Sistemas</h1>
         <div className="page-header-actions">
@@ -363,18 +358,17 @@ export default function ProdutosSoftwareList() {
               <th>Autenticação por AD / SSO?</th>
               <th>Grau de Satisfação</th>
               <th>Problemas Enfrentados</th>
-              <th>TIME</th>
               <th className="th-acoes">Ações</th>
             </tr>
           </thead>
           <tbody>
             {lista.length === 0 ? (
               <tr>
-                <td colSpan={20}>Nenhum sistema cadastrado.</td>
+                <td colSpan={19}>Nenhum sistema cadastrado.</td>
               </tr>
             ) : listaFiltrada.length === 0 ? (
               <tr>
-                <td colSpan={20}>Nenhum resultado para a busca.</td>
+                <td colSpan={19}>Nenhum resultado para a busca.</td>
               </tr>
             ) : (
               listaFiltrada.map((p) => (
@@ -397,17 +391,8 @@ export default function ProdutosSoftwareList() {
                   <td>{simNao(p.autenticacaoAdSso)}</td>
                   <td>{v(p.grauSatisfacao)}</td>
                   <td className="td-texto" title={p.problemasEnfrentados}>{v(p.problemasEnfrentados)}</td>
-                  <td>{v(p.timeNome)}</td>
                   <td className="td-acoes">
-                    <Link to={`/sistemas/editar/${p.id}`} className="btn btn-sm">Editar</Link>
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-danger"
-                      onClick={() => handleExcluir(p.id, p.nomeSistema)}
-                      disabled={excluindo === p.id}
-                    >
-                      {excluindo === p.id ? '...' : 'Excluir'}
-                    </button>
+                    <AcoesListagem basePath="/sistemas" id={p.id} onExcluir={() => handleExcluir(p.id, p.nomeSistema)} excluindo={excluindo === p.id} />
                   </td>
                 </tr>
               ))

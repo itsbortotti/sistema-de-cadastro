@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { projetosApi } from '../../api/client';
+import AcoesListagem from '../../components/AcoesListagem';
 import '../usuarios/Usuarios.css';
 import '../CadastroListLayout.css';
 
@@ -19,11 +20,16 @@ function formatarData(str) {
   }
 }
 
+function normalizarTexto(str) {
+  return String(str ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 export default function ProjetosList() {
   const [lista, setLista] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [excluindo, setExcluindo] = useState(null);
+  const [busca, setBusca] = useState('');
 
   const carregar = () => {
     setCarregando(true);
@@ -38,15 +44,38 @@ export default function ProjetosList() {
     projetosApi.remover(id).then(carregar).catch((e) => setErro(e.message)).finally(() => setExcluindo(null));
   };
 
+  const termoBusca = normalizarTexto(busca).trim();
+  const listaFiltrada = termoBusca
+    ? lista.filter((item) => {
+        const texto = [item.nome, item.empresaNome, item.status, item.descricao].join(' ');
+        return normalizarTexto(texto).includes(termoBusca);
+      })
+    : lista;
+
   if (carregando) return <p className="page-loading">Carregando...</p>;
   if (erro) return <p className="erro-msg">{erro}</p>;
 
   return (
-    <div className="usuarios-page cadastro-list-page">
+    <div className="cadastro-page cadastro-list-page">
       <div className="page-header">
         <h1>Projetos</h1>
-        <Link to="/projetos/novo" className="btn btn-primary">Novo projeto</Link>
+        <div className="page-header-actions">
+          <input
+            type="search"
+            className="input-busca"
+            placeholder="Buscar por nome, empresa, status..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            aria-label="Buscar"
+          />
+          <Link to="/projetos/novo" className="btn btn-primary">Novo projeto</Link>
+        </div>
       </div>
+      {termoBusca && (
+        <p className="busca-resultado">
+          {listaFiltrada.length} de {lista.length} registro(s)
+        </p>
+      )}
       <div className="table-wrap">
         <table className="table table-cadastro">
           <thead>
@@ -61,10 +90,10 @@ export default function ProjetosList() {
             </tr>
           </thead>
           <tbody>
-            {lista.length === 0 ? (
-              <tr><td colSpan={7}>Nenhum projeto cadastrado.</td></tr>
+            {listaFiltrada.length === 0 ? (
+              <tr><td colSpan={7}>{lista.length === 0 ? 'Nenhum projeto cadastrado.' : 'Nenhum resultado para a busca.'}</td></tr>
             ) : (
-              lista.map((item) => (
+              listaFiltrada.map((item) => (
                 <tr key={item.id}>
                   <td className="td-texto" title={item.nome}>{v(item.nome)}</td>
                   <td>{v(item.empresaNome)}</td>
@@ -73,10 +102,7 @@ export default function ProjetosList() {
                   <td>{formatarData(item.dataFim)}</td>
                   <td className="td-texto" title={item.descricao}>{v(item.descricao)}</td>
                   <td className="td-acoes">
-                    <Link to={`/projetos/editar/${item.id}`} className="btn btn-sm">Editar</Link>
-                    <button type="button" className="btn btn-sm btn-danger" onClick={() => handleExcluir(item.id, item.nome)} disabled={excluindo === item.id}>
-                      {excluindo === item.id ? '...' : 'Excluir'}
-                    </button>
+                    <AcoesListagem basePath="/projetos" id={item.id} onExcluir={() => handleExcluir(item.id, item.nome)} excluindo={excluindo === item.id} />
                   </td>
                 </tr>
               ))

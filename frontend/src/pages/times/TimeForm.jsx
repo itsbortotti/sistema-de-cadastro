@@ -49,10 +49,12 @@ export default function TimeForm() {
   };
 
   return (
-    <div className="usuarios-page form-cadastro-page">
+    <div className="cadastro-page form-cadastro-page">
       <div className="page-header">
         <h1>{isEdicao ? 'Editar time' : 'Novo time'}</h1>
-        <Link to="/times" className="btn btn-secondary">Voltar</Link>
+        <div className="page-header-actions">
+          <Link to="/times" className="btn btn-secondary">Voltar</Link>
+        </div>
       </div>
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}

@@ -1,29 +1,31 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { capexApi, areasApi, fornecedoresApi, produtosSoftwareApi } from '../../api/client';
+import { capexApi, areasApi, fornecedoresApi, produtosSoftwareApi, projetosApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
 import '../CadastroFormLayout.css';
 
-export default function CapexForm({ tipo = 'capex' }) {
+export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdicao = Boolean(id);
   const labelTipo = tipo === 'capex' ? 'Capex' : 'Opex';
+  const readOnly = somenteLeitura;
 
   const [areas, setAreas] = useState([]);
   const [fornecedores, setFornecedores] = useState([]);
   const [produtos, setProdutos] = useState([]);
+  const [projetos, setProjetos] = useState([]);
 
   const [areaId, setAreaId] = useState('');
   const [classificacao, setClassificacao] = useState(tipo);
-  const [modelo, setModelo] = useState('sistema');
   const [fornecedorId, setFornecedorId] = useState('');
   const [valor, setValor] = useState('');
   const [dataInicio, setDataInicio] = useState('');
   const [dataFim, setDataFim] = useState('');
   const [produtoSoftwareIds, setProdutoSoftwareIds] = useState([]);
+  const [projetoIds, setProjetoIds] = useState([]);
   const [observacoes, setObservacoes] = useState('');
-  const [buscaProdutos, setBuscaProdutos] = useState('');
+  const [buscaAssociados, setBuscaAssociados] = useState('');
   const [entradas, setEntradas] = useState([]);
   const [novaEntradaValor, setNovaEntradaValor] = useState('');
   const [novaEntradaPeriodo, setNovaEntradaPeriodo] = useState('');
@@ -32,16 +34,32 @@ export default function CapexForm({ tipo = 'capex' }) {
   const [enviando, setEnviando] = useState(false);
 
   const mapaAreaNome = areas.reduce((acc, a) => ({ ...acc, [a.id]: a.nome || '' }), {});
-  const produtosFiltrados = buscaProdutos.trim()
-    ? produtos.filter((p) => (p.nomeSistema || '').toLowerCase().includes(buscaProdutos.trim().toLowerCase()))
-    : produtos;
+  const busca = buscaAssociados.trim().toLowerCase();
+  const produtosFiltrados = tipo === 'opex'
+    ? (busca ? produtos.filter((p) => (p.nomeSistema || '').toLowerCase().includes(busca)) : produtos)
+    : [];
+  const projetosFiltrados = tipo === 'capex'
+    ? (busca ? projetos.filter((p) => (p.nome || '').toLowerCase().includes(busca)) : projetos)
+    : [];
   const selecionarTodosFiltrados = () => {
-    const ids = produtosFiltrados.map((p) => p.id);
-    setProdutoSoftwareIds((prev) => [...new Set([...prev, ...ids])]);
+    if (tipo === 'opex') {
+      const ids = produtosFiltrados.map((p) => p.id);
+      setProdutoSoftwareIds((prev) => [...new Set([...prev, ...ids])]);
+    } else {
+      const ids = projetosFiltrados.map((p) => p.id);
+      setProjetoIds((prev) => [...new Set([...prev, ...ids])]);
+    }
   };
-  const limparSelecao = () => setProdutoSoftwareIds([]);
-  const removerProduto = (prodId) => setProdutoSoftwareIds((prev) => prev.filter((x) => x !== prodId));
+  const limparSelecao = () => {
+    if (tipo === 'opex') setProdutoSoftwareIds([]);
+    else setProjetoIds([]);
+  };
+  const removerAssociado = (id) => {
+    if (tipo === 'opex') setProdutoSoftwareIds((prev) => prev.filter((x) => x !== id));
+    else setProjetoIds((prev) => prev.filter((x) => x !== id));
+  };
   const produtosSelecionados = produtos.filter((p) => produtoSoftwareIds.includes(p.id));
+  const projetosSelecionados = projetos.filter((p) => projetoIds.includes(p.id));
 
   const valorTotal = valor !== '' && !Number.isNaN(Number(valor)) ? Number(valor) : 0;
   const totalEntradas = entradas.reduce((acc, e) => acc + (Number(e.valor) || 0), 0);
@@ -93,14 +111,18 @@ export default function CapexForm({ tipo = 'capex' }) {
   const mesesDisponiveis = mesesDoPeriodo(dataInicio, dataFim);
 
   useEffect(() => {
-    Promise.all([areasApi.listar(), fornecedoresApi.listar(), produtosSoftwareApi.listar()])
-      .then(([areasList, fornList, prodList]) => {
-        setAreas(Array.isArray(areasList) ? areasList : []);
-        setFornecedores(Array.isArray(fornList) ? fornList : []);
-        setProdutos(Array.isArray(prodList) ? prodList : []);
+    const promises = [areasApi.listar(), fornecedoresApi.listar()];
+    if (tipo === 'opex') promises.push(produtosSoftwareApi.listar());
+    if (tipo === 'capex') promises.push(projetosApi.listar());
+    Promise.all(promises)
+      .then((results) => {
+        setAreas(Array.isArray(results[0]) ? results[0] : []);
+        setFornecedores(Array.isArray(results[1]) ? results[1] : []);
+        if (tipo === 'opex') setProdutos(Array.isArray(results[2]) ? results[2] : []);
+        if (tipo === 'capex') setProjetos(Array.isArray(results[2]) ? results[2] : []);
       })
       .catch((e) => setErro(e.message));
-  }, []);
+  }, [tipo]);
 
   useEffect(() => {
     if (isEdicao && id) {
@@ -114,12 +136,12 @@ export default function CapexForm({ tipo = 'capex' }) {
           }
           setAreaId(c.areaId ?? '');
           setClassificacao(classif);
-          setModelo(c.modelo ?? c.tipo ?? 'sistema');
           setFornecedorId(c.fornecedorId ?? '');
           setValor(c.valor != null ? String(c.valor) : '');
           setDataInicio(c.dataInicio ?? (c.ano ? `${c.ano}-01-01` : ''));
           setDataFim(c.dataFim ?? (c.ano ? `${c.ano}-12-31` : ''));
           setProdutoSoftwareIds(Array.isArray(c.produtoSoftwareIds) ? c.produtoSoftwareIds : []);
+          setProjetoIds(Array.isArray(c.projetoIds) ? c.projetoIds : []);
           setObservacoes(c.observacoes ?? '');
           setEntradas(Array.isArray(c.entradas) ? c.entradas : []);
         })
@@ -127,10 +149,16 @@ export default function CapexForm({ tipo = 'capex' }) {
     }
   }, [id, isEdicao, tipo, navigate]);
 
-  const handleToggleProduto = (prodId) => {
-    setProdutoSoftwareIds((prev) =>
-      prev.includes(prodId) ? prev.filter((x) => x !== prodId) : [...prev, prodId]
-    );
+  const handleToggleAssociado = (id) => {
+    if (tipo === 'opex') {
+      setProdutoSoftwareIds((prev) =>
+        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      );
+    } else {
+      setProjetoIds((prev) =>
+        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      );
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -165,12 +193,12 @@ export default function CapexForm({ tipo = 'capex' }) {
       const payload = {
         areaId: areaId.trim(),
         classificacao: isEdicao ? classificacao : tipo,
-        modelo,
         fornecedorId: fornecedorId.trim() || null,
         valor: valorNum,
         dataInicio: ini,
         dataFim: fim,
-        produtoSoftwareIds: produtoSoftwareIds,
+        produtoSoftwareIds: tipo === 'opex' ? produtoSoftwareIds : [],
+        projetoIds: tipo === 'capex' ? projetoIds : [],
         observacoes: observacoes.trim(),
       };
       if (isEdicao) {
@@ -187,14 +215,16 @@ export default function CapexForm({ tipo = 'capex' }) {
   };
 
   return (
-    <div className="usuarios-page form-cadastro-page">
+    <div className="cadastro-page form-cadastro-page">
       <div className="page-header">
-        <h1>{isEdicao ? `Editar ${labelTipo}` : `Novo ${labelTipo}`}</h1>
-        <Link to={`/${tipo}`} className="btn btn-secondary">Voltar</Link>
+        <h1>{readOnly ? `Ver ${labelTipo}` : isEdicao ? `Editar ${labelTipo}` : `Novo ${labelTipo}`}</h1>
+        <div className="page-header-actions">
+          <Link to={`/${tipo}`} className="btn btn-secondary">Voltar</Link>
+        </div>
       </div>
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
-
+        <fieldset disabled={readOnly} style={{ border: 'none', margin: 0, padding: 0 }}>
         <section className="form-secao">
           <h2 className="form-secao-titulo">Dados do {labelTipo}</h2>
           <label className="form-group">
@@ -204,13 +234,6 @@ export default function CapexForm({ tipo = 'capex' }) {
               {areas.map((a) => (
                 <option key={a.id} value={a.id}>{a.nome}</option>
               ))}
-            </select>
-          </label>
-          <label className="form-group">
-            <span className="form-label">Modelo</span>
-            <select value={modelo} onChange={(e) => setModelo(e.target.value)}>
-              <option value="sistema">Sistema</option>
-              <option value="infraestrutura">Infraestrutura</option>
             </select>
           </label>
           <label className="form-group">
@@ -263,82 +286,82 @@ export default function CapexForm({ tipo = 'capex' }) {
         </section>
 
         <section className="form-secao form-secao-produtos">
-          <h2 className="form-secao-titulo">Projetos associados</h2>
-              <p className="form-hint">Nenhum projeto cadastrado.</p>
-
-          {produtosSelecionados.length > 0 && (
-            <div className="produtos-selecionados-resumo">
-              <span className="produtos-selecionados-label">
-                {produtosSelecionados.length} projeto(s) selecionado(s):
-              </span>
-              <div className="produtos-chips">
-                {produtosSelecionados.map((p) => (
-                  <span key={p.id} className="produto-chip">
-                    {p.nomeSistema || p.id}
-                    <button
-                      type="button"
-                      className="produto-chip-remove"
-                      onClick={() => removerProduto(p.id)}
-                      title="Remover"
-                      aria-label={`Remover ${p.nomeSistema || p.id}`}
-                    >
-                      ×
-                    </button>
+          <h2 className="form-secao-titulo">{tipo === 'capex' ? 'Projetos associados' : 'Sistemas associados'}</h2>
+          {tipo === 'capex' ? (
+            <>
+              {projetosSelecionados.length > 0 && (
+                <div className="produtos-selecionados-resumo">
+                  <span className="produtos-selecionados-label">
+                    {projetosSelecionados.length} projeto(s) selecionado(s):
                   </span>
-                ))}
+                  <div className="produtos-chips">
+                    {projetosSelecionados.map((p) => (
+                      <span key={p.id} className="produto-chip">
+                        {p.nome || p.id}
+                        <button type="button" className="produto-chip-remove" onClick={() => removerAssociado(p.id)} title="Remover" aria-label={`Remover ${p.nome || p.id}`}>×</button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="produtos-toolbar">
+                <input type="search" className="produtos-busca" placeholder="Buscar por nome do projeto..." value={buscaAssociados} onChange={(e) => setBuscaAssociados(e.target.value)} aria-label="Buscar projetos" />
+                <div className="produtos-acoes">
+                  <button type="button" className="btn btn-sm btn-outline" onClick={selecionarTodosFiltrados}>Selecionar todos ({projetosFiltrados.length})</button>
+                  <button type="button" className="btn btn-sm btn-outline" onClick={limparSelecao}>Limpar seleção</button>
+                </div>
               </div>
-            </div>
-          )}
-
-          <div className="produtos-toolbar">
-            <input
-              type="search"
-              className="produtos-busca"
-              placeholder="Buscar por nome do projeto..."
-              value={buscaProdutos}
-              onChange={(e) => setBuscaProdutos(e.target.value)}
-              aria-label="Buscar projetos"
-            />
-            <div className="produtos-acoes">
-              <button type="button" className="btn btn-sm btn-outline" onClick={selecionarTodosFiltrados}>
-                Selecionar todos ({produtosFiltrados.length})
-              </button>
-              <button type="button" className="btn btn-sm btn-outline" onClick={limparSelecao}>
-                Limpar seleção
-              </button>
-            </div>
-          </div>
-
-          <div className="produtos-grid" role="list">
-            {produtos.length === 0 ? (
-              <p className="form-hint">Nenhum projeto cadastrado.</p>
-            ) : produtosFiltrados.length === 0 ? (
-              <p className="form-hint">Nenhum projeto encontrado para &quot;{buscaProdutos}&quot;.</p>
-            ) : (
-              produtosFiltrados.map((p) => {
-                const selected = produtoSoftwareIds.includes(p.id);
-                const areaNome = mapaAreaNome[p.areaId] || (p.areaNome ?? '');
-                return (
-                  <label
-                    key={p.id}
-                    className={`produto-card ${selected ? 'produto-card--selected' : ''}`}
-                    role="listitem"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selected}
-                      onChange={() => handleToggleProduto(p.id)}
-                      className="produto-card-check"
-                    />
+              <div className="produtos-grid" role="list">
+                {projetos.length === 0 ? <p className="form-hint">Nenhum projeto cadastrado.</p> : projetosFiltrados.length === 0 ? <p className="form-hint">Nenhum projeto encontrado para &quot;{buscaAssociados}&quot;.</p> : projetosFiltrados.map((p) => (
+                  <label key={p.id} className={`produto-card ${projetoIds.includes(p.id) ? 'produto-card--selected' : ''}`} role="listitem">
+                    <input type="checkbox" checked={projetoIds.includes(p.id)} onChange={() => handleToggleAssociado(p.id)} className="produto-card-check" />
                     <div className="produto-card-body">
-                      <span className="produto-card-nome">{p.nomeSistema || p.id}</span>
-                      {areaNome && <span className="produto-card-meta">{areaNome}</span>}
+                      <span className="produto-card-nome">{p.nome || p.id}</span>
                     </div>
                   </label>
-                );
-              })
-            )}
-          </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              {produtosSelecionados.length > 0 && (
+                <div className="produtos-selecionados-resumo">
+                  <span className="produtos-selecionados-label">
+                    {produtosSelecionados.length} sistema(s) selecionado(s):
+                  </span>
+                  <div className="produtos-chips">
+                    {produtosSelecionados.map((p) => (
+                      <span key={p.id} className="produto-chip">
+                        {p.nomeSistema || p.id}
+                        <button type="button" className="produto-chip-remove" onClick={() => removerAssociado(p.id)} title="Remover" aria-label={`Remover ${p.nomeSistema || p.id}`}>×</button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="produtos-toolbar">
+                <input type="search" className="produtos-busca" placeholder="Buscar por nome do sistema..." value={buscaAssociados} onChange={(e) => setBuscaAssociados(e.target.value)} aria-label="Buscar sistemas" />
+                <div className="produtos-acoes">
+                  <button type="button" className="btn btn-sm btn-outline" onClick={selecionarTodosFiltrados}>Selecionar todos ({produtosFiltrados.length})</button>
+                  <button type="button" className="btn btn-sm btn-outline" onClick={limparSelecao}>Limpar seleção</button>
+                </div>
+              </div>
+              <div className="produtos-grid" role="list">
+                {produtos.length === 0 ? <p className="form-hint">Nenhum sistema cadastrado.</p> : produtosFiltrados.length === 0 ? <p className="form-hint">Nenhum sistema encontrado para &quot;{buscaAssociados}&quot;.</p> : produtosFiltrados.map((p) => {
+                  const areaNome = mapaAreaNome[p.areaId] || (p.areaNome ?? '');
+                  return (
+                    <label key={p.id} className={`produto-card ${produtoSoftwareIds.includes(p.id) ? 'produto-card--selected' : ''}`} role="listitem">
+                      <input type="checkbox" checked={produtoSoftwareIds.includes(p.id)} onChange={() => handleToggleAssociado(p.id)} className="produto-card-check" />
+                      <div className="produto-card-body">
+                        <span className="produto-card-nome">{p.nomeSistema || p.id}</span>
+                        {areaNome && <span className="produto-card-meta">{areaNome}</span>}
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </section>
 
         <section className="form-secao">
@@ -440,13 +463,16 @@ export default function CapexForm({ tipo = 'capex' }) {
             )}
           </section>
         )}
+        </fieldset>
 
+        {!readOnly && (
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={enviando}>
             {enviando ? 'Salvando...' : isEdicao ? 'Salvar alterações' : `Cadastrar ${labelTipo}`}
           </button>
           <Link to={`/${tipo}`} className="btn btn-secondary">Cancelar</Link>
         </div>
+        )}
       </form>
     </div>
   );

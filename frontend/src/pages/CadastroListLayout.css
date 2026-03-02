@@ -1,10 +1,24 @@
-/* Listagem igual ao design de Fornecedores */
+/* Listagem igual ao design de Fornecedores / Sistemas */
 .cadastro-list-page {
   max-width: none;
   width: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+
+.cadastro-list-page .page-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.cadastro-list-page .page-header-actions .input-busca {
+  flex: 1;
+  min-width: 200px;
+  max-width: 320px;
 }
 
 .cadastro-list-page .table-wrap {
@@ -27,8 +41,8 @@
   background: #fff;
   box-shadow: -6px 0 10px -4px rgba(0, 0, 0, 0.06);
   white-space: nowrap;
-  min-width: 140px;
-  width: 140px;
+  min-width: 120px;
+  width: 120px;
 }
 
 .cadastro-list-page .table-cadastro th.th-acoes {
@@ -37,6 +51,61 @@
 
 .cadastro-list-page .table-cadastro tbody tr:hover .td-acoes {
   background: #f8fafc;
+}
+
+/* Ações em ícones (Ver, Editar, Excluir) */
+.acoes-listagem {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fff;
+  color: #475569;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn-icone:hover {
+  background: #f1f5f9;
+  color: #2563eb;
+  border-color: #cbd5e1;
+}
+
+.btn-icone:disabled,
+.btn-icone.btn-icone-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-icone-danger {
+  color: #64748b;
+  border-color: #e2e8f0;
+}
+
+.btn-icone-danger:hover:not(:disabled) {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.btn-icone-loading {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.cadastro-list-page .table-cadastro .td-acoes .acoes-listagem {
+  flex-wrap: nowrap;
 }
 
 .cadastro-list-page .table-cadastro .td-acoes .btn {

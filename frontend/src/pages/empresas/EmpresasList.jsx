@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { empresasApi } from '../../api/client';
+import AcoesListagem from '../../components/AcoesListagem';
 import '../usuarios/Usuarios.css';
 import '../CadastroListLayout.css';
 import './Empresas.css';
@@ -12,11 +13,16 @@ function formatarMoeda(valor) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(Number(valor));
 }
 
+function normalizarTexto(str) {
+  return String(str ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 export default function EmpresasList() {
   const [lista, setLista] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [excluindo, setExcluindo] = useState(null);
+  const [busca, setBusca] = useState('');
 
   const carregar = () => {
     setCarregando(true);
@@ -31,15 +37,38 @@ export default function EmpresasList() {
     empresasApi.remover(id).then(carregar).catch((e) => setErro(e.message)).finally(() => setExcluindo(null));
   };
 
+  const termoBusca = normalizarTexto(busca).trim();
+  const listaFiltrada = termoBusca
+    ? lista.filter((e) => {
+        const texto = [e.cnpj, e.razaoSocial, e.nomeFantasia, e.situacaoCadastral, e.porte, e.cidade, e.uf].join(' ');
+        return normalizarTexto(texto).includes(termoBusca);
+      })
+    : lista;
+
   if (carregando) return <p className="page-loading">Carregando...</p>;
   if (erro) return <p className="erro-msg">{erro}</p>;
 
   return (
-    <div className="usuarios-page cadastro-list-page empresas-list-page">
+    <div className="cadastro-page cadastro-list-page empresas-list-page">
       <div className="page-header">
         <h1>Empresas</h1>
-        <Link to="/empresas/novo" className="btn btn-primary">Nova empresa</Link>
+        <div className="page-header-actions">
+          <input
+            type="search"
+            className="input-busca"
+            placeholder="Buscar por CNPJ, razão social, nome fantasia..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            aria-label="Buscar"
+          />
+          <Link to="/empresas/novo" className="btn btn-primary">Nova empresa</Link>
+        </div>
       </div>
+      {termoBusca && (
+        <p className="busca-resultado">
+          {listaFiltrada.length} de {lista.length} registro(s)
+        </p>
+      )}
       <div className="table-wrap">
         <table className="table table-cadastro table-empresas">
           <thead>
@@ -55,12 +84,12 @@ export default function EmpresasList() {
             </tr>
           </thead>
           <tbody>
-            {lista.length === 0 ? (
+            {listaFiltrada.length === 0 ? (
               <tr>
-                <td colSpan={8}>Nenhuma empresa cadastrada.</td>
+                <td colSpan={8}>{lista.length === 0 ? 'Nenhuma empresa cadastrada.' : 'Nenhum resultado para a busca.'}</td>
               </tr>
             ) : (
-              lista.map((e) => (
+              listaFiltrada.map((e) => (
                 <tr key={e.id}>
                   <td className="td-cnpj">{v(e.cnpj)}</td>
                   <td className="td-razao td-texto" title={e.razaoSocial}>{v(e.razaoSocial)}</td>
@@ -70,15 +99,7 @@ export default function EmpresasList() {
                   <td>{v(e.cidade)}{e.cidade && e.uf ? ' / ' : ''}{v(e.uf)}</td>
                   <td className="td-capital">{formatarMoeda(e.capitalSocial)}</td>
                   <td className="td-acoes">
-                    <Link to={`/empresas/editar/${e.id}`} className="btn btn-sm">Editar</Link>
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-danger"
-                      onClick={() => handleExcluir(e.id, e.razaoSocial)}
-                      disabled={excluindo === e.id}
-                    >
-                      {excluindo === e.id ? '...' : 'Excluir'}
-                    </button>
+                    <AcoesListagem basePath="/empresas" id={e.id} onExcluir={() => handleExcluir(e.id, e.razaoSocial)} excluindo={excluindo === e.id} />
                   </td>
                 </tr>
               ))
