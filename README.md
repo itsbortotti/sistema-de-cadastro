@@ -1,6 +1,6 @@
-# Sistema de Cadastro
+# Gestão Financeira de Projetos
 
-Aplicação com login, menu lateral e cadastro de usuários. Backend em Node.js com APIs documentadas no Swagger e frontend em React.
+Aplicação com login, menu lateral e cadastro de usuários, projetos, Capex/Opex e demais módulos. Backend em Node.js com APIs documentadas no Swagger e frontend em React.
 
 ## Estrutura
 

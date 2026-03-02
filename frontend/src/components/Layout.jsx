@@ -6,9 +6,9 @@ import { usePermissoes } from '../context/PermissoesContext';
 import { ErrorBoundary } from './ErrorBoundary';
 import './Layout.css';
 
-const iconHome = (
+const iconDashboard = (
   <svg className="nav-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+    <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
   </svg>
 );
 const iconCadastros = (
@@ -130,12 +130,12 @@ export default function Layout() {
           >
             {menuAberto ? iconFechar : iconMenu}
           </button>
-          <h2>Sistema de Cadastro</h2>
+          <h2>Gestão Financeira de Projetos</h2>
         </div>
         <nav className="sidebar-nav">
           <NavLink to="/" end className={({ isActive }) => (isActive ? 'nav-link active nav-link-home' : 'nav-link nav-link-home')}>
-            {iconHome}
-            <span>Início</span>
+            {iconDashboard}
+            <span>DASHBOARD</span>
           </NavLink>
 
           <div className="nav-group">

@@ -8,6 +8,7 @@ import {
   hospedagensApi,
   formasAcessoApi,
   timesApi,
+  empresasApi,
 } from '../../api/client';
 import '../usuarios/Usuarios.css';
 import './ProdutoSoftwareForm.css';
@@ -89,12 +90,14 @@ export default function ProdutoSoftwareForm() {
 
   const [fornecedores, setFornecedores] = useState([]);
   const [areas, setAreas] = useState([]);
+  const [empresas, setEmpresas] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [hospedagens, setHospedagens] = useState([]);
   const [formasAcesso, setFormasAcesso] = useState([]);
   const [times, setTimes] = useState([]);
 
   const [nomeSistema, setNomeSistema] = useState('');
+  const [empresaId, setEmpresaId] = useState('');
   const [fornecedorId, setFornecedorId] = useState('');
   const [finalidadePrincipal, setFinalidadePrincipal] = useState('');
   const [breveDescritivo, setBreveDescritivo] = useState('');
@@ -126,14 +129,16 @@ export default function ProdutoSoftwareForm() {
     Promise.all([
       fornecedoresApi.listar(),
       areasApi.listar(),
+      empresasApi.listar(),
       usuariosApi.listar(),
       hospedagensApi.listar(),
       formasAcessoApi.listar(),
       timesApi.listar(),
     ])
-      .then(([f, a, u, h, fa, t]) => {
+      .then(([f, a, emp, u, h, fa, t]) => {
         setFornecedores(f);
         setAreas(a);
+        setEmpresas(Array.isArray(emp) ? emp : []);
         setUsuarios(u);
         setHospedagens(h);
         setFormasAcesso(fa);
@@ -150,6 +155,7 @@ export default function ProdutoSoftwareForm() {
         .buscar(id)
         .then((p) => {
           setNomeSistema(p.nomeSistema || '');
+          setEmpresaId(p.empresaId || '');
           setFornecedorId(p.fornecedorId || '');
           setFinalidadePrincipal(p.finalidadePrincipal || '');
           setBreveDescritivo(p.breveDescritivo || '');
@@ -213,6 +219,7 @@ export default function ProdutoSoftwareForm() {
     setEnviando(true);
     const payload = {
       nomeSistema,
+      empresaId: empresaId || null,
       fornecedorId: fornecedorId || null,
       finalidadePrincipal,
       breveDescritivo,
@@ -269,6 +276,15 @@ export default function ProdutoSoftwareForm() {
           <label className="form-group">
             <span className="form-label">Nome do Projeto</span>
             <input type="text" value={nomeSistema} onChange={(e) => setNomeSistema(e.target.value)} placeholder="Ex.: Sistema de Vendas" />
+          </label>
+          <label className="form-group">
+            <span className="form-label">Empresa</span>
+            <select value={empresaId} onChange={(e) => setEmpresaId(e.target.value)}>
+              <option value="">— Selecione a empresa —</option>
+              {empresas.map((e) => (
+                <option key={e.id} value={e.id}>{e.nomeFantasia || e.razaoSocial || e.id}</option>
+              ))}
+            </select>
           </label>
           <SelectComNovo
             label="Fornecedor / Desenvolvedor"

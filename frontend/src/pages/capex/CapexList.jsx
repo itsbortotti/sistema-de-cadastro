@@ -74,7 +74,7 @@ export default function CapexList() {
               <th>Valor (R$)</th>
               <th>Data inicial</th>
               <th>Data final</th>
-              <th>Produtos</th>
+              <th>Projetos</th>
               <th>OBS</th>
               <th className="th-acoes">Ações</th>
             </tr>

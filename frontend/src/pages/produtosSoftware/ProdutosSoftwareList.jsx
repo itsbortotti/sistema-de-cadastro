@@ -8,6 +8,7 @@ import {
   hospedagensApi,
   formasAcessoApi,
   timesApi,
+  empresasApi,
 } from '../../api/client';
 import '../usuarios/Usuarios.css';
 import './ProdutosSoftwareList.css';
@@ -62,6 +63,8 @@ function formatarData(str) {
 // Mapeia nome do cabeçalho (normalizado) para chave do payload
 const MAPEAMENTO_CSV = {
   'nome do sistema': 'nomeSistema',
+  'nome do projeto': 'nomeSistema',
+  'empresa': 'empresaNome',
   'fornecedor': 'fornecedorNome',
   'fornecedor / desenvolvedor': 'fornecedorNome',
   'finalidade principal': 'finalidadePrincipal',
@@ -134,7 +137,7 @@ export default function ProdutosSoftwareList() {
   const [arquivoPreview, setArquivoPreview] = useState(null);
   const [importando, setImportando] = useState(false);
   const [resultadoImportacao, setResultadoImportacao] = useState(null);
-  const [listasAux, setListasAux] = useState({ fornecedores: [], areas: [], usuarios: [], hospedagens: [], formasAcesso: [], times: [] });
+  const [listasAux, setListasAux] = useState({ fornecedores: [], areas: [], empresas: [], usuarios: [], hospedagens: [], formasAcesso: [], times: [] });
   const inputFileRef = useRef(null);
 
   const carregar = () => {
@@ -149,12 +152,13 @@ export default function ProdutosSoftwareList() {
       Promise.all([
         fornecedoresApi.listar(),
         areasApi.listar(),
+        empresasApi.listar(),
         usuariosApi.listar(),
         hospedagensApi.listar(),
         formasAcessoApi.listar(),
         timesApi.listar(),
       ])
-        .then(([f, a, u, h, fa, t]) => setListasAux({ fornecedores: f, areas: a, usuarios: u, hospedagens: h, formasAcesso: fa, times: t }))
+        .then(([f, a, emp, u, h, fa, t]) => setListasAux({ fornecedores: f, areas: a, empresas: Array.isArray(emp) ? emp : [], usuarios: u, hospedagens: h, formasAcesso: fa, times: t }))
         .catch(() => {});
     }
   }, [modalImportarAberto]);
@@ -194,6 +198,12 @@ export default function ProdutosSoftwareList() {
     const found = lista.find((x) => String(x.nome || '').trim().toLowerCase() === n);
     return found ? found.id : null;
   };
+  const buscarEmpresaPorNome = (lista, nome) => {
+    if (!nome || !lista?.length) return null;
+    const n = String(nome).trim().toLowerCase();
+    const found = lista.find((x) => String(x.nomeFantasia || x.razaoSocial || '').trim().toLowerCase() === n);
+    return found ? found.id : null;
+  };
 
   const processarLinhaParaPayload = (headers, valores, listas) => {
     const obj = {};
@@ -203,6 +213,7 @@ export default function ProdutosSoftwareList() {
       const valor = valores[i] != null ? String(valores[i]).trim() : '';
       if (key === 'fornecedorNome') obj.fornecedorId = buscarPorNome(listas.fornecedores, valor) || null;
       else if (key === 'areaNome') obj.areaId = buscarPorNome(listas.areas, valor) || null;
+      else if (key === 'empresaNome') obj.empresaId = buscarEmpresaPorNome(listas.empresas, valor) || null;
       else if (key === 'responsavelTiNome') obj.responsavelTiId = buscarPorNome(listas.usuarios, valor) || null;
       else if (key === 'usuarioNegocioNome') obj.usuarioNegocioId = buscarPorNome(listas.usuarios, valor) || null;
       else if (key === 'hospedagemNome') obj.hospedagemId = buscarPorNome(listas.hospedagens, valor) || null;
@@ -221,6 +232,7 @@ export default function ProdutosSoftwareList() {
     });
     return {
       nomeSistema: obj.nomeSistema || '',
+      empresaId: obj.empresaId ?? null,
       fornecedorId: obj.fornecedorId ?? null,
       finalidadePrincipal: obj.finalidadePrincipal || '',
       breveDescritivo: obj.breveDescritivo || '',
@@ -291,6 +303,7 @@ export default function ProdutosSoftwareList() {
           <thead>
             <tr>
               <th>Nome do Projeto</th>
+              <th>Empresa</th>
               <th>Fornecedor / Desenvolvedor</th>
               <th>Finalidade Principal</th>
               <th>Breve Descritivo</th>
@@ -318,12 +331,13 @@ export default function ProdutosSoftwareList() {
           <tbody>
             {lista.length === 0 ? (
               <tr>
-                <td colSpan={23}>Nenhum projeto cadastrado.</td>
+                <td colSpan={24}>Nenhum projeto cadastrado.</td>
               </tr>
             ) : (
               lista.map((p) => (
                 <tr key={p.id}>
                   <td>{v(p.nomeSistema)}</td>
+                  <td>{v(p.empresaNome)}</td>
                   <td>{v(p.fornecedorNome)}</td>
                   <td>{v(p.finalidadePrincipal)}</td>
                   <td className="td-texto" title={p.breveDescritivo}>{v(p.breveDescritivo)}</td>

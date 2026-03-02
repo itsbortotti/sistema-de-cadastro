@@ -2,6 +2,7 @@ const express = require('express');
 const { listar, getById, criar, atualizar, remover } = require('../data/produtosSoftware');
 const { getById: getFornecedorById } = require('../data/fornecedores');
 const { getById: getAreaById } = require('../data/areas');
+const { getById: getEmpresaById } = require('../data/empresas');
 const usuariosData = require('../data/usuarios');
 const { getById: getHospedagemById } = require('../data/hospedagens');
 const { getById: getFormaAcessoById } = require('../data/formasAcesso');
@@ -20,6 +21,10 @@ function expandir(item) {
   if (item.fornecedorId) {
     const f = getFornecedorById(item.fornecedorId);
     u.fornecedorNome = f ? f.nome : null;
+  }
+  if (item.empresaId) {
+    const emp = getEmpresaById(item.empresaId);
+    u.empresaNome = emp ? (emp.nomeFantasia || emp.razaoSocial || emp.id) : null;
   }
   if (item.areaId) {
     const a = getAreaById(item.areaId);

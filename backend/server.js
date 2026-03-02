@@ -25,7 +25,7 @@ const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Sistema de Cadastro - API',
+      title: 'Gestão Financeira de Projetos - API',
       version: '1.0.0',
       description: 'APIs de autenticação e cadastro de usuários',
     },

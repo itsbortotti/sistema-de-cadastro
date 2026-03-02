@@ -30,6 +30,7 @@ function criar(dados) {
   const novo = {
     id,
     nomeSistema: dados.nomeSistema || '',
+    empresaId: dados.empresaId && String(dados.empresaId).trim() ? String(dados.empresaId).trim() : null,
     fornecedorId: dados.fornecedorId || null,
     finalidadePrincipal: dados.finalidadePrincipal || '',
     breveDescritivo: dados.breveDescritivo || '',
@@ -63,7 +64,7 @@ function atualizar(id, dados) {
   if (idx === -1) return null;
   const atual = lista[idx];
   const campos = [
-    'nomeSistema', 'fornecedorId', 'finalidadePrincipal', 'breveDescritivo', 'marcasAtendidas',
+    'nomeSistema', 'empresaId', 'fornecedorId', 'finalidadePrincipal', 'breveDescritivo', 'marcasAtendidas',
     'usuariosQtdAproximada', 'areaId', 'responsavelTiId', 'usuarioNegocioId', 'hospedagemId',
     'onPremisesSites', 'formaAcessoId', 'integracoes', 'controleAcessoPorUsuario', 'autenticacaoAdSso',
     'grauSatisfacao', 'problemasEnfrentados', 'custoMensalSistema', 'custoMensalInfraestrutura', 'timeId',
@@ -76,6 +77,8 @@ function atualizar(id, dados) {
       } else if (c === 'controleAcessoPorUsuario' || c === 'autenticacaoAdSso') {
         atual[c] = Boolean(dados[c]);
       } else if (c === 'dataInicio' || c === 'dataFim') {
+        atual[c] = dados[c] && String(dados[c]).trim() ? String(dados[c]).trim() : null;
+      } else if (c === 'empresaId') {
         atual[c] = dados[c] && String(dados[c]).trim() ? String(dados[c]).trim() : null;
       } else {
         atual[c] = dados[c];
