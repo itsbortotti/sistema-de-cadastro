@@ -49,6 +49,7 @@ function criar(dados) {
     custoMensalSistema: dados.custoMensalSistema != null && dados.custoMensalSistema !== '' ? Number(dados.custoMensalSistema) : null,
     custoMensalInfraestrutura: dados.custoMensalInfraestrutura != null && dados.custoMensalInfraestrutura !== '' ? Number(dados.custoMensalInfraestrutura) : null,
     timeId: dados.timeId || null,
+    ano: dados.ano != null && dados.ano !== '' ? Number(dados.ano) : null,
   };
   lista.push(novo);
   write(lista);
@@ -64,11 +65,11 @@ function atualizar(id, dados) {
     'nomeSistema', 'fornecedorId', 'finalidadePrincipal', 'breveDescritivo', 'marcasAtendidas',
     'usuariosQtdAproximada', 'areaId', 'responsavelTiId', 'usuarioNegocioId', 'hospedagemId',
     'onPremisesSites', 'formaAcessoId', 'integracoes', 'controleAcessoPorUsuario', 'autenticacaoAdSso',
-    'grauSatisfacao', 'problemasEnfrentados', 'custoMensalSistema', 'custoMensalInfraestrutura', 'timeId',
+    'grauSatisfacao', 'problemasEnfrentados', 'custoMensalSistema', 'custoMensalInfraestrutura', 'timeId', 'ano',
   ];
   campos.forEach((c) => {
     if (dados[c] !== undefined) {
-      if (c === 'usuariosQtdAproximada' || c === 'custoMensalSistema' || c === 'custoMensalInfraestrutura') {
+      if (c === 'usuariosQtdAproximada' || c === 'custoMensalSistema' || c === 'custoMensalInfraestrutura' || c === 'ano') {
         atual[c] = dados[c] === '' || dados[c] == null ? null : Number(dados[c]);
       } else if (c === 'controleAcessoPorUsuario' || c === 'autenticacaoAdSso') {
         atual[c] = Boolean(dados[c]);

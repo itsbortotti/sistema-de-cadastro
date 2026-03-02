@@ -18,6 +18,8 @@ import TimesList from './pages/times/TimesList';
 import TimeForm from './pages/times/TimeForm';
 import ProdutosSoftwareList from './pages/produtosSoftware/ProdutosSoftwareList';
 import ProdutoSoftwareForm from './pages/produtosSoftware/ProdutoSoftwareForm';
+import CapexList from './pages/capex/CapexList';
+import CapexForm from './pages/capex/CapexForm';
 import PermissoesPage from './pages/configuracoes/PermissoesPage';
 
 function PrivateRoute({ children }) {
@@ -61,6 +63,9 @@ function AppRoutes() {
         <Route path="produtos-software" element={<ProdutosSoftwareList />} />
         <Route path="produtos-software/novo" element={<ProdutoSoftwareForm />} />
         <Route path="produtos-software/editar/:id" element={<ProdutoSoftwareForm />} />
+        <Route path="capex" element={<CapexList />} />
+        <Route path="capex/novo" element={<CapexForm />} />
+        <Route path="capex/editar/:id" element={<CapexForm />} />
         <Route path="configuracoes" element={<PermissoesPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

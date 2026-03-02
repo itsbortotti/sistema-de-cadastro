@@ -56,6 +56,14 @@
     "excluir": true
   },
   {
+    "tipo": "admin",
+    "entidade": "capex",
+    "visualizar": true,
+    "editar": true,
+    "criar": true,
+    "excluir": true
+  },
+  {
     "tipo": "membro",
     "entidade": "usuarios",
     "visualizar": true,
@@ -112,6 +120,14 @@
     "excluir": false
   },
   {
+    "tipo": "membro",
+    "entidade": "capex",
+    "visualizar": true,
+    "editar": true,
+    "criar": true,
+    "excluir": false
+  },
+  {
     "tipo": "visualizacao",
     "entidade": "usuarios",
     "visualizar": true,
@@ -162,6 +178,14 @@
   {
     "tipo": "visualizacao",
     "entidade": "produtos-software",
+    "visualizar": true,
+    "editar": false,
+    "criar": false,
+    "excluir": false
+  },
+  {
+    "tipo": "visualizacao",
+    "entidade": "capex",
     "visualizar": true,
     "editar": false,
     "criar": false,

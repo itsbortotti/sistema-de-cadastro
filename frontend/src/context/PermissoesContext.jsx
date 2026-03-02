@@ -32,7 +32,8 @@ export function PermissoesProvider({ children }) {
   const can = useMemo(() => {
     if (usuario?.tipo === 'admin') return () => true;
     const map = new Map();
-    lista.forEach((r) => {
+    const list = Array.isArray(lista) ? lista : [];
+    list.forEach((r) => {
       map.set(`${r.entidade}:visualizar`, r.visualizar);
       map.set(`${r.entidade}:editar`, r.editar);
       map.set(`${r.entidade}:criar`, r.criar);
@@ -41,14 +42,16 @@ export function PermissoesProvider({ children }) {
     return (entidade, acao) => Boolean(map.get(`${entidade}:${acao}`));
   }, [lista, usuario?.tipo]);
 
+  const listaSegura = Array.isArray(lista) ? lista : [];
+
   const value = useMemo(
     () => ({
-      permissoes: lista,
+      permissoes: listaSegura,
       can,
       isAdmin: usuario?.tipo === 'admin',
       entidadeLabel: (entidade) => ENTIDADE_LABEL[entidade] || entidade,
     }),
-    [lista, can, usuario?.tipo]
+    [listaSegura, can, usuario?.tipo]
   );
 
   return (

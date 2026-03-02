@@ -35,6 +35,17 @@
   gap: 0.35rem;
 }
 
+.dashboard-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  align-items: flex-end;
+}
+
+.dashboard-filtros .dashboard-ano {
+  margin-left: 0;
+}
+
 .dashboard-periodo-label {
   font-size: 0.75rem;
   color: #64748b;
@@ -111,6 +122,168 @@
   background: #f8fafc;
 }
 
+.dashboard-cards-capex .dashboard-card-acima {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+.dashboard-cards-capex .dashboard-card-acima .dashboard-card-value { color: #dc2626; }
+
+.dashboard-cards-capex .dashboard-card-abaixo {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+.dashboard-cards-capex .dashboard-card-abaixo .dashboard-card-value { color: #16a34a; }
+
+.dashboard-cards-capex .dashboard-card-no-limite {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+.dashboard-cards-capex .dashboard-card-no-limite .dashboard-card-value { color: #2563eb; }
+
+.dashboard-card-hint {
+  display: block;
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+  font-weight: 400;
+}
+
+.dashboard-grafico-titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+.dashboard-grafico-legend-capex {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #64748b;
+  margin-left: 0.5rem;
+}
+.dashboard-grafico-legend-capex .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.25rem;
+  vertical-align: middle;
+}
+.dashboard-grafico-legend-capex .dot-acima { background: #dc2626; }
+.dashboard-grafico-legend-capex .dot-abaixo { background: #16a34a; }
+.dashboard-grafico-legend-capex .dot-no-limite { background: #2563eb; }
+
+.dashboard-tabela-dica {
+  margin: -0.5rem 0 0.75rem;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+.dashboard-capex-tabela .dashboard-tabela-capex-wrap {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+}
+.dashboard-tabela-capex {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.dashboard-tabela-capex th,
+.dashboard-tabela-capex td {
+  padding: 0.6rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+.dashboard-tabela-capex th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: #334155;
+}
+.dashboard-tabela-capex tbody tr:hover {
+  background: #f8fafc;
+}
+.dashboard-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.dashboard-badge-acima { background: #fef2f2; color: #dc2626; }
+.dashboard-badge-abaixo { background: #f0fdf4; color: #16a34a; }
+.dashboard-badge-no-limite { background: #eff6ff; color: #2563eb; }
+.dashboard-badge-default { background: #f1f5f9; color: #64748b; }
+
+.dashboard-tabela-capex-row-clicavel {
+  cursor: pointer;
+}
+.dashboard-tabela-capex-row-clicavel:hover {
+  background: #eff6ff !important;
+}
+
+.dashboard-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+.dashboard-modal {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  max-width: 640px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+.dashboard-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+.dashboard-modal-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.dashboard-modal-fechar {
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  background: #f1f5f9;
+  border-radius: 6px;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #64748b;
+  padding: 0;
+}
+.dashboard-modal-fechar:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+.dashboard-modal-body {
+  padding: 1rem 1.25rem;
+  overflow: auto;
+}
+.dashboard-modal-tabela {
+  margin: 0;
+}
+.dashboard-modal-vazio {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
 .dashboard-secao {
   margin-bottom: 2.5rem;
 }
@@ -169,8 +342,12 @@
   min-height: 260px;
 }
 
-.dashboard-grafico-container.dashboard-grafico-pie {
-  min-height: 280px;
+.dashboard-grafico-container.dashboard-grafico-bar {
+  min-height: 260px;
+}
+
+.dashboard-grafico-container.dashboard-grafico-treemap {
+  min-height: 260px;
 }
 
 /* Recharts tooltip/legend legibilidade */

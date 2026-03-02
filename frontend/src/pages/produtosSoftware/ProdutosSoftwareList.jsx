@@ -83,6 +83,9 @@ const MAPEAMENTO_CSV = {
   'custo mensal sistema': 'custoMensalSistema',
   'custo mensal infraestrutura': 'custoMensalInfraestrutura',
   'time': 'timeNome',
+  'ano': 'ano',
+  'ano referencia': 'ano',
+  'ano (referência)': 'ano',
 };
 
 function normalizarHeader(h) {
@@ -189,6 +192,7 @@ export default function ProdutosSoftwareList() {
       else if (key === 'usuariosQtdAproximada') obj.usuariosQtdAproximada = valor === '' ? null : Number(valor);
       else if (key === 'custoMensalSistema') obj.custoMensalSistema = valor === '' ? null : Number(valor);
       else if (key === 'custoMensalInfraestrutura') obj.custoMensalInfraestrutura = valor === '' ? null : Number(valor);
+      else if (key === 'ano') obj.ano = valor === '' ? null : Number(valor);
       else if (key === 'grauSatisfacao') obj.grauSatisfacao = valor === '' ? null : valor;
       else obj[key] = valor;
     });
@@ -213,6 +217,7 @@ export default function ProdutosSoftwareList() {
       custoMensalSistema: obj.custoMensalSistema ?? null,
       custoMensalInfraestrutura: obj.custoMensalInfraestrutura ?? null,
       timeId: obj.timeId ?? null,
+      ano: obj.ano ?? null,
     };
   };
 
@@ -281,13 +286,14 @@ export default function ProdutosSoftwareList() {
               <th>Custo mensal Sistema</th>
               <th>Custo mensal Infraestrutura</th>
               <th>TIME</th>
+              <th>Ano (referência)</th>
               <th className="th-acoes">Ações</th>
             </tr>
           </thead>
           <tbody>
             {lista.length === 0 ? (
               <tr>
-                <td colSpan={21}>Nenhum produto cadastrado.</td>
+                <td colSpan={22}>Nenhum produto cadastrado.</td>
               </tr>
             ) : (
               lista.map((p) => (
@@ -312,6 +318,7 @@ export default function ProdutosSoftwareList() {
                   <td className="td-numero">{p.custoMensalSistema != null ? formatarMoeda(p.custoMensalSistema) : '—'}</td>
                   <td className="td-numero">{p.custoMensalInfraestrutura != null ? formatarMoeda(p.custoMensalInfraestrutura) : '—'}</td>
                   <td>{v(p.timeNome)}</td>
+                  <td className="td-numero">{p.ano != null ? p.ano : '—'}</td>
                   <td className="td-acoes">
                     <Link to={`/produtos-software/editar/${p.id}`} className="btn btn-sm">Editar</Link>
                     <button

@@ -12,6 +12,7 @@ const hospedagensRoutes = require('./routes/hospedagens');
 const formasAcessoRoutes = require('./routes/formasAcesso');
 const timesRoutes = require('./routes/times');
 const produtosSoftwareRoutes = require('./routes/produtosSoftware');
+const capexRoutes = require('./routes/capex');
 const permissoesRoutes = require('./routes/permissoes');
 const { requireAuth, requirePermissaoPorMetodo } = require('./middleware/permissoes');
 
@@ -64,6 +65,7 @@ app.use('/api/hospedagens', requireAuth, requirePermissaoPorMetodo('hospedagens'
 app.use('/api/formas-acesso', requireAuth, requirePermissaoPorMetodo('formas-acesso'), formasAcessoRoutes);
 app.use('/api/times', requireAuth, requirePermissaoPorMetodo('times'), timesRoutes);
 app.use('/api/produtos-software', requireAuth, requirePermissaoPorMetodo('produtos-software'), produtosSoftwareRoutes);
+app.use('/api/capex', requireAuth, requirePermissaoPorMetodo('capex'), capexRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);

@@ -20,6 +20,7 @@ const ENTIDADES_ORDEM = [
   'formas-acesso',
   'times',
   'produtos-software',
+  'capex',
 ];
 const ENTIDADE_LABEL = {
   usuarios: 'Usuários',
@@ -29,6 +30,7 @@ const ENTIDADE_LABEL = {
   'formas-acesso': 'Formas de Acesso',
   times: 'Times',
   'produtos-software': 'Produtos de Software',
+  capex: 'Capex',
 };
 const ACOES = [
   { key: 'visualizar', label: 'Ver' },

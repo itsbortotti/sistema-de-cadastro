@@ -114,6 +114,7 @@ export default function ProdutoSoftwareForm() {
   const [custoMensalSistema, setCustoMensalSistema] = useState('');
   const [custoMensalInfraestrutura, setCustoMensalInfraestrutura] = useState('');
   const [timeId, setTimeId] = useState('');
+  const [ano, setAno] = useState('');
 
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -167,6 +168,7 @@ export default function ProdutoSoftwareForm() {
           setCustoMensalSistema(p.custoMensalSistema != null ? String(p.custoMensalSistema) : '');
           setCustoMensalInfraestrutura(p.custoMensalInfraestrutura != null ? String(p.custoMensalInfraestrutura) : '');
           setTimeId(p.timeId || '');
+          setAno(p.ano != null ? String(p.ano) : '');
         })
         .catch((e) => setErro(e.message));
     }
@@ -228,6 +230,7 @@ export default function ProdutoSoftwareForm() {
       custoMensalSistema: custoMensalSistema === '' ? null : Number(custoMensalSistema),
       custoMensalInfraestrutura: custoMensalInfraestrutura === '' ? null : Number(custoMensalInfraestrutura),
       timeId: timeId || null,
+      ano: ano === '' ? null : Number(ano),
     };
     try {
       if (isEdicao) await produtosSoftwareApi.atualizar(id, payload);
@@ -385,6 +388,17 @@ export default function ProdutoSoftwareForm() {
             opcoes={times}
             onAbrirNovo={() => setPopupTipo('time')}
           />
+          <label className="form-group">
+            <span className="form-label">Ano (referência)</span>
+            <input
+              type="number"
+              min={2000}
+              max={2100}
+              value={ano}
+              onChange={(e) => setAno(e.target.value)}
+              placeholder={String(new Date().getFullYear())}
+            />
+          </label>
         </section>
 
         <div className="form-actions">

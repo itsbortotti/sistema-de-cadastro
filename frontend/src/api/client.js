@@ -39,6 +39,7 @@ export const produtosSoftwareApi = {
   ...crudApi('produtos-software'),
   importarBulk: (items) => api('/produtos-software/bulk', { method: 'POST', body: JSON.stringify({ items }) }),
 };
+export const capexApi = crudApi('capex');
 
 export const permissoesApi = {
   listar: () => api('/permissoes'),
