@@ -11,6 +11,7 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .cadastro-list-page .table-cadastro {
@@ -18,10 +19,24 @@
   min-width: 600px;
 }
 
+/* Coluna Ações fixa à direita ao rolar horizontalmente */
 .cadastro-list-page .table-cadastro .th-acoes,
 .cadastro-list-page .table-cadastro .td-acoes {
+  position: sticky;
+  right: 0;
+  background: #fff;
+  box-shadow: -6px 0 10px -4px rgba(0, 0, 0, 0.06);
   white-space: nowrap;
+  min-width: 140px;
   width: 140px;
+}
+
+.cadastro-list-page .table-cadastro th.th-acoes {
+  background: #f8fafc;
+}
+
+.cadastro-list-page .table-cadastro tbody tr:hover .td-acoes {
+  background: #f8fafc;
 }
 
 .cadastro-list-page .table-cadastro .td-acoes .btn {

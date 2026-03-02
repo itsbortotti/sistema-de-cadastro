@@ -91,6 +91,11 @@ const iconChevronRight = (
     <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
   </svg>
 );
+const iconProjetos = (
+  <svg className="nav-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+  </svg>
+);
 
 export default function Layout() {
   const { usuario, logout } = useAuth();
@@ -130,7 +135,7 @@ export default function Layout() {
           >
             {menuAberto ? iconFechar : iconMenu}
           </button>
-          <h2>Gestão Financeira de Projetos</h2>
+          <h2>Governança Financeira de Projetos</h2>
         </div>
         <nav className="sidebar-nav">
           <NavLink to="/" end className={({ isActive }) => (isActive ? 'nav-link active nav-link-home' : 'nav-link nav-link-home')}>
@@ -175,13 +180,21 @@ export default function Layout() {
                 {iconTimes}
                 <span>Times</span>
               </NavLink>
-              <NavLink to="/projetos" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+              <NavLink to="/sistemas" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
                 {iconProdutosSoftware}
+                <span>Sistemas</span>
+              </NavLink>
+              <NavLink to="/projetos" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                {iconProjetos}
                 <span>Projetos</span>
               </NavLink>
               <NavLink to="/capex" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
                 {iconCapex}
-                <span>Capex / Opex</span>
+                <span>Capex</span>
+              </NavLink>
+              <NavLink to="/opex" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                {iconCapex}
+                <span>Opex</span>
               </NavLink>
               <NavLink to="/empresas" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
                 {iconEmpresas}

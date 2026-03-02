@@ -4,7 +4,7 @@ const path = require('path');
 const FILE = path.join(__dirname, 'permissoes.json');
 
 const TIPOS = ['admin', 'membro', 'visualizacao'];
-const ENTIDADES = ['usuarios', 'fornecedores', 'areas', 'hospedagens', 'formas-acesso', 'times', 'produtos-software', 'capex', 'empresas'];
+const ENTIDADES = ['usuarios', 'fornecedores', 'areas', 'hospedagens', 'formas-acesso', 'times', 'produtos-software', 'projetos', 'capex', 'empresas'];
 
 function defaultRegras() {
   const regras = [];

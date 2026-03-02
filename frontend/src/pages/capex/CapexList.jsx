@@ -26,10 +26,9 @@ function formatarData(str) {
   }
 }
 
-const TIPO_LABEL = { capex: 'Capex', opex: 'Opex' };
 const MODELO_LABEL = { sistema: 'Sistema', infraestrutura: 'Infraestrutura' };
 
-export default function CapexList() {
+export default function CapexList({ tipo = 'capex' }) {
   const [lista, setLista] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
@@ -44,10 +43,14 @@ export default function CapexList() {
   useEffect(() => carregar(), []);
 
   const handleExcluir = (id, desc) => {
-    if (!window.confirm(`Excluir este registro de Capex / Opex?\n${desc}`)) return;
+    const labelTipo = tipo === 'capex' ? 'Capex' : 'Opex';
+    if (!window.confirm(`Excluir este registro de ${labelTipo}?\n${desc}`)) return;
     setExcluindo(id);
     capexApi.remover(id).then(carregar).catch((e) => setErro(e.message)).finally(() => setExcluindo(null));
   };
+
+  const labelTipo = tipo === 'capex' ? 'Capex' : 'Opex';
+  const listaPorTipo = lista.filter((item) => (item.classificacao || 'capex') === tipo);
 
   const produtosTexto = (item) => {
     const nomes = item.produtoSoftwareNomes || item.produtoSoftwareIds || [];
@@ -62,7 +65,7 @@ export default function CapexList() {
       .replace(/[\u0300-\u036f]/g, '');
   const termoBusca = normalizarTexto(busca).trim();
   const listaFiltrada = termoBusca
-    ? lista.filter((item) => {
+    ? listaPorTipo.filter((item) => {
         const texto =
           [
             item.areaNome,
@@ -75,7 +78,7 @@ export default function CapexList() {
           ].join(' ') || '';
         return normalizarTexto(texto).includes(termoBusca);
       })
-    : lista;
+    : listaPorTipo;
 
   if (carregando) return <p className="page-loading">Carregando...</p>;
   if (erro) return <p className="erro-msg">{erro}</p>;
@@ -83,21 +86,21 @@ export default function CapexList() {
   return (
     <div className="usuarios-page cadastro-list-page">
       <div className="page-header">
-        <h1>Capex / Opex</h1>
-        <Link to="/capex/novo" className="btn btn-primary">Novo Capex / Opex</Link>
+        <h1>{labelTipo}</h1>
+        <Link to={`/${tipo}/novo`} className="btn btn-primary">Novo {labelTipo}</Link>
       </div>
       <div className="page-toolbar">
         <input
           type="search"
           className="input-busca"
-          placeholder="Buscar por área, tipo, fornecedor, projetos, observações..."
+          placeholder={`Buscar por área, modelo, fornecedor, projetos, observações...`}
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           aria-label="Buscar"
         />
         {termoBusca && (
           <span className="busca-resultado">
-            {listaFiltrada.length} de {lista.length} registro(s)
+            {listaFiltrada.length} de {listaPorTipo.length} registro(s)
           </span>
         )}
       </div>
@@ -106,7 +109,6 @@ export default function CapexList() {
           <thead>
             <tr>
               <th>Área</th>
-              <th>Tipo</th>
               <th>Modelo</th>
               <th>Fornecedor</th>
               <th>Valor (R$)</th>
@@ -119,12 +121,11 @@ export default function CapexList() {
           </thead>
           <tbody>
             {listaFiltrada.length === 0 ? (
-              <tr><td colSpan={10}>{lista.length === 0 ? 'Nenhum cadastrado.' : 'Nenhum resultado para a busca.'}</td></tr>
+              <tr><td colSpan={9}>{listaPorTipo.length === 0 ? `Nenhum ${labelTipo} cadastrado.` : 'Nenhum resultado para a busca.'}</td></tr>
             ) : (
               listaFiltrada.map((item) => (
                 <tr key={item.id}>
                   <td className="td-texto" title={item.areaNome}>{v(item.areaNome)}</td>
-                  <td>{TIPO_LABEL[item.classificacao] ?? item.classificacao ?? '—'}</td>
                   <td>{MODELO_LABEL[item.modelo] ?? item.modelo ?? '—'}</td>
                   <td className="td-texto" title={item.fornecedorNome}>{v(item.fornecedorNome)}</td>
                   <td className="td-numero">{formatarMoeda(item.valor)}</td>
@@ -133,7 +134,7 @@ export default function CapexList() {
                   <td className="td-texto" title={(item.produtoSoftwareNomes || []).join(', ')}>{produtosTexto(item)}</td>
                   <td className="td-texto td-obs" title={item.observacoes}>{item.observacoes ? (item.observacoes.length > 20 ? item.observacoes.slice(0, 20) + '…' : item.observacoes) : '—'}</td>
                   <td className="td-acoes">
-                    <Link to={`/capex/editar/${item.id}`} className="btn btn-sm">Editar</Link>
+                    <Link to={`/${tipo}/editar/${item.id}`} className="btn btn-sm">Editar</Link>
                     <button
                       type="button"
                       className="btn btn-sm btn-danger"

@@ -251,7 +251,7 @@ export default function ProdutoSoftwareForm() {
     try {
       if (isEdicao) await produtosSoftwareApi.atualizar(id, payload);
       else await produtosSoftwareApi.criar(payload);
-      navigate('/projetos');
+      navigate('/sistemas');
     } catch (err) {
       setErro(err.message);
     } finally {
@@ -271,17 +271,17 @@ export default function ProdutoSoftwareForm() {
   return (
     <div className="form-produto-page">
       <div className="page-header">
-        <h1>{isEdicao ? 'Editar Projeto' : 'Novo Projeto'}</h1>
-        <Link to="/projetos" className="btn btn-secondary">Voltar</Link>
+        <h1>{isEdicao ? 'Editar Sistema' : 'Novo Sistema'}</h1>
+        <Link to="/sistemas" className="btn btn-secondary">Voltar</Link>
       </div>
 
       <form className="form-produto" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
 
         <section className="form-secao">
-          <h2 className="form-secao-titulo">Identificação do projeto</h2>
+          <h2 className="form-secao-titulo">Identificação do sistema</h2>
           <label className="form-group">
-            <span className="form-label">Nome do Projeto</span>
+            <span className="form-label">Nome do Sistema</span>
             <input type="text" value={nomeSistema} onChange={(e) => setNomeSistema(e.target.value)} placeholder="Ex.: Sistema de Vendas" />
           </label>
           <SelectComNovo
@@ -433,9 +433,9 @@ export default function ProdutoSoftwareForm() {
 
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={enviando}>
-            {enviando ? 'Salvando...' : isEdicao ? 'Salvar alterações' : 'Cadastrar projeto'}
+            {enviando ? 'Salvando...' : isEdicao ? 'Salvar alterações' : 'Cadastrar sistema'}
           </button>
-          <Link to="/projetos" className="btn btn-secondary">Cancelar</Link>
+          <Link to="/sistemas" className="btn btn-secondary">Cancelar</Link>
         </div>
       </form>
 

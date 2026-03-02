@@ -18,6 +18,8 @@ import TimesList from './pages/times/TimesList';
 import TimeForm from './pages/times/TimeForm';
 import ProdutosSoftwareList from './pages/produtosSoftware/ProdutosSoftwareList';
 import ProdutoSoftwareForm from './pages/produtosSoftware/ProdutoSoftwareForm';
+import ProjetosList from './pages/projetos/ProjetosList';
+import ProjetoForm from './pages/projetos/ProjetoForm';
 import CapexList from './pages/capex/CapexList';
 import CapexForm from './pages/capex/CapexForm';
 import EmpresasList from './pages/empresas/EmpresasList';
@@ -33,7 +35,7 @@ function PrivateRoute({ children }) {
 
 function RedirectProjetoEditar() {
   const { id } = useParams();
-  return <Navigate to={id ? `/projetos/editar/${id}` : '/projetos'} replace />;
+  return <Navigate to={id ? `/sistemas/editar/${id}` : '/sistemas'} replace />;
 }
 
 function AppRoutes() {
@@ -67,15 +69,21 @@ function AppRoutes() {
         <Route path="times" element={<TimesList />} />
         <Route path="times/novo" element={<TimeForm />} />
         <Route path="times/editar/:id" element={<TimeForm />} />
-        <Route path="projetos" element={<ProdutosSoftwareList />} />
-        <Route path="projetos/novo" element={<ProdutoSoftwareForm />} />
-        <Route path="projetos/editar/:id" element={<ProdutoSoftwareForm />} />
-        <Route path="produtos-software" element={<Navigate to="/projetos" replace />} />
-        <Route path="produtos-software/novo" element={<Navigate to="/projetos/novo" replace />} />
+        <Route path="sistemas" element={<ProdutosSoftwareList />} />
+        <Route path="sistemas/novo" element={<ProdutoSoftwareForm />} />
+        <Route path="sistemas/editar/:id" element={<ProdutoSoftwareForm />} />
+        <Route path="projetos" element={<ProjetosList />} />
+        <Route path="projetos/novo" element={<ProjetoForm />} />
+        <Route path="projetos/editar/:id" element={<ProjetoForm />} />
+        <Route path="produtos-software" element={<Navigate to="/sistemas" replace />} />
+        <Route path="produtos-software/novo" element={<Navigate to="/sistemas/novo" replace />} />
         <Route path="produtos-software/editar/:id" element={<RedirectProjetoEditar />} />
-        <Route path="capex" element={<CapexList />} />
-        <Route path="capex/novo" element={<CapexForm />} />
-        <Route path="capex/editar/:id" element={<CapexForm />} />
+        <Route path="capex" element={<CapexList tipo="capex" />} />
+        <Route path="capex/novo" element={<CapexForm tipo="capex" />} />
+        <Route path="capex/editar/:id" element={<CapexForm tipo="capex" />} />
+        <Route path="opex" element={<CapexList tipo="opex" />} />
+        <Route path="opex/novo" element={<CapexForm tipo="opex" />} />
+        <Route path="opex/editar/:id" element={<CapexForm tipo="opex" />} />
         <Route path="empresas" element={<EmpresasList />} />
         <Route path="empresas/novo" element={<EmpresaForm />} />
         <Route path="empresas/editar/:id" element={<EmpresaForm />} />

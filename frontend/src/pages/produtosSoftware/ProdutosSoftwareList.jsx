@@ -165,7 +165,7 @@ export default function ProdutosSoftwareList() {
   }, [modalImportarAberto]);
 
   const handleExcluir = (id, nome) => {
-    if (!window.confirm(`Excluir o projeto "${nome}"?`)) return;
+    if (!window.confirm(`Excluir o sistema "${nome}"?`)) return;
     setExcluindo(id);
     produtosSoftwareApi.remover(id).then(carregar).catch((e) => setErro(e.message)).finally(() => setExcluindo(null));
   };
@@ -320,7 +320,7 @@ export default function ProdutosSoftwareList() {
   return (
     <div className="usuarios-page produtos-software-list-page">
       <div className="page-header">
-        <h1>Projetos</h1>
+        <h1>Sistemas</h1>
         <div className="page-header-actions">
           <input
             type="search"
@@ -333,19 +333,19 @@ export default function ProdutosSoftwareList() {
           <button type="button" className="btn btn-outline" onClick={() => setModalImportarAberto(true)}>
             Importar CSV
           </button>
-          <Link to="/projetos/novo" className="btn btn-primary">Novo Projeto</Link>
+          <Link to="/sistemas/novo" className="btn btn-primary">Novo Sistema</Link>
         </div>
       </div>
       {termoBusca && (
         <p className="busca-resultado">
-          {listaFiltrada.length} de {lista.length} projeto(s)
+          {listaFiltrada.length} de {lista.length} sistema(s)
         </p>
       )}
       <div className="table-wrap table-wrap-scroll">
         <table className="table table-produtos-software">
           <thead>
             <tr>
-              <th>Nome do Projeto</th>
+              <th>Nome do Sistema</th>
               <th>Empresa</th>
               <th>Fornecedor / Desenvolvedor</th>
               <th>Finalidade Principal</th>
@@ -363,22 +363,18 @@ export default function ProdutosSoftwareList() {
               <th>Autenticação por AD / SSO?</th>
               <th>Grau de Satisfação</th>
               <th>Problemas Enfrentados</th>
-              <th>Capex</th>
-              <th>Opex</th>
               <th>TIME</th>
-              <th>Período inicial</th>
-              <th>Período final</th>
               <th className="th-acoes">Ações</th>
             </tr>
           </thead>
           <tbody>
             {lista.length === 0 ? (
               <tr>
-                <td colSpan={24}>Nenhum projeto cadastrado.</td>
+                <td colSpan={20}>Nenhum sistema cadastrado.</td>
               </tr>
             ) : listaFiltrada.length === 0 ? (
               <tr>
-                <td colSpan={24}>Nenhum resultado para a busca.</td>
+                <td colSpan={20}>Nenhum resultado para a busca.</td>
               </tr>
             ) : (
               listaFiltrada.map((p) => (
@@ -401,13 +397,9 @@ export default function ProdutosSoftwareList() {
                   <td>{simNao(p.autenticacaoAdSso)}</td>
                   <td>{v(p.grauSatisfacao)}</td>
                   <td className="td-texto" title={p.problemasEnfrentados}>{v(p.problemasEnfrentados)}</td>
-                  <td className="td-numero">{p.custoMensalSistema != null ? formatarMoeda(p.custoMensalSistema) : '—'}</td>
-                  <td className="td-numero">{p.custoMensalInfraestrutura != null ? formatarMoeda(p.custoMensalInfraestrutura) : '—'}</td>
                   <td>{v(p.timeNome)}</td>
-                  <td>{formatarData(p.dataInicio)}</td>
-                  <td>{formatarData(p.dataFim)}</td>
                   <td className="td-acoes">
-                    <Link to={`/projetos/editar/${p.id}`} className="btn btn-sm">Editar</Link>
+                    <Link to={`/sistemas/editar/${p.id}`} className="btn btn-sm">Editar</Link>
                     <button
                       type="button"
                       className="btn btn-sm btn-danger"
@@ -435,7 +427,7 @@ export default function ProdutosSoftwareList() {
       {modalImportarAberto && (
         <div className="modal-overlay" onClick={fecharModalImportar} role="dialog" aria-modal="true">
           <div className="modal-box modal-importar-csv" onClick={(e) => e.stopPropagation()}>
-            <h2 className="modal-titulo">Importar projetos (CSV)</h2>
+            <h2 className="modal-titulo">Importar sistemas (CSV)</h2>
             <p className="modal-desc">
               Selecione um arquivo CSV com a primeira linha contendo os nomes das colunas. Use vírgula ou ponto e vírgula como separador.
               Campos com texto que contém vírgula devem estar entre aspas.

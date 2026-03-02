@@ -21,7 +21,18 @@ function normalizarItem(item) {
   if (!u.modelo && (u.tipo === 'sistema' || u.tipo === 'infraestrutura')) u.modelo = u.tipo;
   if (!MODELOS_VALIDOS.includes(u.modelo)) u.modelo = 'sistema';
   if (!CLASSIFICACOES_VALIDAS.includes(u.classificacao)) u.classificacao = 'capex';
+  if (!Array.isArray(u.entradas)) u.entradas = [];
+  u.entradas = u.entradas.map((e) => ({
+    id: e.id || String(Date.now()) + Math.random().toString(36).slice(2),
+    valor: e.valor != null && e.valor !== '' ? Number(e.valor) : 0,
+    periodo: e.periodo != null ? String(e.periodo).trim() : '',
+  }));
   return u;
+}
+
+function somaEntradas(entradas) {
+  if (!Array.isArray(entradas)) return 0;
+  return entradas.reduce((acc, e) => acc + (Number(e.valor) || 0), 0);
 }
 
 function write(data) {
@@ -34,7 +45,7 @@ function listar() {
 
 function getById(id) {
   const item = read().find((x) => x.id === id) || null;
-  return item ? normalizarItem(item) : null;
+  return item ? normalizarItem({ ...item }) : null;
 }
 
 function normalizarProdutoIds(v) {
@@ -74,10 +85,11 @@ function criar(dados) {
     dataFim,
     produtoSoftwareIds,
     observacoes,
+    entradas: [],
   };
   lista.push(novo);
   write(lista);
-  return novo;
+  return normalizarItem(novo);
 }
 
 function atualizar(id, dados) {
@@ -95,9 +107,19 @@ function atualizar(id, dados) {
   if (dados.dataFim !== undefined) atual.dataFim = dados.dataFim && String(dados.dataFim).trim() ? String(dados.dataFim).trim() : null;
   if (dados.produtoSoftwareIds !== undefined) atual.produtoSoftwareIds = normalizarProdutoIds(dados.produtoSoftwareIds);
   if (dados.observacoes !== undefined) atual.observacoes = String(dados.observacoes).trim();
+  if (Array.isArray(dados.entradas)) {
+    atual.entradas = dados.entradas.map((e) => ({
+      id: e.id || String(Date.now()) + Math.random().toString(36).slice(2),
+      valor: e.valor != null && e.valor !== '' ? Number(e.valor) : 0,
+      periodo: e.periodo != null ? String(e.periodo).trim() : '',
+    }));
+    const soma = somaEntradas(atual.entradas);
+    const valorMax = Number(atual.valor) || 0;
+    if (soma > valorMax) throw new Error(`A soma das entradas (${soma.toFixed(2)}) não pode superar o valor total do Capex/Opex (${valorMax.toFixed(2)}).`);
+  }
 
   write(lista);
-  return atual;
+  return normalizarItem(atual);
 }
 
 function remover(id) {

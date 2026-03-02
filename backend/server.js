@@ -12,6 +12,7 @@ const hospedagensRoutes = require('./routes/hospedagens');
 const formasAcessoRoutes = require('./routes/formasAcesso');
 const timesRoutes = require('./routes/times');
 const produtosSoftwareRoutes = require('./routes/produtosSoftware');
+const projetosRoutes = require('./routes/projetos');
 const capexRoutes = require('./routes/capex');
 const empresasRoutes = require('./routes/empresas');
 const permissoesRoutes = require('./routes/permissoes');
@@ -25,7 +26,7 @@ const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Gestão Financeira de Projetos - API',
+      title: 'Governança Financeira de Projetos - API',
       version: '1.0.0',
       description: 'APIs de autenticação e cadastro de usuários',
     },
@@ -66,6 +67,7 @@ app.use('/api/hospedagens', requireAuth, requirePermissaoPorMetodo('hospedagens'
 app.use('/api/formas-acesso', requireAuth, requirePermissaoPorMetodo('formas-acesso'), formasAcessoRoutes);
 app.use('/api/times', requireAuth, requirePermissaoPorMetodo('times'), timesRoutes);
 app.use('/api/produtos-software', requireAuth, requirePermissaoPorMetodo('produtos-software'), produtosSoftwareRoutes);
+app.use('/api/projetos', requireAuth, requirePermissaoPorMetodo('projetos'), projetosRoutes);
 app.use('/api/capex', requireAuth, requirePermissaoPorMetodo('capex'), capexRoutes);
 app.use('/api/empresas', requireAuth, requirePermissaoPorMetodo('empresas'), empresasRoutes);
 

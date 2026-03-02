@@ -41,6 +41,7 @@ export const produtosSoftwareApi = {
 };
 export const capexApi = crudApi('capex');
 export const empresasApi = crudApi('empresas');
+export const projetosApi = crudApi('projetos');
 
 export const permissoesApi = {
   listar: () => api('/permissoes'),

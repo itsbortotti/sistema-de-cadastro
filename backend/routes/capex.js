@@ -79,9 +79,13 @@ router.post('/', (req, res) => {
  *     tags: [Capex]
  */
 router.put('/:id', (req, res) => {
-  const item = atualizar(req.params.id, req.body || {});
-  if (!item) return res.status(404).json({ erro: 'Não encontrado' });
-  res.json(expandir(item));
+  try {
+    const item = atualizar(req.params.id, req.body || {});
+    if (!item) return res.status(404).json({ erro: 'Não encontrado' });
+    res.json(expandir(item));
+  } catch (err) {
+    return res.status(400).json({ erro: err.message || 'Dados inválidos' });
+  }
 });
 
 /**
