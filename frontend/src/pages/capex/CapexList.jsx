@@ -34,6 +34,7 @@ export default function CapexList() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [excluindo, setExcluindo] = useState(null);
+  const [busca, setBusca] = useState('');
 
   const carregar = () => {
     setCarregando(true);
@@ -54,6 +55,28 @@ export default function CapexList() {
     return nomes.slice(0, 3).join(', ') + (nomes.length > 3 ? ` +${nomes.length - 3}` : '');
   };
 
+  const normalizarTexto = (str) =>
+    String(str ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  const termoBusca = normalizarTexto(busca).trim();
+  const listaFiltrada = termoBusca
+    ? lista.filter((item) => {
+        const texto =
+          [
+            item.areaNome,
+            item.classificacao,
+            item.modelo,
+            item.fornecedorNome,
+            item.valor,
+            item.observacoes,
+            ...(item.produtoSoftwareNomes || []),
+          ].join(' ') || '';
+        return normalizarTexto(texto).includes(termoBusca);
+      })
+    : lista;
+
   if (carregando) return <p className="page-loading">Carregando...</p>;
   if (erro) return <p className="erro-msg">{erro}</p>;
 
@@ -62,6 +85,21 @@ export default function CapexList() {
       <div className="page-header">
         <h1>Capex / Opex</h1>
         <Link to="/capex/novo" className="btn btn-primary">Novo Capex / Opex</Link>
+      </div>
+      <div className="page-toolbar">
+        <input
+          type="search"
+          className="input-busca"
+          placeholder="Buscar por área, tipo, fornecedor, projetos, observações..."
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          aria-label="Buscar"
+        />
+        {termoBusca && (
+          <span className="busca-resultado">
+            {listaFiltrada.length} de {lista.length} registro(s)
+          </span>
+        )}
       </div>
       <div className="table-wrap">
         <table className="table table-cadastro">
@@ -80,10 +118,10 @@ export default function CapexList() {
             </tr>
           </thead>
           <tbody>
-            {lista.length === 0 ? (
-              <tr><td colSpan={10}>Nenhum cadastrado.</td></tr>
+            {listaFiltrada.length === 0 ? (
+              <tr><td colSpan={10}>{lista.length === 0 ? 'Nenhum cadastrado.' : 'Nenhum resultado para a busca.'}</td></tr>
             ) : (
-              lista.map((item) => (
+              listaFiltrada.map((item) => (
                 <tr key={item.id}>
                   <td className="td-texto" title={item.areaNome}>{v(item.areaNome)}</td>
                   <td>{TIPO_LABEL[item.classificacao] ?? item.classificacao ?? '—'}</td>

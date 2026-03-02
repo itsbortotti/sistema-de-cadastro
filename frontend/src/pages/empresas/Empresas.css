@@ -1,0 +1,245 @@
+/* ========== Listagem de Empresas ========== */
+.empresas-list-page {
+  max-width: none;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.empresas-list-page .table-wrap {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.empresas-list-page .table-empresas {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+}
+
+.empresas-list-page .table-empresas th,
+.empresas-list-page .table-empresas td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+
+.empresas-list-page .table-empresas th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.empresas-list-page .table-empresas tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* Colunas com texto longo: ellipsis e tooltip */
+.empresas-list-page .table-empresas .td-razao,
+.empresas-list-page .table-empresas .td-fantasia {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empresas-list-page .table-empresas .td-razao[title],
+.empresas-list-page .table-empresas .td-fantasia[title] {
+  cursor: help;
+}
+
+.empresas-list-page .table-empresas .td-cnpj {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.empresas-list-page .table-empresas .td-capital {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Coluna Ações fixa à direita ao rolar */
+.empresas-list-page .table-empresas .th-acoes,
+.empresas-list-page .table-empresas .td-acoes {
+  position: sticky;
+  right: 0;
+  background: #fff;
+  box-shadow: -6px 0 10px -4px rgba(0, 0, 0, 0.06);
+  white-space: nowrap;
+  min-width: 150px;
+  text-align: right;
+}
+
+.empresas-list-page .table-empresas th.th-acoes {
+  background: #f8fafc;
+}
+
+.empresas-list-page .table-empresas tbody tr:hover .td-acoes {
+  background: #f8fafc;
+}
+
+.empresas-list-page .table-empresas .td-acoes .btn {
+  margin-left: 0.35rem;
+}
+
+.empresas-list-page .table-empresas .td-acoes .btn:first-child {
+  margin-left: 0;
+}
+
+/* Mensagem vazia */
+.empresas-list-page .table-empresas tbody tr td[colSpan] {
+  text-align: center;
+  color: #64748b;
+  padding: 2rem 1rem;
+}
+
+/* ========== Formulário de Empresa ========== */
+.empresas-form-page .form-card.form-cadastro {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.empresas-form-page .form-secao-endereco {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 1.5rem;
+}
+
+.empresas-form-page .form-secao-endereco .form-secao-titulo {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 640px) {
+  .empresas-form-page .form-secao-endereco {
+    grid-template-columns: 100px 1fr 80px;
+  }
+
+  .empresas-form-page .form-secao-endereco .form-group-cep {
+    grid-column: 1;
+  }
+
+  .empresas-form-page .form-secao-endereco .form-group-logradouro {
+    grid-column: 2;
+  }
+
+  .empresas-form-page .form-secao-endereco .form-group-numero {
+    grid-column: 3;
+  }
+
+  .empresas-form-page .form-secao-endereco .form-group-complemento {
+    grid-column: 1 / -1;
+  }
+
+  .empresas-form-page .form-secao-endereco .form-group-bairro {
+    grid-column: 1;
+  }
+
+  .empresas-form-page .form-secao-endereco .form-group-cidade {
+    grid-column: 2;
+  }
+
+  .empresas-form-page .form-secao-endereco .form-group-uf {
+    grid-column: 3;
+  }
+}
+
+.empresas-form-page .form-secao-contato {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 1.5rem;
+}
+
+.empresas-form-page .form-secao-contato .form-secao-titulo {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 640px) {
+  .empresas-form-page .form-secao-contato {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .empresas-form-page .form-secao-contato .form-group-responsavel {
+    grid-column: 1 / -1;
+  }
+}
+
+.empresas-form-page .form-secao-identificacao {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 1.5rem;
+}
+
+.empresas-form-page .form-secao-identificacao .form-secao-titulo {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 640px) {
+  .empresas-form-page .form-secao-identificacao {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .empresas-form-page .form-secao-identificacao .form-group-cnpj {
+    grid-column: 1;
+  }
+
+  .empresas-form-page .form-secao-identificacao .form-group-data {
+    grid-column: 2;
+  }
+
+  .empresas-form-page .form-secao-identificacao .form-group-data input {
+    width: 100%;
+    min-width: 10rem;
+  }
+
+  .empresas-form-page .form-secao-identificacao .form-group-razao,
+  .empresas-form-page .form-secao-identificacao .form-group-fantasia {
+    grid-column: 1 / -1;
+  }
+}
+
+.empresas-form-page .form-secao-capital {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 1.5rem;
+}
+
+.empresas-form-page .form-secao-capital .form-secao-titulo {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 640px) {
+  .empresas-form-page .form-secao-capital {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.empresas-form-page .form-secao-situacao {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 1.5rem;
+}
+
+.empresas-form-page .form-secao-situacao .form-secao-titulo {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 640px) {
+  .empresas-form-page .form-secao-situacao {
+    grid-template-columns: 180px 140px 1fr;
+  }
+}

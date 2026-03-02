@@ -24,7 +24,8 @@ function expandir(item) {
   }
   if (item.empresaId) {
     const emp = getEmpresaById(item.empresaId);
-    u.empresaNome = emp ? (emp.nomeFantasia || emp.razaoSocial || emp.id) : null;
+    const nome = emp && (emp.nomeFantasia || emp.razaoSocial || String(emp.id).trim());
+    u.empresaNome = nome || null;
   }
   if (item.areaId) {
     const a = getAreaById(item.areaId);

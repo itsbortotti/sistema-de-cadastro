@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { empresasApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
 import '../CadastroListLayout.css';
+import './Empresas.css';
 
 const v = (x) => (x != null && x !== '' ? String(x) : '—');
 
@@ -34,13 +35,13 @@ export default function EmpresasList() {
   if (erro) return <p className="erro-msg">{erro}</p>;
 
   return (
-    <div className="usuarios-page cadastro-list-page">
+    <div className="usuarios-page cadastro-list-page empresas-list-page">
       <div className="page-header">
-        <h1>Empresas (CNPJ)</h1>
+        <h1>Empresas</h1>
         <Link to="/empresas/novo" className="btn btn-primary">Nova empresa</Link>
       </div>
       <div className="table-wrap">
-        <table className="table table-cadastro">
+        <table className="table table-cadastro table-empresas">
           <thead>
             <tr>
               <th>CNPJ</th>
@@ -61,13 +62,13 @@ export default function EmpresasList() {
             ) : (
               lista.map((e) => (
                 <tr key={e.id}>
-                  <td>{v(e.cnpj)}</td>
-                  <td className="td-texto" title={e.razaoSocial}>{v(e.razaoSocial)}</td>
-                  <td className="td-texto" title={e.nomeFantasia}>{v(e.nomeFantasia)}</td>
+                  <td className="td-cnpj">{v(e.cnpj)}</td>
+                  <td className="td-razao td-texto" title={e.razaoSocial}>{v(e.razaoSocial)}</td>
+                  <td className="td-fantasia td-texto" title={e.nomeFantasia}>{v(e.nomeFantasia)}</td>
                   <td>{v(e.situacaoCadastral)}</td>
                   <td>{v(e.porte)}</td>
                   <td>{v(e.cidade)}{e.cidade && e.uf ? ' / ' : ''}{v(e.uf)}</td>
-                  <td>{formatarMoeda(e.capitalSocial)}</td>
+                  <td className="td-capital">{formatarMoeda(e.capitalSocial)}</td>
                   <td className="td-acoes">
                     <Link to={`/empresas/editar/${e.id}`} className="btn btn-sm">Editar</Link>
                     <button

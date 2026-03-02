@@ -75,7 +75,7 @@ function SelectComNovo({ label, value, onChange, opcoes, onAbrirNovo, placeholde
             <option key={o.id} value={o.id}>{o.nome}</option>
           ))}
         </select>
-        <button type="button" className="btn btn-novo-item" onClick={onAbrirNovo} title={`Cadastrar novo ${label}`}>
+        <button type="button" className="btn btn-novo-item" onClick={onAbrirNovo} title={`Cadastrar nova ${label}`}>
           + Novo
         </button>
       </div>
@@ -185,7 +185,13 @@ export default function ProdutoSoftwareForm() {
   const handleSalvarPopup = async (nome) => {
     setPopupSalvando(true);
     try {
-      if (popupTipo === 'fornecedor') {
+      if (popupTipo === 'empresa') {
+        const razaoSocial = nome.trim();
+        if (!razaoSocial) return;
+        const novo = await empresasApi.criar({ razaoSocial, nomeFantasia: razaoSocial });
+        setEmpresas((prev) => [...prev, novo]);
+        setEmpresaId(novo.id);
+      } else if (popupTipo === 'fornecedor') {
         const novo = await fornecedoresApi.criar({ nome: nome.trim() });
         setFornecedores((prev) => [...prev, novo]);
         setFornecedorId(novo.id);
@@ -254,6 +260,7 @@ export default function ProdutoSoftwareForm() {
   };
 
   const tituloPopup = {
+    empresa: 'Nova Empresa',
     fornecedor: 'Novo Fornecedor / Desenvolvedor',
     area: 'Nova Área',
     hospedagem: 'Nova Hospedagem',
@@ -277,15 +284,14 @@ export default function ProdutoSoftwareForm() {
             <span className="form-label">Nome do Projeto</span>
             <input type="text" value={nomeSistema} onChange={(e) => setNomeSistema(e.target.value)} placeholder="Ex.: Sistema de Vendas" />
           </label>
-          <label className="form-group">
-            <span className="form-label">Empresa</span>
-            <select value={empresaId} onChange={(e) => setEmpresaId(e.target.value)}>
-              <option value="">— Selecione a empresa —</option>
-              {empresas.map((e) => (
-                <option key={e.id} value={e.id}>{e.nomeFantasia || e.razaoSocial || e.id}</option>
-              ))}
-            </select>
-          </label>
+          <SelectComNovo
+            label="Empresa"
+            value={empresaId}
+            onChange={setEmpresaId}
+            opcoes={empresas.map((e) => ({ id: e.id, nome: e.nomeFantasia || e.razaoSocial || e.id }))}
+            onAbrirNovo={() => setPopupTipo('empresa')}
+            placeholder="— Selecione a empresa —"
+          />
           <SelectComNovo
             label="Fornecedor / Desenvolvedor"
             value={fornecedorId}
@@ -435,7 +441,7 @@ export default function ProdutoSoftwareForm() {
 
       <ModalNovo
         titulo={popupTipo ? tituloPopup[popupTipo] : ''}
-        labelCampo="Nome"
+        labelCampo={popupTipo === 'empresa' ? 'Razão social ou Nome fantasia' : 'Nome'}
         aberto={Boolean(popupTipo)}
         onFechar={() => setPopupTipo(null)}
         onSalvar={handleSalvarPopup}

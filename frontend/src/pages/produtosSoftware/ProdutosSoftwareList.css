@@ -75,8 +75,15 @@
 
 .page-header-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+}
+
+.page-header-actions .input-busca {
+  flex: 1;
+  min-width: 200px;
+  max-width: 320px;
 }
 
 .btn-outline {

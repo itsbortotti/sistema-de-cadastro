@@ -138,6 +138,7 @@ export default function ProdutosSoftwareList() {
   const [importando, setImportando] = useState(false);
   const [resultadoImportacao, setResultadoImportacao] = useState(null);
   const [listasAux, setListasAux] = useState({ fornecedores: [], areas: [], empresas: [], usuarios: [], hospedagens: [], formasAcesso: [], times: [] });
+  const [busca, setBusca] = useState('');
   const inputFileRef = useRef(null);
 
   const carregar = () => {
@@ -284,6 +285,35 @@ export default function ProdutosSoftwareList() {
   const simNao = (v) => (v ? 'Sim' : 'Não');
   const v = (x) => (x != null && x !== '' ? String(x) : '—');
 
+  const normalizarTexto = (str) =>
+    String(str ?? '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  const termoBusca = normalizarTexto(busca).trim();
+  const listaFiltrada = termoBusca
+    ? lista.filter((p) => {
+        const texto =
+          [
+            p.nomeSistema,
+            p.empresaNome,
+            p.fornecedorNome,
+            p.finalidadePrincipal,
+            p.breveDescritivo,
+            p.marcasAtendidas,
+            p.areaNome,
+            p.responsavelTiNome,
+            p.usuarioNegocioNome,
+            p.hospedagemNome,
+            p.formaAcessoNome,
+            p.integracoes,
+            p.problemasEnfrentados,
+            p.timeNome,
+          ].join(' ') || '';
+        return normalizarTexto(texto).includes(termoBusca);
+      })
+    : lista;
+
   if (carregando) return <p>Carregando...</p>;
   if (erro) return <p className="erro-msg">{erro}</p>;
 
@@ -292,12 +322,25 @@ export default function ProdutosSoftwareList() {
       <div className="page-header">
         <h1>Projetos</h1>
         <div className="page-header-actions">
+          <input
+            type="search"
+            className="input-busca"
+            placeholder="Buscar por nome, empresa, fornecedor, área..."
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            aria-label="Buscar projetos"
+          />
           <button type="button" className="btn btn-outline" onClick={() => setModalImportarAberto(true)}>
             Importar CSV
           </button>
           <Link to="/projetos/novo" className="btn btn-primary">Novo Projeto</Link>
         </div>
       </div>
+      {termoBusca && (
+        <p className="busca-resultado">
+          {listaFiltrada.length} de {lista.length} projeto(s)
+        </p>
+      )}
       <div className="table-wrap table-wrap-scroll">
         <table className="table table-produtos-software">
           <thead>
@@ -333,8 +376,12 @@ export default function ProdutosSoftwareList() {
               <tr>
                 <td colSpan={24}>Nenhum projeto cadastrado.</td>
               </tr>
+            ) : listaFiltrada.length === 0 ? (
+              <tr>
+                <td colSpan={24}>Nenhum resultado para a busca.</td>
+              </tr>
             ) : (
-              lista.map((p) => (
+              listaFiltrada.map((p) => (
                 <tr key={p.id}>
                   <td>{v(p.nomeSistema)}</td>
                   <td>{v(p.empresaNome)}</td>

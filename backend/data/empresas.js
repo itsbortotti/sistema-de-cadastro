@@ -93,7 +93,9 @@ function listar() {
 }
 
 function getById(id) {
-  const item = read().find((x) => x.id === id);
+  if (id == null || id === '') return null;
+  const idStr = String(id).trim();
+  const item = read().find((x) => String(x.id) === idStr);
   return item ? { ...defaults(), ...item } : null;
 }
 
