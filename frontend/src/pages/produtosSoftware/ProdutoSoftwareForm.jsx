@@ -114,7 +114,8 @@ export default function ProdutoSoftwareForm() {
   const [custoMensalSistema, setCustoMensalSistema] = useState('');
   const [custoMensalInfraestrutura, setCustoMensalInfraestrutura] = useState('');
   const [timeId, setTimeId] = useState('');
-  const [ano, setAno] = useState('');
+  const [dataInicio, setDataInicio] = useState('');
+  const [dataFim, setDataFim] = useState('');
 
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
@@ -168,7 +169,8 @@ export default function ProdutoSoftwareForm() {
           setCustoMensalSistema(p.custoMensalSistema != null ? String(p.custoMensalSistema) : '');
           setCustoMensalInfraestrutura(p.custoMensalInfraestrutura != null ? String(p.custoMensalInfraestrutura) : '');
           setTimeId(p.timeId || '');
-          setAno(p.ano != null ? String(p.ano) : '');
+          setDataInicio(p.dataInicio ?? (p.ano ? `${p.ano}-01-01` : ''));
+          setDataFim(p.dataFim ?? (p.ano ? `${p.ano}-12-31` : ''));
         })
         .catch((e) => setErro(e.message));
     }
@@ -230,12 +232,13 @@ export default function ProdutoSoftwareForm() {
       custoMensalSistema: custoMensalSistema === '' ? null : Number(custoMensalSistema),
       custoMensalInfraestrutura: custoMensalInfraestrutura === '' ? null : Number(custoMensalInfraestrutura),
       timeId: timeId || null,
-      ano: ano === '' ? null : Number(ano),
+      dataInicio: dataInicio.trim() || null,
+      dataFim: dataFim.trim() || null,
     };
     try {
       if (isEdicao) await produtosSoftwareApi.atualizar(id, payload);
       else await produtosSoftwareApi.criar(payload);
-      navigate('/produtos-software');
+      navigate('/projetos');
     } catch (err) {
       setErro(err.message);
     } finally {
@@ -254,17 +257,17 @@ export default function ProdutoSoftwareForm() {
   return (
     <div className="form-produto-page">
       <div className="page-header">
-        <h1>{isEdicao ? 'Editar produto de software' : 'Novo produto de software'}</h1>
-        <Link to="/produtos-software" className="btn btn-secondary">Voltar</Link>
+        <h1>{isEdicao ? 'Editar Projeto' : 'Novo Projeto'}</h1>
+        <Link to="/projetos" className="btn btn-secondary">Voltar</Link>
       </div>
 
       <form className="form-produto" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
 
         <section className="form-secao">
-          <h2 className="form-secao-titulo">Identificação do sistema</h2>
+          <h2 className="form-secao-titulo">Identificação do projeto</h2>
           <label className="form-group">
-            <span className="form-label">Nome do Sistema</span>
+            <span className="form-label">Nome do Projeto</span>
             <input type="text" value={nomeSistema} onChange={(e) => setNomeSistema(e.target.value)} placeholder="Ex.: Sistema de Vendas" />
           </label>
           <SelectComNovo
@@ -276,11 +279,11 @@ export default function ProdutoSoftwareForm() {
           />
           <label className="form-group">
             <span className="form-label">Finalidade Principal</span>
-            <textarea value={finalidadePrincipal} onChange={(e) => setFinalidadePrincipal(e.target.value)} placeholder="Descreva a finalidade principal do sistema" rows={2} />
+            <textarea value={finalidadePrincipal} onChange={(e) => setFinalidadePrincipal(e.target.value)} placeholder="Descreva a finalidade principal do projeto" rows={2} />
           </label>
           <label className="form-group">
             <span className="form-label">Breve Descritivo</span>
-            <textarea value={breveDescritivo} onChange={(e) => setBreveDescritivo(e.target.value)} placeholder="Resumo do que o sistema faz" rows={3} />
+            <textarea value={breveDescritivo} onChange={(e) => setBreveDescritivo(e.target.value)} placeholder="Resumo do que o projeto faz" rows={3} />
           </label>
         </section>
 
@@ -374,11 +377,11 @@ export default function ProdutoSoftwareForm() {
         <section className="form-secao">
           <h2 className="form-secao-titulo">Custos e time</h2>
           <label className="form-group">
-            <span className="form-label">Custo mensal Sistema (R$)</span>
+            <span className="form-label">Capex (R$)</span>
             <input type="number" step="0.01" min={0} value={custoMensalSistema} onChange={(e) => setCustoMensalSistema(e.target.value)} placeholder="0,00" />
           </label>
           <label className="form-group">
-            <span className="form-label">Custo mensal Infraestrutura (R$)</span>
+            <span className="form-label">Opex (R$)</span>
             <input type="number" step="0.01" min={0} value={custoMensalInfraestrutura} onChange={(e) => setCustoMensalInfraestrutura(e.target.value)} placeholder="0,00" />
           </label>
           <SelectComNovo
@@ -389,23 +392,28 @@ export default function ProdutoSoftwareForm() {
             onAbrirNovo={() => setPopupTipo('time')}
           />
           <label className="form-group">
-            <span className="form-label">Ano (referência)</span>
+            <span className="form-label">Período inicial</span>
             <input
-              type="number"
-              min={2000}
-              max={2100}
-              value={ano}
-              onChange={(e) => setAno(e.target.value)}
-              placeholder={String(new Date().getFullYear())}
+              type="date"
+              value={dataInicio}
+              onChange={(e) => setDataInicio(e.target.value)}
+            />
+          </label>
+          <label className="form-group">
+            <span className="form-label">Período final</span>
+            <input
+              type="date"
+              value={dataFim}
+              onChange={(e) => setDataFim(e.target.value)}
             />
           </label>
         </section>
 
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={enviando}>
-            {enviando ? 'Salvando...' : isEdicao ? 'Salvar alterações' : 'Cadastrar produto'}
+            {enviando ? 'Salvando...' : isEdicao ? 'Salvar alterações' : 'Cadastrar projeto'}
           </button>
-          <Link to="/produtos-software" className="btn btn-secondary">Cancelar</Link>
+          <Link to="/projetos" className="btn btn-secondary">Cancelar</Link>
         </div>
       </form>
 

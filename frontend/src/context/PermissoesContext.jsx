@@ -11,7 +11,9 @@ const ENTIDADE_LABEL = {
   hospedagens: 'Hospedagens',
   'formas-acesso': 'Formas de Acesso',
   times: 'Times',
-  'produtos-software': 'Produtos de Software',
+  'produtos-software': 'Projetos',
+  capex: 'Capex / Opex',
+  empresas: 'Empresas',
 };
 
 export function PermissoesProvider({ children }) {

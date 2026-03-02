@@ -100,16 +100,35 @@ export default function Dashboard() {
   const mult = periodoAtual.multiplicador;
 
   const anosDisponiveis = useMemo(() => {
-    const anos = [...new Set(produtos.map((p) => p.ano).filter((a) => a != null && !Number.isNaN(Number(a))))]
-      .map(Number)
-      .sort((a, b) => a - b);
-    return anos;
+    const set = new Set();
+    produtos.forEach((p) => {
+      if (p.ano != null && !Number.isNaN(Number(p.ano))) set.add(Number(p.ano));
+      if (p.dataInicio) {
+        const y = parseInt(String(p.dataInicio).substring(0, 4), 10);
+        if (!Number.isNaN(y)) set.add(y);
+      }
+      if (p.dataFim) {
+        const y = parseInt(String(p.dataFim).substring(0, 4), 10);
+        if (!Number.isNaN(y)) set.add(y);
+      }
+    });
+    return [...set].sort((a, b) => a - b);
   }, [produtos]);
+
+  const produtoAplicaAoAno = (p, anoNum) => {
+    if (p.ano != null && Number(p.ano) === anoNum) return true;
+    if (p.dataInicio || p.dataFim) {
+      const yIni = p.dataInicio ? parseInt(String(p.dataInicio).substring(0, 4), 10) : anoNum;
+      const yFim = p.dataFim ? parseInt(String(p.dataFim).substring(0, 4), 10) : anoNum;
+      return !Number.isNaN(yIni) && !Number.isNaN(yFim) && anoNum >= yIni && anoNum <= yFim;
+    }
+    return false;
+  };
 
   const produtosFiltrados = useMemo(() => {
     if (!anoFiltro || anoFiltro === '') return produtos;
     const anoNum = Number(anoFiltro);
-    return produtos.filter((p) => p.ano != null && Number(p.ano) === anoNum);
+    return produtos.filter((p) => produtoAplicaAoAno(p, anoNum));
   }, [produtos, anoFiltro]);
 
   /** Comparativo Capex vs custo real por área (só quando ano está selecionado). */
@@ -127,8 +146,17 @@ export default function Dashboard() {
       custoPorAreaId[areaId].areaNome = nome;
       custoPorAreaId[areaId].custoReal += custoAnual;
     });
+    const capexAplicaAoAno = (c, ano) => {
+      if (c.ano != null && c.ano === ano) return true;
+      if (c.dataInicio && c.dataFim) {
+        const yIni = parseInt(String(c.dataInicio).substring(0, 4), 10);
+        const yFim = parseInt(String(c.dataFim).substring(0, 4), 10);
+        return !Number.isNaN(yIni) && !Number.isNaN(yFim) && ano >= yIni && ano <= yFim;
+      }
+      return false;
+    };
     const capexPorAreaId = {};
-    (capexList || []).filter((c) => c.ano === anoNum).forEach((c) => {
+    (capexList || []).filter((c) => capexAplicaAoAno(c, anoNum)).forEach((c) => {
       const areaId = c.areaId ? String(c.areaId) : null;
       const total = (capexPorAreaId[areaId]?.total || 0) + (Number(c.valor) || 0);
       const areaNome = c.areaNome || 'Não informado';
@@ -379,7 +407,7 @@ export default function Dashboard() {
         <div className="dashboard-header-top">
           <div>
             <h1>Bem-vindo, {usuario?.nome || usuario?.login}</h1>
-            <p className="dashboard-subtitle">Visão geral dos produtos de software e custos por período</p>
+            <p className="dashboard-subtitle">Visão geral dos projetos e custos por período</p>
           </div>
           <div className="dashboard-filtros">
             <div className="dashboard-periodo">
@@ -428,7 +456,7 @@ export default function Dashboard() {
 
       <section className="dashboard-cards">
         <div className="dashboard-card">
-          <span className="dashboard-card-label">Total de produtos</span>
+          <span className="dashboard-card-label">Total de projetos</span>
           <span className="dashboard-card-value">{totalProdutos}</span>
         </div>
         <div className="dashboard-card dashboard-card-destaque">
@@ -466,13 +494,13 @@ export default function Dashboard() {
       )}
 
       {totalProdutos === 0 ? (
-        <p className="dashboard-vazio">Nenhum produto cadastrado. Os gráficos aparecerão aqui quando houver dados.</p>
+        <p className="dashboard-vazio">Nenhum projeto cadastrado. Os gráficos aparecerão aqui quando houver dados.</p>
       ) : (
         <>
           {temFiltroAno && comparativoCapex.porArea.length > 0 && (
             <section className="dashboard-secao dashboard-capex-tabela">
               <h2 className="dashboard-secao-titulo">Capex vs custo real por área (ano {anoFiltro})</h2>
-              <p className="dashboard-tabela-dica">Clique em uma área para ver os produtos de software vinculados a ela.</p>
+              <p className="dashboard-tabela-dica">Clique em uma área para ver os projetos vinculados a ela.</p>
               <div className="dashboard-tabela-capex-wrap">
                 <table className="dashboard-tabela-capex">
                   <thead>
@@ -519,7 +547,7 @@ export default function Dashboard() {
               <div className="dashboard-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="dashboard-modal-header">
                   <h2 id="modal-titulo">
-                    Produtos da área: {detalheArea.areaNome}
+                    Projetos da área: {detalheArea.areaNome}
                     {detalheArea.status === 'acima' && <span className="dashboard-badge dashboard-badge-acima" style={{ marginLeft: '0.5rem' }}>Acima do Capex</span>}
                     {detalheArea.status === 'abaixo' && <span className="dashboard-badge dashboard-badge-abaixo" style={{ marginLeft: '0.5rem' }}>Abaixo do Capex</span>}
                     {detalheArea.status === 'no_limite' && <span className="dashboard-badge dashboard-badge-no-limite" style={{ marginLeft: '0.5rem' }}>No limite</span>}
@@ -530,13 +558,13 @@ export default function Dashboard() {
                   {(() => {
                     const produtosDaArea = (produtosFiltrados || []).filter((p) => String(p.areaId) === String(detalheArea.areaId));
                     if (produtosDaArea.length === 0) {
-                      return <p className="dashboard-modal-vazio">Nenhum produto de software vinculado a esta área no ano selecionado.</p>;
+                      return <p className="dashboard-modal-vazio">Nenhum projeto vinculado a esta área no ano selecionado.</p>;
                     }
                     return (
                       <table className="dashboard-tabela-capex dashboard-modal-tabela">
                         <thead>
                           <tr>
-                            <th>Produto</th>
+                            <th>Projeto</th>
                             <th>Custo mensal Sistema</th>
                             <th>Custo mensal Infra</th>
                             <th>Custo anual (total)</th>
@@ -570,7 +598,7 @@ export default function Dashboard() {
             <h2 className="dashboard-secao-titulo">Insights de custo ({periodoAtual.label.toLowerCase()})</h2>
             <div className="dashboard-graficos">
               <div className="dashboard-grafico-box dashboard-grafico-full">
-                <h3 className="dashboard-grafico-titulo">Produtos que mais gastam (top 15)</h3>
+                <h3 className="dashboard-grafico-titulo">Projetos que mais gastam (top 15)</h3>
                 <div className="dashboard-grafico-container">
                   <ResponsiveContainer width="100%" height={320}>
                     <BarChart
@@ -702,7 +730,7 @@ export default function Dashboard() {
 
               {top5Radial.length > 0 && (
                 <div className="dashboard-grafico-box">
-                  <h3 className="dashboard-grafico-titulo">Top 5 produtos por custo (radial)</h3>
+                  <h3 className="dashboard-grafico-titulo">Top 5 projetos por custo (radial)</h3>
                   <div className="dashboard-grafico-container">
                     <ResponsiveContainer width="100%" height={280}>
                       <RadialBarChart data={top5Radial} innerRadius="20%" outerRadius="90%" startAngle={180} endAngle={0}>
@@ -739,7 +767,7 @@ export default function Dashboard() {
 
               {top10CustoAcumulado.length > 0 && (
                 <div className="dashboard-grafico-box dashboard-grafico-full">
-                  <h3 className="dashboard-grafico-titulo">Top 10 produtos: custo e participação acumulada (%)</h3>
+                  <h3 className="dashboard-grafico-titulo">Top 10 projetos: custo e participação acumulada (%)</h3>
                   <div className="dashboard-grafico-container">
                     <ResponsiveContainer width="100%" height={300}>
                       <ComposedChart data={top10CustoAcumulado} margin={{ top: 8, right: 48, left: 8, bottom: 8 }}>
@@ -767,7 +795,7 @@ export default function Dashboard() {
             <h2 className="dashboard-secao-titulo">Distribuição por quantidade</h2>
             <div className="dashboard-graficos">
               <div className="dashboard-grafico-box">
-                <h3 className="dashboard-grafico-titulo">Produtos por área</h3>
+                <h3 className="dashboard-grafico-titulo">Projetos por área</h3>
                 <div className="dashboard-grafico-container">
                   <ResponsiveContainer width="100%" height={280}>
                     <BarChart data={porArea} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
@@ -775,17 +803,17 @@ export default function Dashboard() {
                       <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
                       <YAxis type="category" dataKey="nome" width={180} tick={{ fontSize: 11 }} />
                       <Tooltip
-                        formatter={(value) => [value, 'Produtos']}
+                        formatter={(value) => [value, 'Projetos']}
                         labelFormatter={(_, payload) => payload[0]?.payload?.nomeCompleto ?? _}
                       />
-                      <Bar dataKey="total" fill={CORES[0]} name="Produtos" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="total" fill={CORES[0]} name="Projetos" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </div>
 
               <div className="dashboard-grafico-box">
-                <h3 className="dashboard-grafico-titulo">Produtos por hospedagem</h3>
+                <h3 className="dashboard-grafico-titulo">Projetos por hospedagem</h3>
                 <div className="dashboard-grafico-container">
                   <ResponsiveContainer width="100%" height={280}>
                     <BarChart data={porHospedagem} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
@@ -793,10 +821,10 @@ export default function Dashboard() {
                       <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
                       <YAxis type="category" dataKey="nome" width={180} tick={{ fontSize: 11 }} />
                       <Tooltip
-                        formatter={(value) => [value, 'Produtos']}
+                        formatter={(value) => [value, 'Projetos']}
                         labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _}
                       />
-                      <Bar dataKey="value" name="Produtos" radius={[0, 4, 4, 0]}>
+                      <Bar dataKey="value" name="Projetos" radius={[0, 4, 4, 0]}>
                         {porHospedagem.map((_, i) => (
                           <Cell key={i} fill={CORES[i % CORES.length]} />
                         ))}
@@ -815,10 +843,10 @@ export default function Dashboard() {
                       <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
                       <YAxis type="category" dataKey="nome" width={180} tick={{ fontSize: 11 }} />
                       <Tooltip
-                        formatter={(value) => [value, 'Produtos']}
+                        formatter={(value) => [value, 'Projetos']}
                         labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _}
                       />
-                      <Bar dataKey="value" name="Produtos" radius={[0, 4, 4, 0]}>
+                      <Bar dataKey="value" name="Projetos" radius={[0, 4, 4, 0]}>
                         {porSatisfacao.map((_, i) => (
                           <Cell key={i} fill={CORES[i % CORES.length]} />
                         ))}
@@ -829,7 +857,7 @@ export default function Dashboard() {
               </div>
 
               <div className="dashboard-grafico-box dashboard-grafico-full">
-                <h3 className="dashboard-grafico-titulo">Top 10 fornecedores (quantidade de produtos)</h3>
+                <h3 className="dashboard-grafico-titulo">Top 10 fornecedores (quantidade de projetos)</h3>
                 <div className="dashboard-grafico-container">
                   <ResponsiveContainer width="100%" height={280}>
                     <BarChart data={porFornecedor} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
@@ -837,10 +865,10 @@ export default function Dashboard() {
                       <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
                       <YAxis type="category" dataKey="nome" width={180} tick={{ fontSize: 11 }} />
                       <Tooltip
-                        formatter={(value) => [value, 'Produtos']}
+                        formatter={(value) => [value, 'Projetos']}
                         labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _}
                       />
-                      <Bar dataKey="total" fill={CORES[1]} name="Produtos" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="total" fill={CORES[1]} name="Projetos" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

@@ -21,6 +21,7 @@ const ENTIDADES_ORDEM = [
   'times',
   'produtos-software',
   'capex',
+  'empresas',
 ];
 const ENTIDADE_LABEL = {
   usuarios: 'Usuários',
@@ -29,8 +30,9 @@ const ENTIDADE_LABEL = {
   hospedagens: 'Hospedagens',
   'formas-acesso': 'Formas de Acesso',
   times: 'Times',
-  'produtos-software': 'Produtos de Software',
-  capex: 'Capex',
+  'produtos-software': 'Projetos',
+  capex: 'Capex / Opex',
+  empresas: 'Empresas',
 };
 const ACOES = [
   { key: 'visualizar', label: 'Ver' },

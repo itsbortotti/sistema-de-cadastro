@@ -48,6 +48,17 @@ function formatarMoeda(valor) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n);
 }
 
+function formatarData(str) {
+  if (!str || typeof str !== 'string') return '—';
+  try {
+    const d = new Date(str + 'T12:00:00');
+    if (Number.isNaN(d.getTime())) return str;
+    return d.toLocaleDateString('pt-BR');
+  } catch {
+    return str;
+  }
+}
+
 // Mapeia nome do cabeçalho (normalizado) para chave do payload
 const MAPEAMENTO_CSV = {
   'nome do sistema': 'nomeSistema',
@@ -82,10 +93,20 @@ const MAPEAMENTO_CSV = {
   'problemas enfrentados': 'problemasEnfrentados',
   'custo mensal sistema': 'custoMensalSistema',
   'custo mensal infraestrutura': 'custoMensalInfraestrutura',
+  'capex': 'custoMensalSistema',
+  'opex': 'custoMensalInfraestrutura',
   'time': 'timeNome',
   'ano': 'ano',
   'ano referencia': 'ano',
   'ano (referência)': 'ano',
+  'periodo inicial': 'dataInicio',
+  'período inicial': 'dataInicio',
+  'periodo final': 'dataFim',
+  'período final': 'dataFim',
+  'data inicio': 'dataInicio',
+  'data fim': 'dataFim',
+  'início': 'dataInicio',
+  'fim': 'dataFim',
 };
 
 function normalizarHeader(h) {
@@ -139,7 +160,7 @@ export default function ProdutosSoftwareList() {
   }, [modalImportarAberto]);
 
   const handleExcluir = (id, nome) => {
-    if (!window.confirm(`Excluir o sistema "${nome}"?`)) return;
+    if (!window.confirm(`Excluir o projeto "${nome}"?`)) return;
     setExcluindo(id);
     produtosSoftwareApi.remover(id).then(carregar).catch((e) => setErro(e.message)).finally(() => setExcluindo(null));
   };
@@ -193,6 +214,8 @@ export default function ProdutosSoftwareList() {
       else if (key === 'custoMensalSistema') obj.custoMensalSistema = valor === '' ? null : Number(valor);
       else if (key === 'custoMensalInfraestrutura') obj.custoMensalInfraestrutura = valor === '' ? null : Number(valor);
       else if (key === 'ano') obj.ano = valor === '' ? null : Number(valor);
+      else if (key === 'dataInicio') obj.dataInicio = valor === '' ? null : valor;
+      else if (key === 'dataFim') obj.dataFim = valor === '' ? null : valor;
       else if (key === 'grauSatisfacao') obj.grauSatisfacao = valor === '' ? null : valor;
       else obj[key] = valor;
     });
@@ -217,7 +240,8 @@ export default function ProdutosSoftwareList() {
       custoMensalSistema: obj.custoMensalSistema ?? null,
       custoMensalInfraestrutura: obj.custoMensalInfraestrutura ?? null,
       timeId: obj.timeId ?? null,
-      ano: obj.ano ?? null,
+      dataInicio: obj.dataInicio ?? null,
+      dataFim: obj.dataFim ?? null,
     };
   };
 
@@ -254,19 +278,19 @@ export default function ProdutosSoftwareList() {
   return (
     <div className="usuarios-page produtos-software-list-page">
       <div className="page-header">
-        <h1>Produtos de Software</h1>
+        <h1>Projetos</h1>
         <div className="page-header-actions">
           <button type="button" className="btn btn-outline" onClick={() => setModalImportarAberto(true)}>
             Importar CSV
           </button>
-          <Link to="/produtos-software/novo" className="btn btn-primary">Novo sistema</Link>
+          <Link to="/projetos/novo" className="btn btn-primary">Novo Projeto</Link>
         </div>
       </div>
       <div className="table-wrap table-wrap-scroll">
         <table className="table table-produtos-software">
           <thead>
             <tr>
-              <th>Nome do Sistema</th>
+              <th>Nome do Projeto</th>
               <th>Fornecedor / Desenvolvedor</th>
               <th>Finalidade Principal</th>
               <th>Breve Descritivo</th>
@@ -283,17 +307,18 @@ export default function ProdutosSoftwareList() {
               <th>Autenticação por AD / SSO?</th>
               <th>Grau de Satisfação</th>
               <th>Problemas Enfrentados</th>
-              <th>Custo mensal Sistema</th>
-              <th>Custo mensal Infraestrutura</th>
+              <th>Capex</th>
+              <th>Opex</th>
               <th>TIME</th>
-              <th>Ano (referência)</th>
+              <th>Período inicial</th>
+              <th>Período final</th>
               <th className="th-acoes">Ações</th>
             </tr>
           </thead>
           <tbody>
             {lista.length === 0 ? (
               <tr>
-                <td colSpan={22}>Nenhum produto cadastrado.</td>
+                <td colSpan={23}>Nenhum projeto cadastrado.</td>
               </tr>
             ) : (
               lista.map((p) => (
@@ -318,9 +343,10 @@ export default function ProdutosSoftwareList() {
                   <td className="td-numero">{p.custoMensalSistema != null ? formatarMoeda(p.custoMensalSistema) : '—'}</td>
                   <td className="td-numero">{p.custoMensalInfraestrutura != null ? formatarMoeda(p.custoMensalInfraestrutura) : '—'}</td>
                   <td>{v(p.timeNome)}</td>
-                  <td className="td-numero">{p.ano != null ? p.ano : '—'}</td>
+                  <td>{formatarData(p.dataInicio)}</td>
+                  <td>{formatarData(p.dataFim)}</td>
                   <td className="td-acoes">
-                    <Link to={`/produtos-software/editar/${p.id}`} className="btn btn-sm">Editar</Link>
+                    <Link to={`/projetos/editar/${p.id}`} className="btn btn-sm">Editar</Link>
                     <button
                       type="button"
                       className="btn btn-sm btn-danger"
@@ -348,7 +374,7 @@ export default function ProdutosSoftwareList() {
       {modalImportarAberto && (
         <div className="modal-overlay" onClick={fecharModalImportar} role="dialog" aria-modal="true">
           <div className="modal-box modal-importar-csv" onClick={(e) => e.stopPropagation()}>
-            <h2 className="modal-titulo">Importar produtos de software (CSV)</h2>
+            <h2 className="modal-titulo">Importar projetos (CSV)</h2>
             <p className="modal-desc">
               Selecione um arquivo CSV com a primeira linha contendo os nomes das colunas. Use vírgula ou ponto e vírgula como separador.
               Campos com texto que contém vírgula devem estar entre aspas.

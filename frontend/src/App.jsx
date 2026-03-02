@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PermissoesProvider } from './context/PermissoesContext';
 import Login from './pages/Login';
@@ -20,6 +20,8 @@ import ProdutosSoftwareList from './pages/produtosSoftware/ProdutosSoftwareList'
 import ProdutoSoftwareForm from './pages/produtosSoftware/ProdutoSoftwareForm';
 import CapexList from './pages/capex/CapexList';
 import CapexForm from './pages/capex/CapexForm';
+import EmpresasList from './pages/empresas/EmpresasList';
+import EmpresaForm from './pages/empresas/EmpresaForm';
 import PermissoesPage from './pages/configuracoes/PermissoesPage';
 
 function PrivateRoute({ children }) {
@@ -27,6 +29,11 @@ function PrivateRoute({ children }) {
   if (carregando) return <div className="carregando">Carregando...</div>;
   if (!usuario) return <Navigate to="/login" replace />;
   return children;
+}
+
+function RedirectProjetoEditar() {
+  const { id } = useParams();
+  return <Navigate to={id ? `/projetos/editar/${id}` : '/projetos'} replace />;
 }
 
 function AppRoutes() {
@@ -60,12 +67,18 @@ function AppRoutes() {
         <Route path="times" element={<TimesList />} />
         <Route path="times/novo" element={<TimeForm />} />
         <Route path="times/editar/:id" element={<TimeForm />} />
-        <Route path="produtos-software" element={<ProdutosSoftwareList />} />
-        <Route path="produtos-software/novo" element={<ProdutoSoftwareForm />} />
-        <Route path="produtos-software/editar/:id" element={<ProdutoSoftwareForm />} />
+        <Route path="projetos" element={<ProdutosSoftwareList />} />
+        <Route path="projetos/novo" element={<ProdutoSoftwareForm />} />
+        <Route path="projetos/editar/:id" element={<ProdutoSoftwareForm />} />
+        <Route path="produtos-software" element={<Navigate to="/projetos" replace />} />
+        <Route path="produtos-software/novo" element={<Navigate to="/projetos/novo" replace />} />
+        <Route path="produtos-software/editar/:id" element={<RedirectProjetoEditar />} />
         <Route path="capex" element={<CapexList />} />
         <Route path="capex/novo" element={<CapexForm />} />
         <Route path="capex/editar/:id" element={<CapexForm />} />
+        <Route path="empresas" element={<EmpresasList />} />
+        <Route path="empresas/novo" element={<EmpresaForm />} />
+        <Route path="empresas/editar/:id" element={<EmpresaForm />} />
         <Route path="configuracoes" element={<PermissoesPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

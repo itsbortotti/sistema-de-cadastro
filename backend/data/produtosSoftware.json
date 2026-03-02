@@ -718,5 +718,29 @@
     "custoMensalInfraestrutura": 0,
     "timeId": "24",
     "ano": 2026
+  },
+  {
+    "id": "1772459236100",
+    "nomeSistema": "SAD",
+    "fornecedorId": "1772459190576",
+    "finalidadePrincipal": "",
+    "breveDescritivo": "",
+    "marcasAtendidas": "",
+    "usuariosQtdAproximada": null,
+    "areaId": null,
+    "responsavelTiId": null,
+    "usuarioNegocioId": null,
+    "hospedagemId": null,
+    "onPremisesSites": "",
+    "formaAcessoId": null,
+    "integracoes": "",
+    "controleAcessoPorUsuario": false,
+    "autenticacaoAdSso": false,
+    "grauSatisfacao": null,
+    "problemasEnfrentados": "",
+    "custoMensalSistema": 20000,
+    "custoMensalInfraestrutura": null,
+    "timeId": "2",
+    "ano": 2026
   }
 ]

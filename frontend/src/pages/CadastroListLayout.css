@@ -8,7 +8,9 @@
 }
 
 .cadastro-list-page .table-wrap {
-  overflow-x: auto;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
 
 .cadastro-list-page .table-cadastro {
@@ -38,5 +40,15 @@
 }
 
 .cadastro-list-page .table-cadastro .td-texto[title] {
+  cursor: help;
+}
+
+.cadastro-list-page .table-cadastro .td-obs {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cadastro-list-page .table-cadastro .td-obs[title] {
   cursor: help;
 }

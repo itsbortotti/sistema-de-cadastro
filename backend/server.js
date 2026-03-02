@@ -13,6 +13,7 @@ const formasAcessoRoutes = require('./routes/formasAcesso');
 const timesRoutes = require('./routes/times');
 const produtosSoftwareRoutes = require('./routes/produtosSoftware');
 const capexRoutes = require('./routes/capex');
+const empresasRoutes = require('./routes/empresas');
 const permissoesRoutes = require('./routes/permissoes');
 const { requireAuth, requirePermissaoPorMetodo } = require('./middleware/permissoes');
 
@@ -66,6 +67,7 @@ app.use('/api/formas-acesso', requireAuth, requirePermissaoPorMetodo('formas-ace
 app.use('/api/times', requireAuth, requirePermissaoPorMetodo('times'), timesRoutes);
 app.use('/api/produtos-software', requireAuth, requirePermissaoPorMetodo('produtos-software'), produtosSoftwareRoutes);
 app.use('/api/capex', requireAuth, requirePermissaoPorMetodo('capex'), capexRoutes);
+app.use('/api/empresas', requireAuth, requirePermissaoPorMetodo('empresas'), empresasRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);

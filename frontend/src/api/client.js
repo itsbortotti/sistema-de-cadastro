@@ -40,6 +40,7 @@ export const produtosSoftwareApi = {
   importarBulk: (items) => api('/produtos-software/bulk', { method: 'POST', body: JSON.stringify({ items }) }),
 };
 export const capexApi = crudApi('capex');
+export const empresasApi = crudApi('empresas');
 
 export const permissoesApi = {
   listar: () => api('/permissoes'),

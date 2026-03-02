@@ -49,7 +49,8 @@ function criar(dados) {
     custoMensalSistema: dados.custoMensalSistema != null && dados.custoMensalSistema !== '' ? Number(dados.custoMensalSistema) : null,
     custoMensalInfraestrutura: dados.custoMensalInfraestrutura != null && dados.custoMensalInfraestrutura !== '' ? Number(dados.custoMensalInfraestrutura) : null,
     timeId: dados.timeId || null,
-    ano: dados.ano != null && dados.ano !== '' ? Number(dados.ano) : null,
+    dataInicio: dados.dataInicio && String(dados.dataInicio).trim() ? String(dados.dataInicio).trim() : null,
+    dataFim: dados.dataFim && String(dados.dataFim).trim() ? String(dados.dataFim).trim() : null,
   };
   lista.push(novo);
   write(lista);
@@ -65,14 +66,17 @@ function atualizar(id, dados) {
     'nomeSistema', 'fornecedorId', 'finalidadePrincipal', 'breveDescritivo', 'marcasAtendidas',
     'usuariosQtdAproximada', 'areaId', 'responsavelTiId', 'usuarioNegocioId', 'hospedagemId',
     'onPremisesSites', 'formaAcessoId', 'integracoes', 'controleAcessoPorUsuario', 'autenticacaoAdSso',
-    'grauSatisfacao', 'problemasEnfrentados', 'custoMensalSistema', 'custoMensalInfraestrutura', 'timeId', 'ano',
+    'grauSatisfacao', 'problemasEnfrentados', 'custoMensalSistema', 'custoMensalInfraestrutura', 'timeId',
+    'dataInicio', 'dataFim',
   ];
   campos.forEach((c) => {
     if (dados[c] !== undefined) {
-      if (c === 'usuariosQtdAproximada' || c === 'custoMensalSistema' || c === 'custoMensalInfraestrutura' || c === 'ano') {
+      if (c === 'usuariosQtdAproximada' || c === 'custoMensalSistema' || c === 'custoMensalInfraestrutura') {
         atual[c] = dados[c] === '' || dados[c] == null ? null : Number(dados[c]);
       } else if (c === 'controleAcessoPorUsuario' || c === 'autenticacaoAdSso') {
         atual[c] = Boolean(dados[c]);
+      } else if (c === 'dataInicio' || c === 'dataFim') {
+        atual[c] = dados[c] && String(dados[c]).trim() ? String(dados[c]).trim() : null;
       } else {
         atual[c] = dados[c];
       }

@@ -2,6 +2,7 @@ const express = require('express');
 const { listar, getById, criar, atualizar, remover } = require('../data/capex');
 const { getById: getAreaById } = require('../data/areas');
 const { getById: getFornecedorById } = require('../data/fornecedores');
+const { getById: getProdutoById } = require('../data/produtosSoftware');
 
 const router = express.Router();
 
@@ -21,6 +22,11 @@ function expandir(item) {
     const f = getFornecedorById(item.fornecedorId);
     u.fornecedorNome = f ? f.nome : null;
   }
+  const ids = item.produtoSoftwareIds || [];
+  u.produtoSoftwareNomes = ids.map((pid) => {
+    const p = getProdutoById(pid);
+    return p ? (p.nomeSistema || p.id) : pid;
+  });
   return u;
 }
 
