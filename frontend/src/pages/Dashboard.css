@@ -16,13 +16,14 @@
 .dashboard-header h1 {
   margin: 0;
   font-size: 1.75rem;
+  font-family: var(--font-h1);
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ts-laranja);
 }
 
 .dashboard-subtitle {
   margin: 0.35rem 0 0;
-  color: #64748b;
+  color: var(--ts-cinza-escuro);
   font-size: 0.95rem;
 }
 
@@ -53,7 +54,7 @@
 
 .dashboard-periodo-label {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--ts-cinza-escuro);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -66,25 +67,25 @@
 .dashboard-periodo-btn {
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
-  font-weight: 500;
-  border: 1px solid #e2e8f0;
+  font-weight: 700;
+  border: 1px solid var(--ts-cinza);
   border-radius: 8px;
-  background: #fff;
-  color: #475569;
+  background: var(--ts-branco);
+  color: var(--ts-azul);
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
 
 .dashboard-periodo-btn:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
-  color: #0f172a;
+  border-color: var(--ts-azul);
+  background: rgba(19, 27, 113, 0.04);
+  color: var(--ts-azul);
 }
 
 .dashboard-periodo-btn.ativo {
-  border-color: #3b82f6;
-  background: #eff6ff;
-  color: #1d4ed8;
+  border-color: var(--ts-laranja);
+  background: rgba(255, 64, 26, 0.08);
+  color: var(--ts-laranja);
 }
 
 .dashboard-cards {
@@ -95,9 +96,9 @@
 }
 
 .dashboard-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
+  background: var(--ts-branco);
+  border: 1px solid var(--ts-cinza);
+  border-radius: 12px;
   padding: 1.25rem 1.5rem;
   min-width: 200px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
@@ -106,7 +107,7 @@
 .dashboard-card-label {
   display: block;
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--ts-cinza-escuro);
   text-transform: uppercase;
   letter-spacing: 0.03em;
   margin-bottom: 0.35rem;
@@ -115,7 +116,7 @@
 .dashboard-card-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ts-azul);
 }
 
 .dashboard-card-moeda {
@@ -123,32 +124,32 @@
 }
 
 .dashboard-card.dashboard-card-destaque {
-  border-color: #3b82f6;
-  background: #f8fafc;
+  border-color: var(--ts-ciano);
+  background: rgba(2, 176, 198, 0.06);
 }
 
 .dashboard-cards-capex .dashboard-card-acima {
-  border-color: #fecaca;
-  background: #fef2f2;
+  border-color: rgba(255, 64, 26, 0.4);
+  background: rgba(255, 64, 26, 0.06);
 }
-.dashboard-cards-capex .dashboard-card-acima .dashboard-card-value { color: #dc2626; }
+.dashboard-cards-capex .dashboard-card-acima .dashboard-card-value { color: var(--ts-erro); }
 
 .dashboard-cards-capex .dashboard-card-abaixo {
-  border-color: #bbf7d0;
-  background: #f0fdf4;
+  border-color: rgba(46, 125, 50, 0.4);
+  background: rgba(46, 125, 50, 0.08);
 }
-.dashboard-cards-capex .dashboard-card-abaixo .dashboard-card-value { color: #16a34a; }
+.dashboard-cards-capex .dashboard-card-abaixo .dashboard-card-value { color: var(--ts-sucesso); }
 
 .dashboard-cards-capex .dashboard-card-no-limite {
-  border-color: #bfdbfe;
-  background: #eff6ff;
+  border-color: var(--ts-ciano);
+  background: rgba(2, 176, 198, 0.08);
 }
-.dashboard-cards-capex .dashboard-card-no-limite .dashboard-card-value { color: #2563eb; }
+.dashboard-cards-capex .dashboard-card-no-limite .dashboard-card-value { color: var(--ts-ciano); }
 
 .dashboard-card-hint {
   display: block;
   font-size: 0.7rem;
-  color: #64748b;
+  color: var(--ts-cinza-escuro);
   margin-top: 0.25rem;
   font-weight: 400;
 }
@@ -162,7 +163,7 @@
 .dashboard-grafico-legend-capex {
   font-size: 0.75rem;
   font-weight: 400;
-  color: #64748b;
+  color: var(--ts-cinza-escuro);
   margin-left: 0.5rem;
 }
 .dashboard-grafico-legend-capex .dot {
@@ -173,20 +174,20 @@
   margin-right: 0.25rem;
   vertical-align: middle;
 }
-.dashboard-grafico-legend-capex .dot-acima { background: #dc2626; }
-.dashboard-grafico-legend-capex .dot-abaixo { background: #16a34a; }
-.dashboard-grafico-legend-capex .dot-no-limite { background: #2563eb; }
+.dashboard-grafico-legend-capex .dot-acima { background: var(--ts-erro); }
+.dashboard-grafico-legend-capex .dot-abaixo { background: var(--ts-sucesso); }
+.dashboard-grafico-legend-capex .dot-no-limite { background: var(--ts-ciano); }
 
 .dashboard-tabela-dica {
   margin: -0.5rem 0 0.75rem;
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--ts-cinza-escuro);
 }
 .dashboard-capex-tabela .dashboard-tabela-capex-wrap {
   overflow-x: auto;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  background: #fff;
+  border: 1px solid var(--ts-cinza);
+  border-radius: 12px;
+  background: var(--ts-branco);
 }
 .dashboard-tabela-capex {
   width: 100%;
@@ -197,33 +198,33 @@
 .dashboard-tabela-capex td {
   padding: 0.6rem 1rem;
   text-align: left;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--ts-cinza);
 }
 .dashboard-tabela-capex th {
-  background: #f8fafc;
-  font-weight: 600;
-  color: #334155;
+  background: var(--ts-cinza);
+  font-weight: 700;
+  color: var(--ts-azul);
 }
 .dashboard-tabela-capex tbody tr:hover {
-  background: #f8fafc;
+  background: rgba(19, 27, 113, 0.04);
 }
 .dashboard-badge {
   display: inline-block;
   padding: 0.2rem 0.6rem;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 700;
 }
-.dashboard-badge-acima { background: #fef2f2; color: #dc2626; }
-.dashboard-badge-abaixo { background: #f0fdf4; color: #16a34a; }
-.dashboard-badge-no-limite { background: #eff6ff; color: #2563eb; }
-.dashboard-badge-default { background: #f1f5f9; color: #64748b; }
+.dashboard-badge-acima { background: rgba(255, 64, 26, 0.12); color: var(--ts-erro); }
+.dashboard-badge-abaixo { background: rgba(46, 125, 50, 0.12); color: var(--ts-sucesso); }
+.dashboard-badge-no-limite { background: rgba(2, 176, 198, 0.15); color: var(--ts-ciano); }
+.dashboard-badge-default { background: var(--ts-cinza); color: var(--ts-cinza-escuro); }
 
 .dashboard-tabela-capex-row-clicavel {
   cursor: pointer;
 }
 .dashboard-tabela-capex-row-clicavel:hover {
-  background: #eff6ff !important;
+  background: rgba(2, 176, 198, 0.08) !important;
 }
 
 .dashboard-modal-overlay {

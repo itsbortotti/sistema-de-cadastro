@@ -12,10 +12,10 @@
 
 /* Card no mesmo estilo do form-cadastro */
 .permissoes-card {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e2e8f0;
+  background: var(--ts-branco);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--ts-cinza);
   overflow: hidden;
   padding: 1.5rem 2rem;
 }
@@ -24,9 +24,9 @@
   margin: 0 0 1rem 0;
   padding-bottom: 0.5rem;
   font-size: 1rem;
-  font-weight: 600;
-  color: #334155;
-  border-bottom: 2px solid #2563eb;
+  font-weight: 700;
+  color: var(--ts-azul);
+  border-bottom: 2px solid var(--ts-azul);
   display: block;
   padding-left: 0;
   padding-right: 0;
@@ -38,13 +38,13 @@
   margin: 0 0 1rem 0;
   padding: 0;
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--ts-cinza-escuro);
   background: transparent;
   border: none;
 }
 
 .permissoes-card .table-wrap {
-  background: #fff;
+  background: var(--ts-branco);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: none;
@@ -56,21 +56,21 @@
 .permissoes-card .table-permissoes td {
   padding: 0.75rem 1rem;
   text-align: left;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--ts-cinza);
 }
 
 .permissoes-card .table-permissoes th {
-  background: #f8fafc;
-  font-weight: 600;
-  color: #475569;
+  background: var(--ts-cinza);
+  font-weight: 700;
+  color: var(--ts-azul);
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
 .permissoes-entidade {
-  font-weight: 500;
-  color: #334155;
+  font-weight: 700;
+  color: var(--ts-azul);
 }
 
 .permissoes-cell {
@@ -93,13 +93,13 @@
   height: 1.15rem;
   margin: 0;
   cursor: pointer;
-  accent-color: #2563eb;
+  accent-color: var(--ts-azul);
 }
 
 .permissoes-page .form-actions.permissoes-actions {
   margin-top: 0.5rem;
   padding-top: 1.25rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--ts-cinza);
 }
 
 .permissoes-actions .btn {

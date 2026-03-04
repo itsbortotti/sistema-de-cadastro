@@ -20,11 +20,11 @@
 .form-cadastro {
   flex: 1;
   width: 100%;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  background: var(--ts-branco);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   padding: 1.5rem 2rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ts-cinza);
   overflow-y: auto;
   min-height: 0;
 }
@@ -32,7 +32,7 @@
 .form-cadastro .form-secao {
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--ts-cinza);
   display: grid;
   grid-template-columns: 1fr;
   gap: 0 2rem;
@@ -55,11 +55,11 @@
 
 .form-cadastro .form-secao-titulo {
   font-size: 1rem;
-  font-weight: 600;
-  color: #334155;
+  font-weight: 700;
+  color: var(--ts-azul);
   margin: 0 0 1rem 0;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #2563eb;
+  border-bottom: 2px solid var(--ts-azul);
   display: block;
   grid-column: 1 / -1;
 }
@@ -71,8 +71,8 @@
 
 .form-cadastro .form-label {
   display: block;
-  font-weight: 500;
-  color: #475569;
+  font-weight: 700;
+  color: var(--ts-azul);
   margin-bottom: 0.35rem;
   font-size: 0.9rem;
 }
@@ -81,19 +81,19 @@
 .form-cadastro .form-group select,
 .form-cadastro .form-group textarea {
   width: 100%;
-  padding: 0.6rem 0.75rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--ts-cinza);
+  border-radius: 8px;
   font-size: 1rem;
-  background: #fff;
+  background: var(--ts-branco);
 }
 
 .form-cadastro .form-group input:focus,
 .form-cadastro .form-group select:focus,
 .form-cadastro .form-group textarea:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  border-color: var(--ts-azul);
+  box-shadow: 0 0 0 2px rgba(19, 27, 113, 0.15);
 }
 
 .form-cadastro .form-group textarea {
@@ -107,7 +107,7 @@
   gap: 0.75rem;
   margin-top: 1.5rem;
   padding-top: 1.25rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--ts-cinza);
 }
 
 .form-cadastro .form-group-inline {
@@ -249,15 +249,15 @@
   flex: 1;
   min-width: 180px;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
+  border: 1px solid var(--ts-cinza);
+  border-radius: 8px;
   font-size: 0.9rem;
 }
 
 .form-cadastro .produtos-busca:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  border-color: var(--ts-azul);
+  box-shadow: 0 0 0 2px rgba(19, 27, 113, 0.2);
 }
 
 .form-cadastro .produtos-acoes {
@@ -267,13 +267,13 @@
 
 .form-cadastro .btn-outline {
   background: transparent;
-  border: 1px solid #cbd5e1;
-  color: #475569;
+  border: 2px solid var(--ts-azul);
+  color: var(--ts-azul);
 }
 
 .form-cadastro .btn-outline:hover {
-  background: #f1f5f9;
-  border-color: #94a3b8;
+  background: rgba(19, 27, 113, 0.06);
+  border-color: var(--ts-azul);
 }
 
 .form-cadastro .produtos-grid {
@@ -290,22 +290,22 @@
   align-items: flex-start;
   gap: 0.5rem;
   padding: 0.6rem 0.75rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--ts-cinza);
   border-radius: 8px;
-  background: #fff;
+  background: var(--ts-branco);
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 }
 
 .form-cadastro .produto-card:hover {
-  border-color: #94a3b8;
-  background: #f8fafc;
+  border-color: var(--ts-azul);
+  background: rgba(19, 27, 113, 0.04);
 }
 
 .form-cadastro .produto-card--selected {
-  border-color: #3b82f6;
-  background: #eff6ff;
-  box-shadow: 0 0 0 1px #3b82f6;
+  border-color: var(--ts-azul);
+  background: rgba(19, 27, 113, 0.06);
+  box-shadow: 0 0 0 1px var(--ts-azul);
 }
 
 .form-cadastro .produto-card-check {
@@ -313,7 +313,7 @@
   margin-top: 0.15rem;
   width: 1rem;
   height: 1rem;
-  accent-color: #3b82f6;
+  accent-color: var(--ts-azul);
 }
 
 .form-cadastro .produto-card-body {
@@ -325,14 +325,14 @@
 }
 
 .form-cadastro .produto-card-nome {
-  font-weight: 500;
-  color: #0f172a;
+  font-weight: 700;
+  color: var(--ts-azul);
   font-size: 0.9rem;
 }
 
 .form-cadastro .produto-card-meta {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--ts-cinza-escuro);
 }
 
 /* Entradas de valor (Capex/Opex) */

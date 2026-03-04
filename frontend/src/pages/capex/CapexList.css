@@ -4,7 +4,7 @@
   flex-wrap: wrap;
   gap: 0;
   margin-bottom: 1rem;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--ts-cinza);
   padding: 0;
 }
 
@@ -14,8 +14,8 @@
   gap: 0.5rem;
   padding: 0.75rem 1.25rem;
   font-size: 0.95rem;
-  font-weight: 500;
-  color: #64748b;
+  font-weight: 700;
+  color: var(--ts-cinza-escuro);
   background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
@@ -25,13 +25,13 @@
 }
 
 .capex-list-page .tab-item:hover {
-  color: #334155;
-  background: #f8fafc;
+  color: var(--ts-azul);
+  background: rgba(19, 27, 113, 0.04);
 }
 
 .capex-list-page .tab-item.active {
-  color: #2563eb;
-  border-bottom-color: #2563eb;
+  color: var(--ts-ciano);
+  border-bottom-color: var(--ts-ciano);
   background: transparent;
 }
 
@@ -43,13 +43,13 @@
   height: 1.5rem;
   padding: 0 0.4rem;
   font-size: 0.8rem;
-  font-weight: 600;
-  color: #64748b;
-  background: #f1f5f9;
+  font-weight: 700;
+  color: var(--ts-cinza-escuro);
+  background: var(--ts-cinza);
   border-radius: 999px;
 }
 
 .capex-list-page .tab-item.active .tab-badge {
-  color: #2563eb;
-  background: #eff6ff;
+  color: var(--ts-ciano);
+  background: rgba(2, 176, 198, 0.12);
 }
