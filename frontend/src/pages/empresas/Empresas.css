@@ -13,39 +13,24 @@
   min-height: 0;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e2e8f0;
+  background: var(--ts-branco);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--ts-cinza);
 }
 
 .empresas-list-page .table-empresas {
   width: 100%;
   min-width: 900px;
-  border-collapse: collapse;
 }
 
 .empresas-list-page .table-empresas th,
 .empresas-list-page .table-empresas td {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid #f1f5f9;
-  vertical-align: middle;
-  font-size: 0.9rem;
+  border-bottom-color: var(--ts-cinza);
 }
 
-.empresas-list-page .table-empresas th {
-  background: #f8fafc;
-  font-weight: 600;
-  color: #475569;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-
-.empresas-list-page .table-empresas tbody tr:hover {
-  background: #f8fafc;
+.empresas-list-page .table-empresas tbody tr:hover td {
+  background: rgba(19, 27, 113, 0.04);
 }
 
 /* Colunas com texto longo: ellipsis e tooltip */

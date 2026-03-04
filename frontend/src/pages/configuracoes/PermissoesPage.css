@@ -54,18 +54,14 @@
 
 .permissoes-card .table-permissoes th,
 .permissoes-card .table-permissoes td {
-  padding: 0.75rem 1rem;
+  padding: var(--table-cell-padding);
   text-align: left;
   border-bottom: 1px solid var(--ts-cinza);
 }
 
 .permissoes-card .table-permissoes th {
   background: var(--ts-cinza);
-  font-weight: 700;
   color: var(--ts-azul);
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
 }
 
 .permissoes-entidade {

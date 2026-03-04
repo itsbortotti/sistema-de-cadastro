@@ -28,7 +28,7 @@ const swaggerOptions = {
     info: {
       title: 'Governança Financeira de Projetos - API',
       version: '1.0.0',
-      description: 'APIs de autenticação e cadastro de usuários',
+      description: 'API REST para autenticação, usuários, projetos, Capex/Opex, sistemas, empresas e demais cadastros. Erros retornam `{ erro: "mensagem em PT-BR" }`. Documentação de padrões: docs/api-standards.md e docs/backend.md.',
     },
     servers: [{ url: `http://localhost:${PORT}`, description: 'Servidor local' }],
     components: {

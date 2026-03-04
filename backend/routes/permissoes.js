@@ -13,7 +13,7 @@ function requireAdmin(req, res, next) {
   const uid = req.session?.usuario?.id;
   const u = uid ? getUsuarioById(uid) : null;
   const tipo = u?.tipo || req.session?.usuario?.tipo || 'membro';
-  if (tipo !== 'admin') return res.status(403).json({ erro: 'Acesso negado. Apenas administrador.' });
+  if (tipo !== 'admin') return res.status(403).json({ erro: 'Você não tem permissão para realizar esta ação.' });
   next();
 }
 

@@ -19,7 +19,7 @@ function requirePermissao(entidade, acao) {
   return (req, res, next) => {
     const tipo = tipoAtual(req);
     if (pode(tipo, entidade, acao)) return next();
-    return res.status(403).json({ erro: 'Sem permissão para esta ação' });
+    return res.status(403).json({ erro: 'Você não tem permissão para realizar esta ação.' });
   };
 }
 
@@ -32,7 +32,7 @@ function requirePermissaoPorMetodo(entidade) {
     else if (req.method === 'PUT' || req.method === 'PATCH') acao = 'editar';
     else if (req.method === 'DELETE') acao = 'excluir';
     if (pode(tipo, entidade, acao)) return next();
-    return res.status(403).json({ erro: 'Sem permissão para esta ação' });
+    return res.status(403).json({ erro: 'Você não tem permissão para realizar esta ação.' });
   };
 }
 

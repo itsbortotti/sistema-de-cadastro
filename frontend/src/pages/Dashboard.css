@@ -192,17 +192,14 @@
 .dashboard-tabela-capex {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
 }
 .dashboard-tabela-capex th,
 .dashboard-tabela-capex td {
-  padding: 0.6rem 1rem;
   text-align: left;
   border-bottom: 1px solid var(--ts-cinza);
 }
 .dashboard-tabela-capex th {
   background: var(--ts-cinza);
-  font-weight: 700;
   color: var(--ts-azul);
 }
 .dashboard-tabela-capex tbody tr:hover {

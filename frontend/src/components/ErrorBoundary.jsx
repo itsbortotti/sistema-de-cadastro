@@ -13,7 +13,7 @@ export class ErrorBoundary extends Component {
 
   render() {
     if (this.state.hasError) {
-      const msg = this.state.error?.message || 'Erro ao carregar';
+      const msg = this.state.error?.message || 'Erro ao carregar dados. Tente novamente.';
       return (
         <div className="error-boundary" style={{
           padding: '2rem',

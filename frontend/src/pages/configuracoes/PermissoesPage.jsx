@@ -148,7 +148,7 @@ export default function PermissoesPage() {
           <Link to="/" className="btn btn-secondary">Voltar ao início</Link>
         </div>
         <div className="permissoes-acesso-negado">
-          <p className="erro-msg">Acesso negado. Apenas administradores podem configurar permissões.</p>
+          <p className="erro-msg">Você não tem permissão para realizar esta ação.</p>
           <p className="page-desc">Se você é administrador, faça logout e login novamente para atualizar suas permissões.</p>
         </div>
       </div>

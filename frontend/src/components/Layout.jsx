@@ -163,45 +163,45 @@ export default function Layout() {
               {cadastrosAberto ? iconChevronDown : iconChevronRight}
             </button>
             <div className={`nav-group-itens ${cadastrosAberto ? '' : 'recolhido'}`}>
-              <NavLink to="/usuarios" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
-                {iconUsuarios}
-                <span>Usuários</span>
-              </NavLink>
-              <NavLink to="/fornecedores" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
-                {iconFornecedores}
-                <span>Fornecedores</span>
-              </NavLink>
               <NavLink to="/areas" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
                 {iconAreas}
                 <span>Áreas</span>
-              </NavLink>
-              <NavLink to="/hospedagens" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
-                {iconHospedagens}
-                <span>Hospedagens</span>
-              </NavLink>
-              <NavLink to="/formas-acesso" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
-                {iconFormasAcesso}
-                <span>Formas de Acesso</span>
-              </NavLink>
-              <NavLink to="/sistemas" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
-                {iconProdutosSoftware}
-                <span>Sistemas</span>
-              </NavLink>
-              <NavLink to="/projetos" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
-                {iconProjetos}
-                <span>Projetos</span>
               </NavLink>
               <NavLink to="/capex" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
                 {iconCapex}
                 <span>Capex</span>
               </NavLink>
+              <NavLink to="/empresas" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                {iconEmpresas}
+                <span>Empresas</span>
+              </NavLink>
+              <NavLink to="/formas-acesso" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                {iconFormasAcesso}
+                <span>Formas de Acesso</span>
+              </NavLink>
+              <NavLink to="/fornecedores" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                {iconFornecedores}
+                <span>Fornecedores</span>
+              </NavLink>
+              <NavLink to="/hospedagens" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                {iconHospedagens}
+                <span>Hospedagens</span>
+              </NavLink>
               <NavLink to="/opex" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
                 {iconCapex}
                 <span>Opex</span>
               </NavLink>
-              <NavLink to="/empresas" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
-                {iconEmpresas}
-                <span>Empresas</span>
+              <NavLink to="/projetos" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                {iconProjetos}
+                <span>Projetos</span>
+              </NavLink>
+              <NavLink to="/sistemas" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                {iconProdutosSoftware}
+                <span>Sistemas</span>
+              </NavLink>
+              <NavLink to="/usuarios" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                {iconUsuarios}
+                <span>Usuários</span>
               </NavLink>
             </div>
           </div>

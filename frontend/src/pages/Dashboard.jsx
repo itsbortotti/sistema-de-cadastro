@@ -63,7 +63,7 @@ export default function Dashboard() {
     const timeout = setTimeout(() => {
       if (!cancel) {
         setCarregando(false);
-        setErro('Timeout ou servidor indisponível. Verifique se o backend está em http://localhost:3001');
+        setErro('Não foi possível conectar ao servidor. Verifique sua conexão.');
       }
     }, 15000);
     Promise.all([
@@ -80,7 +80,7 @@ export default function Dashboard() {
         }
       })
       .catch((e) => {
-        if (!cancel) setErro(e?.message || 'Erro ao carregar dados');
+        if (!cancel) setErro(e?.message || 'Erro ao carregar dados. Tente novamente.');
       })
       .finally(() => {
         if (!cancel) {

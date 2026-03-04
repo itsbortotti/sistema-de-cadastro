@@ -126,13 +126,14 @@
 }
 
 .btn-secondary {
-  background: transparent;
-  color: var(--ts-azul);
+  background: var(--ts-azul);
+  color: var(--ts-branco);
   border: 2px solid var(--ts-azul);
 }
 
 .btn-secondary:hover {
-  background: rgba(19, 27, 113, 0.08);
+  background: var(--ts-azul-light);
+  border-color: var(--ts-azul-light);
 }
 
 .btn-sm {
@@ -212,22 +213,6 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-}
-
-.table th,
-.table td {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--ts-cinza);
-}
-
-.table th {
-  background: var(--ts-cinza);
-  font-weight: 700;
-  color: var(--ts-azul);
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
 }
 
 .table .acoes-cell {

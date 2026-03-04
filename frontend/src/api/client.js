@@ -5,10 +5,27 @@ const defaultOptions = {
   headers: { 'Content-Type': 'application/json' },
 };
 
+/** Mensagens padrão para o usuário (ui-guidelines — Tratamento de Erros) */
+const MENSAGENS_ERRO = {
+  401: 'Sua sessão expirou. Faça login novamente.',
+  403: 'Você não tem permissão para realizar esta ação.',
+  404: 'O registro solicitado não foi encontrado.',
+  500: 'Ocorreu um erro inesperado. Tente novamente.',
+  network: 'Não foi possível conectar ao servidor. Verifique sua conexão.',
+};
+
 export async function api(path, options = {}) {
-  const res = await fetch(`${API}${path}`, { ...defaultOptions, ...options });
+  let res;
+  try {
+    res = await fetch(`${API}${path}`, { ...defaultOptions, ...options });
+  } catch (_e) {
+    throw new Error(MENSAGENS_ERRO.network);
+  }
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.erro || `Erro ${res.status}`);
+  if (!res.ok) {
+    const msg = MENSAGENS_ERRO[res.status] || data.erro || `Erro ${res.status}`;
+    throw new Error(msg);
+  }
   return data;
 }
 

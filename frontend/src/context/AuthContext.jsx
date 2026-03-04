@@ -31,7 +31,7 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ login, senha }),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.erro || 'Erro ao fazer login');
+    if (!res.ok) throw new Error(data.erro || (res.status === 401 ? 'Login ou senha inválidos.' : 'Erro ao fazer login. Tente novamente.'));
     setUsuario(data.usuario);
     return data.usuario;
   };

@@ -21,7 +21,7 @@ export default function Login() {
       await login(loginVal, senha);
       navigate('/');
     } catch (err) {
-      setErro(err.message || 'Erro ao fazer login');
+      setErro(err.message || 'Login ou senha inválidos.');
     } finally {
       setEnviando(false);
     }

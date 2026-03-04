@@ -15,6 +15,11 @@
   --ts-info: #02b0c6;
   --font-h1: 'Archivo Black', sans-serif;
   --font-body: 'Lato', sans-serif;
+  /* Tabelas: tamanho de célula e texto */
+  --table-cell-padding: 0.625rem 1rem;
+  --table-cell-font-size: 0.9375rem;
+  --table-header-font-size: 0.8125rem;
+  --table-line-height: 1.4;
 }
 
 * {
@@ -73,6 +78,59 @@ input, select, textarea {
   font-family: var(--font-body);
 }
 
+/* ========== Tabelas: colunas, linhas e texto ========== */
+.table,
+.table-cadastro,
+.table-empresas,
+.table-produtos-software,
+.table-permissoes,
+.dashboard-tabela-capex {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td,
+.table-cadastro th,
+.table-cadastro td,
+.table-empresas th,
+.table-empresas td,
+.table-produtos-software th,
+.table-produtos-software td,
+.table-permissoes th,
+.table-permissoes td,
+.dashboard-tabela-capex th,
+.dashboard-tabela-capex td {
+  padding: var(--table-cell-padding);
+  font-size: var(--table-cell-font-size);
+  line-height: var(--table-line-height);
+  text-align: left;
+  border-bottom: 1px solid var(--ts-cinza);
+  vertical-align: middle;
+}
+
+.table th,
+.table-cadastro th,
+.table-empresas th,
+.table-produtos-software th,
+.table-permissoes th,
+.dashboard-tabela-capex th {
+  font-size: var(--table-header-font-size);
+  font-weight: 700;
+  color: var(--ts-azul);
+  background: var(--ts-cinza);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.table tbody tr:hover td,
+.table-cadastro tbody tr:hover td,
+.table-empresas tbody tr:hover td,
+.table-produtos-software tbody tr:hover td {
+  background: rgba(19, 27, 113, 0.04);
+}
+
 /* Ocultar barras de rolagem nas telas (mantém a rolagem funcional) */
 .main-content > *,
 .cadastro-list-page .table-wrap,
@@ -126,6 +184,14 @@ body.dark-mode {
   color: #e2e8f0;
 }
 
+body.dark-mode a {
+  color: var(--ts-ciano-light);
+}
+
+body.dark-mode a:hover {
+  color: #ffffff;
+}
+
 body.dark-mode .carregando {
   background: #0f172a;
   color: #94a3b8;
@@ -154,18 +220,37 @@ body.dark-mode .form-cadastro {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-body.dark-mode .table th {
+body.dark-mode .table th,
+body.dark-mode .table-cadastro th,
+body.dark-mode .table-empresas th,
+body.dark-mode .table-produtos-software th,
+body.dark-mode .table-permissoes th,
+body.dark-mode .dashboard-tabela-capex th {
   background: #334155;
-  color: #cbd5e1;
+  color: #e2e8f0;
   border-bottom-color: #475569;
 }
 
 body.dark-mode .table td,
-body.dark-mode .table th {
+body.dark-mode .table th,
+body.dark-mode .table-cadastro td,
+body.dark-mode .table-cadastro th,
+body.dark-mode .table-empresas td,
+body.dark-mode .table-empresas th,
+body.dark-mode .table-produtos-software td,
+body.dark-mode .table-produtos-software th,
+body.dark-mode .table-permissoes td,
+body.dark-mode .table-permissoes th,
+body.dark-mode .dashboard-tabela-capex td,
+body.dark-mode .dashboard-tabela-capex th {
   border-bottom-color: #334155;
+  color: #e2e8f0;
 }
 
 body.dark-mode .table tbody tr:hover td,
+body.dark-mode .table-cadastro tbody tr:hover td,
+body.dark-mode .table-empresas tbody tr:hover td,
+body.dark-mode .table-produtos-software tbody tr:hover td,
 body.dark-mode .table-cadastro tbody tr:hover .td-acoes {
   background: #334155;
 }
@@ -228,12 +313,14 @@ body.dark-mode .form-actions {
 }
 
 body.dark-mode .btn-secondary {
-  background: #475569;
-  color: #e2e8f0;
+  background: #282f7d;
+  color: #ffffff;
+  border-color: #282f7d;
 }
 
 body.dark-mode .btn-secondary:hover {
-  background: #64748b;
+  background: #3c44a0;
+  border-color: #3c44a0;
   color: #fff;
 }
 
@@ -321,17 +408,6 @@ body.dark-mode .produtos-software-list-page .table-wrap {
   border-color: #334155;
 }
 
-body.dark-mode .table-produtos-software th {
-  background: #334155;
-  color: #cbd5e1;
-  border-bottom-color: #475569;
-}
-
-body.dark-mode .table-produtos-software td,
-body.dark-mode .table-produtos-software th {
-  border-bottom-color: #334155;
-  color: #e2e8f0;
-}
 
 body.dark-mode .table-produtos-software .th-acoes,
 body.dark-mode .table-produtos-software .td-acoes {
@@ -630,16 +706,6 @@ body.dark-mode .empresas-list-page .table-wrap {
   border-color: #334155;
 }
 
-body.dark-mode .empresas-list-page .table-empresas th,
-body.dark-mode .empresas-list-page .table-empresas td {
-  border-bottom-color: #334155;
-  color: #e2e8f0;
-}
-
-body.dark-mode .empresas-list-page .table-empresas th {
-  background: #334155;
-  color: #cbd5e1;
-}
 
 body.dark-mode .empresas-list-page .table-empresas tbody tr:hover {
   background: #334155;
