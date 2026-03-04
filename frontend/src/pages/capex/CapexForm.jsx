@@ -149,6 +149,30 @@ export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
     }
   }, [id, isEdicao, tipo, navigate]);
 
+  /** Preenche datas do Capex com base nos projetos associados (data inicial mais antiga e data final mais recente). */
+  useEffect(() => {
+    if (tipo !== 'capex' || projetoIds.length === 0 || projetos.length === 0) return;
+    const selecionados = projetos.filter((p) => projetoIds.includes(p.id));
+    if (selecionados.length === 0) return;
+    const inicios = selecionados.map((p) => p.dataInicio).filter((d) => d && String(d).trim());
+    const fims = selecionados.map((p) => p.dataFim).filter((d) => d && String(d).trim());
+    if (inicios.length > 0) setDataInicio(inicios.reduce((a, b) => (a < b ? a : b)));
+    if (fims.length > 0) setDataFim(fims.reduce((a, b) => (a > b ? a : b)));
+  }, [tipo, projetoIds, projetos]);
+
+  /** Preenche datas do Opex com base nos sistemas associados (data inicial mais antiga e data final mais recente; usa ano do sistema se não houver data). */
+  useEffect(() => {
+    if (tipo !== 'opex' || produtoSoftwareIds.length === 0 || produtos.length === 0) return;
+    const selecionados = produtos.filter((p) => produtoSoftwareIds.includes(p.id));
+    if (selecionados.length === 0) return;
+    const toInicio = (p) => (p.dataInicio && String(p.dataInicio).trim()) || (p.ano != null ? `${p.ano}-01-01` : null);
+    const toFim = (p) => (p.dataFim && String(p.dataFim).trim()) || (p.ano != null ? `${p.ano}-12-31` : null);
+    const inicios = selecionados.map(toInicio).filter(Boolean);
+    const fims = selecionados.map(toFim).filter(Boolean);
+    if (inicios.length > 0) setDataInicio(inicios.reduce((a, b) => (a < b ? a : b)));
+    if (fims.length > 0) setDataFim(fims.reduce((a, b) => (a > b ? a : b)));
+  }, [tipo, produtoSoftwareIds, produtos]);
+
   const handleToggleAssociado = (id) => {
     if (tipo === 'opex') {
       setProdutoSoftwareIds((prev) =>
@@ -166,6 +190,14 @@ export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
     setErro('');
     if (!areaId || !areaId.trim()) {
       setErro('Área é obrigatória.');
+      return;
+    }
+    if (tipo === 'capex' && projetoIds.length === 0) {
+      setErro('Selecione pelo menos um projeto associado ao Capex.');
+      return;
+    }
+    if (tipo === 'opex' && produtoSoftwareIds.length === 0) {
+      setErro('Selecione pelo menos um sistema associado ao Opex.');
       return;
     }
     const valorNum = valor === '' ? null : Number(valor);
@@ -225,66 +257,6 @@ export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
         <fieldset disabled={readOnly} style={{ border: 'none', margin: 0, padding: 0 }}>
-        <section className="form-secao">
-          <h2 className="form-secao-titulo">Dados do {labelTipo}</h2>
-          <label className="form-group">
-            <span className="form-label">Área *</span>
-            <select value={areaId} onChange={(e) => setAreaId(e.target.value)} required>
-              <option value="">— Selecione a área —</option>
-              {areas.map((a) => (
-                <option key={a.id} value={a.id}>{a.nome}</option>
-              ))}
-            </select>
-          </label>
-          <label className="form-group">
-            <span className="form-label">Fornecedor</span>
-            <select value={fornecedorId} onChange={(e) => setFornecedorId(e.target.value)}>
-              <option value="">— Nenhum / Selecione —</option>
-              {fornecedores.map((f) => (
-                <option key={f.id} value={f.id}>{f.nome}</option>
-              ))}
-            </select>
-          </label>
-          <label className="form-group">
-            <span className="form-label">Valor (R$)</span>
-            <input
-              type="number"
-              step="0.01"
-              min={0}
-              value={valor}
-              onChange={(e) => setValor(e.target.value)}
-              placeholder="0,00"
-            />
-          </label>
-        </section>
-
-        <section className="form-secao form-secao-periodo">
-          <h2 className="form-secao-titulo">Período</h2>
-          <p className="form-hint">Informe o intervalo de vigência do {labelTipo} (opcional).</p>
-          <div className="form-row-datas">
-            <label className="form-group form-group-inline">
-              <span className="form-label">Data inicial</span>
-              <input
-                type="date"
-                value={dataInicio}
-                onChange={(e) => setDataInicio(e.target.value)}
-                max={dataFim || undefined}
-                aria-label="Data inicial do período"
-              />
-            </label>
-            <label className="form-group form-group-inline">
-              <span className="form-label">Data final</span>
-              <input
-                type="date"
-                value={dataFim}
-                onChange={(e) => setDataFim(e.target.value)}
-                min={dataInicio || undefined}
-                aria-label="Data final do período"
-              />
-            </label>
-          </div>
-        </section>
-
         <section className="form-secao form-secao-produtos">
           <h2 className="form-secao-titulo">{tipo === 'capex' ? 'Projetos associados' : 'Sistemas associados'}</h2>
           {tipo === 'capex' ? (
@@ -362,6 +334,72 @@ export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
               </div>
             </>
           )}
+        </section>
+
+        <section className="form-secao">
+          <h2 className="form-secao-titulo">Dados do {labelTipo}</h2>
+          <label className="form-group">
+            <span className="form-label">Área *</span>
+            <select value={areaId} onChange={(e) => setAreaId(e.target.value)} required>
+              <option value="">— Selecione a área —</option>
+              {areas.map((a) => (
+                <option key={a.id} value={a.id}>{a.nome}</option>
+              ))}
+            </select>
+          </label>
+          <label className="form-group">
+            <span className="form-label">Fornecedor</span>
+            <select value={fornecedorId} onChange={(e) => setFornecedorId(e.target.value)}>
+              <option value="">— Nenhum / Selecione —</option>
+              {fornecedores.map((f) => (
+                <option key={f.id} value={f.id}>{f.nome}</option>
+              ))}
+            </select>
+          </label>
+          <label className="form-group">
+            <span className="form-label">Valor (R$)</span>
+            <input
+              type="number"
+              step="0.01"
+              min={0}
+              value={valor}
+              onChange={(e) => setValor(e.target.value)}
+              placeholder="0,00"
+            />
+          </label>
+        </section>
+
+        <section className="form-secao form-secao-periodo">
+          <h2 className="form-secao-titulo">Período</h2>
+          {tipo === 'capex' ? (
+            <p className="form-hint">As datas são preenchidas automaticamente com base nos projetos associados (data inicial mais antiga e data final mais recente). Você pode ajustá-las se necessário.</p>
+          ) : tipo === 'opex' ? (
+            <p className="form-hint">As datas são preenchidas automaticamente com base nos sistemas associados (data inicial mais antiga e data final mais recente). Você pode ajustá-las se necessário.</p>
+          ) : (
+            <p className="form-hint">Informe o intervalo de vigência do {labelTipo} (opcional).</p>
+          )}
+          <div className="form-row-datas">
+            <label className="form-group form-group-inline">
+              <span className="form-label">Data inicial</span>
+              <input
+                type="date"
+                value={dataInicio}
+                onChange={(e) => setDataInicio(e.target.value)}
+                max={dataFim || undefined}
+                aria-label="Data inicial do período"
+              />
+            </label>
+            <label className="form-group form-group-inline">
+              <span className="form-label">Data final</span>
+              <input
+                type="date"
+                value={dataFim}
+                onChange={(e) => setDataFim(e.target.value)}
+                min={dataInicio || undefined}
+                aria-label="Data final do período"
+              />
+            </label>
+          </div>
         </section>
 
         <section className="form-secao">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { projetosApi, empresasApi } from '../../api/client';
+import { projetosApi, empresasApi, produtosSoftwareApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
 import '../CadastroFormLayout.css';
 
@@ -19,6 +19,7 @@ export default function ProjetoForm({ somenteLeitura = false }) {
   const readOnly = somenteLeitura;
 
   const [empresas, setEmpresas] = useState([]);
+  const [produtos, setProdutos] = useState([]);
   const [nome, setNome] = useState('');
   const [descricao, setDescricao] = useState('');
   const [empresaId, setEmpresaId] = useState('');
@@ -26,11 +27,22 @@ export default function ProjetoForm({ somenteLeitura = false }) {
   const [dataFim, setDataFim] = useState('');
   const [status, setStatus] = useState('');
   const [observacoes, setObservacoes] = useState('');
+  const [produtoSoftwareIds, setProdutoSoftwareIds] = useState([]);
+  const [buscaSistemas, setBuscaSistemas] = useState('');
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
 
+  const busca = buscaSistemas.trim().toLowerCase();
+  const sistemasFiltrados = busca ? produtos.filter((p) => (p.nomeSistema || '').toLowerCase().includes(busca)) : produtos;
+  const sistemasSelecionados = produtos.filter((p) => produtoSoftwareIds.includes(p.id));
+
   useEffect(() => {
-    empresasApi.listar().then((e) => setEmpresas(Array.isArray(e) ? e : [])).catch(() => {});
+    Promise.all([empresasApi.listar(), produtosSoftwareApi.listar()])
+      .then(([e, p]) => {
+        setEmpresas(Array.isArray(e) ? e : []);
+        setProdutos(Array.isArray(p) ? p : []);
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -45,6 +57,7 @@ export default function ProjetoForm({ somenteLeitura = false }) {
           setDataFim(p.dataFim ?? '');
           setStatus(p.status ?? '');
           setObservacoes(p.observacoes ?? '');
+          setProdutoSoftwareIds(Array.isArray(p.produtoSoftwareIds) ? p.produtoSoftwareIds : []);
         })
         .catch((e) => setErro(e.message));
     }
@@ -63,6 +76,10 @@ export default function ProjetoForm({ somenteLeitura = false }) {
       setErro('A data final deve ser igual ou posterior à data inicial.');
       return;
     }
+    if (produtoSoftwareIds.length === 0) {
+      setErro('O projeto deve estar associado a pelo menos um sistema.');
+      return;
+    }
     setEnviando(true);
     try {
       const payload = {
@@ -73,6 +90,7 @@ export default function ProjetoForm({ somenteLeitura = false }) {
         dataFim: fim,
         status: status.trim() || null,
         observacoes: observacoes.trim(),
+        produtoSoftwareIds,
       };
       if (isEdicao) await projetosApi.atualizar(id, payload);
       else await projetosApi.criar(payload);
@@ -122,6 +140,49 @@ export default function ProjetoForm({ somenteLeitura = false }) {
               ))}
             </select>
           </label>
+        </section>
+
+        <section className="form-secao form-secao-produtos">
+          <h2 className="form-secao-titulo">Sistemas associados *</h2>
+          <p className="form-hint">O projeto deve estar vinculado a pelo menos um sistema.</p>
+          {sistemasSelecionados.length > 0 && (
+            <div className="produtos-selecionados-resumo">
+              <span className="produtos-selecionados-label">
+                {sistemasSelecionados.length} sistema(s) selecionado(s):
+              </span>
+              <div className="produtos-chips">
+                {sistemasSelecionados.map((p) => (
+                  <span key={p.id} className="produto-chip">
+                    {p.nomeSistema || p.id}
+                    {!readOnly && (
+                      <button type="button" className="produto-chip-remove" onClick={() => setProdutoSoftwareIds((prev) => prev.filter((x) => x !== p.id))} title="Remover" aria-label={`Remover ${p.nomeSistema || p.id}`}>×</button>
+                    )}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {!readOnly && (
+            <>
+              <div className="produtos-toolbar">
+                <input type="search" className="produtos-busca" placeholder="Buscar por nome do sistema..." value={buscaSistemas} onChange={(e) => setBuscaSistemas(e.target.value)} aria-label="Buscar sistemas" />
+                <div className="produtos-acoes">
+                  <button type="button" className="btn btn-sm btn-outline" onClick={() => setProdutoSoftwareIds((prev) => [...new Set([...prev, ...sistemasFiltrados.map((s) => s.id)])])}>Selecionar todos ({sistemasFiltrados.length})</button>
+                  <button type="button" className="btn btn-sm btn-outline" onClick={() => setProdutoSoftwareIds([])}>Limpar seleção</button>
+                </div>
+              </div>
+              <div className="produtos-grid" role="list">
+                {produtos.length === 0 ? <p className="form-hint">Nenhum sistema cadastrado. Cadastre sistemas antes de criar o projeto.</p> : sistemasFiltrados.length === 0 ? <p className="form-hint">Nenhum sistema encontrado para &quot;{buscaSistemas}&quot;.</p> : sistemasFiltrados.map((p) => (
+                  <label key={p.id} className={`produto-card ${produtoSoftwareIds.includes(p.id) ? 'produto-card--selected' : ''}`} role="listitem">
+                    <input type="checkbox" checked={produtoSoftwareIds.includes(p.id)} onChange={() => setProdutoSoftwareIds((prev) => prev.includes(p.id) ? prev.filter((x) => x !== p.id) : [...prev, p.id])} className="produto-card-check" />
+                    <div className="produto-card-body">
+                      <span className="produto-card-nome">{p.nomeSistema || p.id}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </>
+          )}
         </section>
 
         <section className="form-secao form-secao-periodo">

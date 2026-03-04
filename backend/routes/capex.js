@@ -74,6 +74,11 @@ router.post('/', (req, res) => {
   const body = req.body || {};
   if (body.areaId == null || body.areaId === '') return res.status(400).json({ erro: 'Área é obrigatória' });
   if (body.valor == null || body.valor === '' || isNaN(Number(body.valor))) return res.status(400).json({ erro: 'Valor é obrigatório e deve ser um número' });
+  const classificacao = body.classificacao || 'capex';
+  const projetoIds = Array.isArray(body.projetoIds) ? body.projetoIds.filter((id) => id != null && String(id).trim()) : [];
+  const produtoSoftwareIds = Array.isArray(body.produtoSoftwareIds) ? body.produtoSoftwareIds.filter((id) => id != null && String(id).trim()) : [];
+  if (classificacao === 'capex' && projetoIds.length === 0) return res.status(400).json({ erro: 'O Capex deve estar associado a pelo menos um projeto.' });
+  if (classificacao === 'opex' && produtoSoftwareIds.length === 0) return res.status(400).json({ erro: 'O Opex deve estar associado a pelo menos um sistema.' });
   res.status(201).json(criar(body));
 });
 
@@ -86,8 +91,19 @@ router.post('/', (req, res) => {
  */
 router.put('/:id', (req, res) => {
   try {
-    const item = atualizar(req.params.id, req.body || {});
-    if (!item) return res.status(404).json({ erro: 'Não encontrado' });
+    const body = req.body || {};
+    const existente = getById(req.params.id);
+    if (!existente) return res.status(404).json({ erro: 'Não encontrado' });
+    const classificacao = body.classificacao ?? existente.classificacao ?? 'capex';
+    const projetoIds = body.projetoIds !== undefined
+      ? (Array.isArray(body.projetoIds) ? body.projetoIds.filter((id) => id != null && String(id).trim()) : [])
+      : (existente.projetoIds || []);
+    const produtoSoftwareIds = body.produtoSoftwareIds !== undefined
+      ? (Array.isArray(body.produtoSoftwareIds) ? body.produtoSoftwareIds.filter((id) => id != null && String(id).trim()) : [])
+      : (existente.produtoSoftwareIds || []);
+    if (classificacao === 'capex' && projetoIds.length === 0) return res.status(400).json({ erro: 'O Capex deve estar associado a pelo menos um projeto.' });
+    if (classificacao === 'opex' && produtoSoftwareIds.length === 0) return res.status(400).json({ erro: 'O Opex deve estar associado a pelo menos um sistema.' });
+    const item = atualizar(req.params.id, body);
     res.json(expandir(item));
   } catch (err) {
     return res.status(400).json({ erro: err.message || 'Dados inválidos' });

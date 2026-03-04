@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PermissoesProvider } from './context/PermissoesContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Login from './pages/Login';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
@@ -101,10 +102,12 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <PermissoesProvider>
-        <AppRoutes />
-      </PermissoesProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <PermissoesProvider>
+          <AppRoutes />
+        </PermissoesProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

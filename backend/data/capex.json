@@ -11,7 +11,11 @@
     "produtoSoftwareIds": [
       "1772209380748"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p1"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854076",
@@ -25,7 +29,8 @@
     "produtoSoftwareIds": [
       "2"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": []
   },
   {
     "id": "1772452854077",
@@ -39,7 +44,11 @@
     "produtoSoftwareIds": [
       "3"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p2"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854078",
@@ -53,7 +62,8 @@
     "produtoSoftwareIds": [
       "4"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": []
   },
   {
     "id": "1772452854079",
@@ -67,7 +77,11 @@
     "produtoSoftwareIds": [
       "5"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p3"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854080",
@@ -81,7 +95,8 @@
     "produtoSoftwareIds": [
       "6"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": []
   },
   {
     "id": "1772452854081",
@@ -95,7 +110,11 @@
     "produtoSoftwareIds": [
       "7"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p4"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854082",
@@ -109,7 +128,8 @@
     "produtoSoftwareIds": [
       "8"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": []
   },
   {
     "id": "1772452854083",
@@ -123,7 +143,11 @@
     "produtoSoftwareIds": [
       "9"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p5"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854084",
@@ -137,7 +161,11 @@
     "produtoSoftwareIds": [
       "10"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p6"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854085",
@@ -151,7 +179,11 @@
     "produtoSoftwareIds": [
       "11"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p7"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854086",
@@ -165,7 +197,8 @@
     "produtoSoftwareIds": [
       "12"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": []
   },
   {
     "id": "1772452854087",
@@ -179,7 +212,11 @@
     "produtoSoftwareIds": [
       "13"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p8"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854088",
@@ -193,7 +230,14 @@
     "produtoSoftwareIds": [
       "14"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": [
+      {
+        "id": "e-1772452854088-1",
+        "valor": 38400,
+        "periodo": "01/26"
+      }
+    ]
   },
   {
     "id": "1772452854089",
@@ -207,7 +251,11 @@
     "produtoSoftwareIds": [
       "15"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p9"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854090",
@@ -221,7 +269,11 @@
     "produtoSoftwareIds": [
       "16"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p10"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854091",
@@ -235,7 +287,11 @@
     "produtoSoftwareIds": [
       "17"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p1"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854092",
@@ -249,7 +305,11 @@
     "produtoSoftwareIds": [
       "18"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p2"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854093",
@@ -263,7 +323,11 @@
     "produtoSoftwareIds": [
       "19"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p3"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854094",
@@ -277,7 +341,11 @@
     "produtoSoftwareIds": [
       "20"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p4"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854095",
@@ -291,7 +359,11 @@
     "produtoSoftwareIds": [
       "21"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p5"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854096",
@@ -305,7 +377,11 @@
     "produtoSoftwareIds": [
       "22"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p6"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854097",
@@ -319,7 +395,11 @@
     "produtoSoftwareIds": [
       "23"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p7"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854098",
@@ -333,7 +413,11 @@
     "produtoSoftwareIds": [
       "24"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p8"
+    ],
+    "entradas": []
   },
   {
     "id": "1772452854099",
@@ -347,7 +431,17 @@
     "produtoSoftwareIds": [
       "25"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p9"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854099-1",
+        "valor": 29760,
+        "periodo": "01/25"
+      }
+    ]
   },
   {
     "id": "1772452854100",
@@ -361,7 +455,17 @@
     "produtoSoftwareIds": [
       "26"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p10"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854100-1",
+        "valor": 29760,
+        "periodo": "01/26"
+      }
+    ]
   },
   {
     "id": "1772452854101",
@@ -375,7 +479,17 @@
     "produtoSoftwareIds": [
       "27"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p1"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854101-1",
+        "valor": 40320,
+        "periodo": "01/25"
+      }
+    ]
   },
   {
     "id": "1772452854102",
@@ -389,7 +503,17 @@
     "produtoSoftwareIds": [
       "28"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p2"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854102-1",
+        "valor": 40320,
+        "periodo": "01/26"
+      }
+    ]
   },
   {
     "id": "1772452854103",
@@ -403,7 +527,17 @@
     "produtoSoftwareIds": [
       "29"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p3"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854103-1",
+        "valor": 9120,
+        "periodo": "01/25"
+      }
+    ]
   },
   {
     "id": "1772452854104",
@@ -417,7 +551,17 @@
     "produtoSoftwareIds": [
       "30"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p4"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854104-1",
+        "valor": 9120,
+        "periodo": "01/26"
+      }
+    ]
   },
   {
     "id": "1772452854105",
@@ -431,7 +575,17 @@
     "produtoSoftwareIds": [
       "1772459236100"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p5"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854105-1",
+        "valor": 34560,
+        "periodo": "01/25"
+      }
+    ]
   },
   {
     "id": "1772452854106",
@@ -445,7 +599,17 @@
     "produtoSoftwareIds": [
       "1772209380748"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p6"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854106-1",
+        "valor": 34560,
+        "periodo": "01/26"
+      }
+    ]
   },
   {
     "id": "1772452854107",
@@ -459,7 +623,17 @@
     "produtoSoftwareIds": [
       "2"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p7"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854107-1",
+        "valor": 26400,
+        "periodo": "01/25"
+      }
+    ]
   },
   {
     "id": "1772452854108",
@@ -473,7 +647,17 @@
     "produtoSoftwareIds": [
       "3"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p8"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854108-1",
+        "valor": 26400,
+        "periodo": "01/26"
+      }
+    ]
   },
   {
     "id": "1772452854109",
@@ -487,7 +671,17 @@
     "produtoSoftwareIds": [
       "4"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p9"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854109-1",
+        "valor": 57600,
+        "periodo": "01/25"
+      }
+    ]
   },
   {
     "id": "1772452854110",
@@ -501,7 +695,17 @@
     "produtoSoftwareIds": [
       "5"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p10"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854110-1",
+        "valor": 57600,
+        "periodo": "01/26"
+      }
+    ]
   },
   {
     "id": "1772452854111",
@@ -515,7 +719,17 @@
     "produtoSoftwareIds": [
       "6"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p1"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854111-1",
+        "valor": 11520,
+        "periodo": "01/25"
+      }
+    ]
   },
   {
     "id": "1772452854112",
@@ -529,7 +743,17 @@
     "produtoSoftwareIds": [
       "7"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p2"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854112-1",
+        "valor": 11520,
+        "periodo": "01/26"
+      }
+    ]
   },
   {
     "id": "1772452854113",
@@ -543,7 +767,17 @@
     "produtoSoftwareIds": [
       "8"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p3"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854113-1",
+        "valor": 19680,
+        "periodo": "01/25"
+      }
+    ]
   },
   {
     "id": "1772452854114",
@@ -557,7 +791,17 @@
     "produtoSoftwareIds": [
       "9"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p4"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854114-1",
+        "valor": 19680,
+        "periodo": "01/26"
+      }
+    ]
   },
   {
     "id": "1772452854115",
@@ -571,7 +815,17 @@
     "produtoSoftwareIds": [
       "10"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p5"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854115-1",
+        "valor": 18240,
+        "periodo": "01/25"
+      }
+    ]
   },
   {
     "id": "1772452854116",
@@ -585,7 +839,17 @@
     "produtoSoftwareIds": [
       "11"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p6"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854116-1",
+        "valor": 18240,
+        "periodo": "01/26"
+      }
+    ]
   },
   {
     "id": "1772452854117",
@@ -599,7 +863,22 @@
     "produtoSoftwareIds": [
       "12"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p7"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854117-1",
+        "valor": 108000,
+        "periodo": "01/25"
+      },
+      {
+        "id": "e-1772452854117-2",
+        "valor": 72000,
+        "periodo": "02/25"
+      }
+    ]
   },
   {
     "id": "1772452854118",
@@ -613,7 +892,14 @@
     "produtoSoftwareIds": [
       "13"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": [
+      {
+        "id": "e-1772452854118-1",
+        "valor": 24000,
+        "periodo": "01/25"
+      }
+    ]
   },
   {
     "id": "1772452854119",
@@ -627,7 +913,22 @@
     "produtoSoftwareIds": [
       "14"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p8"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854119-1",
+        "valor": 108000,
+        "periodo": "01/26"
+      },
+      {
+        "id": "e-1772452854119-2",
+        "valor": 72000,
+        "periodo": "02/26"
+      }
+    ]
   },
   {
     "id": "1772452854120",
@@ -641,7 +942,14 @@
     "produtoSoftwareIds": [
       "15"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": [
+      {
+        "id": "e-1772452854120-1",
+        "valor": 24000,
+        "periodo": "01/26"
+      }
+    ]
   },
   {
     "id": "1772452854121",
@@ -655,7 +963,22 @@
     "produtoSoftwareIds": [
       "16"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p9"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854121-1",
+        "valor": 158400,
+        "periodo": "01/25"
+      },
+      {
+        "id": "e-1772452854121-2",
+        "valor": 105600,
+        "periodo": "02/25"
+      }
+    ]
   },
   {
     "id": "1772452854122",
@@ -669,7 +992,22 @@
     "produtoSoftwareIds": [
       "17"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p10"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854122-1",
+        "valor": 158400,
+        "periodo": "01/26"
+      },
+      {
+        "id": "e-1772452854122-2",
+        "valor": 105600,
+        "periodo": "02/26"
+      }
+    ]
   },
   {
     "id": "1772452854123",
@@ -683,7 +1021,22 @@
     "produtoSoftwareIds": [
       "18"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p1"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854123-1",
+        "valor": 252000,
+        "periodo": "01/25"
+      },
+      {
+        "id": "e-1772452854123-2",
+        "valor": 168000,
+        "periodo": "02/25"
+      }
+    ]
   },
   {
     "id": "1772452854124",
@@ -697,7 +1050,14 @@
     "produtoSoftwareIds": [
       "19"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": [
+      {
+        "id": "e-1772452854124-1",
+        "valor": 57600,
+        "periodo": "01/25"
+      }
+    ]
   },
   {
     "id": "1772452854125",
@@ -711,7 +1071,22 @@
     "produtoSoftwareIds": [
       "20"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p2"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854125-1",
+        "valor": 252000,
+        "periodo": "01/26"
+      },
+      {
+        "id": "e-1772452854125-2",
+        "valor": 168000,
+        "periodo": "02/26"
+      }
+    ]
   },
   {
     "id": "1772452854126",
@@ -725,7 +1100,14 @@
     "produtoSoftwareIds": [
       "21"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": [
+      {
+        "id": "e-1772452854126-1",
+        "valor": 57600,
+        "periodo": "01/26"
+      }
+    ]
   },
   {
     "id": "1772452854127",
@@ -739,7 +1121,19 @@
     "produtoSoftwareIds": [
       "22"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": [
+      {
+        "id": "e-1772452854127-1",
+        "valor": 129600,
+        "periodo": "01/25"
+      },
+      {
+        "id": "e-1772452854127-2",
+        "valor": 86400,
+        "periodo": "02/25"
+      }
+    ]
   },
   {
     "id": "1772452854128",
@@ -753,7 +1147,19 @@
     "produtoSoftwareIds": [
       "23"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": [
+      {
+        "id": "e-1772452854128-1",
+        "valor": 129600,
+        "periodo": "01/26"
+      },
+      {
+        "id": "e-1772452854128-2",
+        "valor": 86400,
+        "periodo": "02/26"
+      }
+    ]
   },
   {
     "id": "1772452854129",
@@ -767,7 +1173,22 @@
     "produtoSoftwareIds": [
       "24"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p3"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854129-1",
+        "valor": 61200,
+        "periodo": "01/25"
+      },
+      {
+        "id": "e-1772452854129-2",
+        "valor": 40800,
+        "periodo": "02/25"
+      }
+    ]
   },
   {
     "id": "1772452854130",
@@ -781,7 +1202,22 @@
     "produtoSoftwareIds": [
       "25"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p4"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854130-1",
+        "valor": 61200,
+        "periodo": "01/26"
+      },
+      {
+        "id": "e-1772452854130-2",
+        "valor": 40800,
+        "periodo": "02/26"
+      }
+    ]
   },
   {
     "id": "1772452854131",
@@ -795,7 +1231,22 @@
     "produtoSoftwareIds": [
       "26"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p5"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854131-1",
+        "valor": 54000,
+        "periodo": "01/25"
+      },
+      {
+        "id": "e-1772452854131-2",
+        "valor": 36000,
+        "periodo": "02/25"
+      }
+    ]
   },
   {
     "id": "1772452854132",
@@ -809,7 +1260,22 @@
     "produtoSoftwareIds": [
       "27"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p6"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854132-1",
+        "valor": 54000,
+        "periodo": "01/26"
+      },
+      {
+        "id": "e-1772452854132-2",
+        "valor": 36000,
+        "periodo": "02/26"
+      }
+    ]
   },
   {
     "id": "1772452854133",
@@ -823,7 +1289,22 @@
     "produtoSoftwareIds": [
       "28"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p7"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854133-1",
+        "valor": 180000,
+        "periodo": "01/25"
+      },
+      {
+        "id": "e-1772452854133-2",
+        "valor": 120000,
+        "periodo": "02/25"
+      }
+    ]
   },
   {
     "id": "1772452854134",
@@ -837,7 +1318,22 @@
     "produtoSoftwareIds": [
       "29"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p8"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854134-1",
+        "valor": 180000,
+        "periodo": "01/26"
+      },
+      {
+        "id": "e-1772452854134-2",
+        "valor": 120000,
+        "periodo": "02/26"
+      }
+    ]
   },
   {
     "id": "1772452854135",
@@ -851,7 +1347,22 @@
     "produtoSoftwareIds": [
       "30"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p9"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854135-1",
+        "valor": 100800,
+        "periodo": "01/25"
+      },
+      {
+        "id": "e-1772452854135-2",
+        "valor": 67200,
+        "periodo": "02/25"
+      }
+    ]
   },
   {
     "id": "1772452854136",
@@ -865,7 +1376,22 @@
     "produtoSoftwareIds": [
       "1772459236100"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p10"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854136-1",
+        "valor": 100800,
+        "periodo": "01/26"
+      },
+      {
+        "id": "e-1772452854136-2",
+        "valor": 67200,
+        "periodo": "02/26"
+      }
+    ]
   },
   {
     "id": "1772452854137",
@@ -879,7 +1405,22 @@
     "produtoSoftwareIds": [
       "1772209380748"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p1"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854137-1",
+        "valor": 115200,
+        "periodo": "01/25"
+      },
+      {
+        "id": "e-1772452854137-2",
+        "valor": 76800,
+        "periodo": "02/25"
+      }
+    ]
   },
   {
     "id": "1772452854138",
@@ -893,7 +1434,22 @@
     "produtoSoftwareIds": [
       "2"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p2"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854138-1",
+        "valor": 115200,
+        "periodo": "01/26"
+      },
+      {
+        "id": "e-1772452854138-2",
+        "valor": 76800,
+        "periodo": "02/26"
+      }
+    ]
   },
   {
     "id": "1772452854139",
@@ -907,7 +1463,19 @@
     "produtoSoftwareIds": [
       "3"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": [
+      {
+        "id": "e-1772452854139-1",
+        "valor": 252000,
+        "periodo": "01/25"
+      },
+      {
+        "id": "e-1772452854139-2",
+        "valor": 168000,
+        "periodo": "02/25"
+      }
+    ]
   },
   {
     "id": "1772452854140",
@@ -921,7 +1489,19 @@
     "produtoSoftwareIds": [
       "4"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": [
+      {
+        "id": "e-1772452854140-1",
+        "valor": 252000,
+        "periodo": "01/26"
+      },
+      {
+        "id": "e-1772452854140-2",
+        "valor": 168000,
+        "periodo": "02/26"
+      }
+    ]
   },
   {
     "id": "1772452854141",
@@ -935,7 +1515,19 @@
     "produtoSoftwareIds": [
       "5"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": [
+      {
+        "id": "e-1772452854141-1",
+        "valor": 201600,
+        "periodo": "01/25"
+      },
+      {
+        "id": "e-1772452854141-2",
+        "valor": 134400,
+        "periodo": "02/25"
+      }
+    ]
   },
   {
     "id": "1772452854142",
@@ -949,7 +1541,19 @@
     "produtoSoftwareIds": [
       "6"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "entradas": [
+      {
+        "id": "e-1772452854142-1",
+        "valor": 201600,
+        "periodo": "01/26"
+      },
+      {
+        "id": "e-1772452854142-2",
+        "valor": 134400,
+        "periodo": "02/26"
+      }
+    ]
   },
   {
     "id": "1772452854143",
@@ -963,7 +1567,22 @@
     "produtoSoftwareIds": [
       "7"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p3"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854143-1",
+        "valor": 74880,
+        "periodo": "01/25"
+      },
+      {
+        "id": "e-1772452854143-2",
+        "valor": 49920,
+        "periodo": "02/25"
+      }
+    ]
   },
   {
     "id": "1772452854144",
@@ -977,6 +1596,21 @@
     "produtoSoftwareIds": [
       "8"
     ],
-    "observacoes": ""
+    "observacoes": "",
+    "projetoIds": [
+      "p4"
+    ],
+    "entradas": [
+      {
+        "id": "e-1772452854144-1",
+        "valor": 74880,
+        "periodo": "01/26"
+      },
+      {
+        "id": "e-1772452854144-2",
+        "valor": 49920,
+        "periodo": "02/26"
+      }
+    ]
   }
 ]

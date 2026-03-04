@@ -47,7 +47,8 @@ export default function ProjetosList() {
   const termoBusca = normalizarTexto(busca).trim();
   const listaFiltrada = termoBusca
     ? lista.filter((item) => {
-        const texto = [item.nome, item.empresaNome, item.status, item.descricao].join(' ');
+        const sistemaStr = (item.sistemaNomes || []).join(' ');
+        const texto = [item.nome, item.empresaNome, item.status, item.descricao, sistemaStr].join(' ');
         return normalizarTexto(texto).includes(termoBusca);
       })
     : lista;
@@ -63,7 +64,7 @@ export default function ProjetosList() {
           <input
             type="search"
             className="input-busca"
-            placeholder="Buscar por nome, empresa, status..."
+            placeholder="Buscar por nome, empresa, status, sistema..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             aria-label="Buscar"
@@ -81,6 +82,7 @@ export default function ProjetosList() {
           <thead>
             <tr>
               <th>Nome</th>
+              <th>Sistemas</th>
               <th>Empresa</th>
               <th>Status</th>
               <th>Data início</th>
@@ -91,11 +93,12 @@ export default function ProjetosList() {
           </thead>
           <tbody>
             {listaFiltrada.length === 0 ? (
-              <tr><td colSpan={7}>{lista.length === 0 ? 'Nenhum projeto cadastrado.' : 'Nenhum resultado para a busca.'}</td></tr>
+              <tr><td colSpan={8}>{lista.length === 0 ? 'Nenhum projeto cadastrado.' : 'Nenhum resultado para a busca.'}</td></tr>
             ) : (
               listaFiltrada.map((item) => (
                 <tr key={item.id}>
                   <td className="td-texto" title={item.nome}>{v(item.nome)}</td>
+                  <td className="td-texto" title={(item.sistemaNomes || []).join(', ')}>{(item.sistemaNomes && item.sistemaNomes.length > 0) ? item.sistemaNomes.join(', ') : '—'}</td>
                   <td>{v(item.empresaNome)}</td>
                   <td>{v(item.status)}</td>
                   <td>{formatarData(item.dataInicio)}</td>

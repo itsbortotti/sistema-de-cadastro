@@ -388,33 +388,6 @@ export default function ProdutoSoftwareForm({ somenteLeitura = false }) {
           </label>
         </section>
 
-        <section className="form-secao">
-          <h2 className="form-secao-titulo">Custos</h2>
-          <label className="form-group">
-            <span className="form-label">Capex (R$)</span>
-            <input type="number" step="0.01" min={0} value={custoMensalSistema} onChange={(e) => setCustoMensalSistema(e.target.value)} placeholder="0,00" />
-          </label>
-          <label className="form-group">
-            <span className="form-label">Opex (R$)</span>
-            <input type="number" step="0.01" min={0} value={custoMensalInfraestrutura} onChange={(e) => setCustoMensalInfraestrutura(e.target.value)} placeholder="0,00" />
-          </label>
-          <label className="form-group">
-            <span className="form-label">Período inicial</span>
-            <input
-              type="date"
-              value={dataInicio}
-              onChange={(e) => setDataInicio(e.target.value)}
-            />
-          </label>
-          <label className="form-group">
-            <span className="form-label">Período final</span>
-            <input
-              type="date"
-              value={dataFim}
-              onChange={(e) => setDataFim(e.target.value)}
-            />
-          </label>
-        </section>
         </fieldset>
 
         {!readOnly && (

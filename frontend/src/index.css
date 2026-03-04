@@ -39,6 +39,42 @@ input, select, textarea {
   font-family: inherit;
 }
 
+/* Ocultar barras de rolagem nas telas (mantém a rolagem funcional) */
+.main-content > *,
+.cadastro-list-page .table-wrap,
+.form-cadastro,
+.form-cadastro .form-checkbox-group,
+.form-cadastro .produtos-grid,
+.form-cadastro .entradas-lista-wrap,
+.dashboard,
+.table-wrap,
+.table-wrap-scroll,
+.dashboard-tabela-capex-wrap,
+.dashboard-modal-body,
+.permissoes-card .table-wrap,
+.produtos-software-list-page .table-wrap,
+.empresas-list-page .table-wrap {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.main-content > *::-webkit-scrollbar,
+.cadastro-list-page .table-wrap::-webkit-scrollbar,
+.form-cadastro::-webkit-scrollbar,
+.form-cadastro .form-checkbox-group::-webkit-scrollbar,
+.form-cadastro .produtos-grid::-webkit-scrollbar,
+.form-cadastro .entradas-lista-wrap::-webkit-scrollbar,
+.dashboard::-webkit-scrollbar,
+.table-wrap::-webkit-scrollbar,
+.table-wrap-scroll::-webkit-scrollbar,
+.dashboard-tabela-capex-wrap::-webkit-scrollbar,
+.dashboard-modal-body::-webkit-scrollbar,
+.permissoes-card .table-wrap::-webkit-scrollbar,
+.produtos-software-list-page .table-wrap::-webkit-scrollbar,
+.empresas-list-page .table-wrap::-webkit-scrollbar {
+  display: none;
+}
+
 /* Estado de carregamento global (usado em PrivateRoute e outras telas) */
 .carregando {
   min-height: 100vh;
@@ -48,4 +84,593 @@ input, select, textarea {
   font-size: 1.125rem;
   color: #64748b;
   background: #f0f2f5;
+}
+
+/* ========== Modo escuro ========== */
+body.dark-mode {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+body.dark-mode .carregando {
+  background: #0f172a;
+  color: #94a3b8;
+}
+
+body.dark-mode .page-header h1,
+body.dark-mode .cadastro-page h1,
+body.dark-mode .form-cadastro-page h1 {
+  color: #f1f5f9;
+}
+
+body.dark-mode .busca-resultado,
+body.dark-mode .page-desc {
+  color: #94a3b8;
+}
+
+body.dark-mode .page-loading {
+  color: #94a3b8;
+}
+
+body.dark-mode .table-wrap,
+body.dark-mode .form-card,
+body.dark-mode .form-cadastro {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .table th {
+  background: #334155;
+  color: #cbd5e1;
+  border-bottom-color: #475569;
+}
+
+body.dark-mode .table td,
+body.dark-mode .table th {
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .table tbody tr:hover td,
+body.dark-mode .table-cadastro tbody tr:hover .td-acoes {
+  background: #334155;
+}
+
+body.dark-mode .table-cadastro .th-acoes,
+body.dark-mode .table-cadastro .td-acoes {
+  background: #1e293b;
+  border-left: 1px solid #334155;
+}
+
+body.dark-mode .table-cadastro th.th-acoes {
+  background: #334155;
+}
+
+body.dark-mode .input-busca {
+  background: #1e293b url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E") no-repeat 0.6rem center;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+body.dark-mode .input-busca::placeholder {
+  color: #64748b;
+}
+
+body.dark-mode .form-cadastro .form-secao-titulo,
+body.dark-mode .form-secao-titulo {
+  color: #e2e8f0;
+  border-bottom-color: #3b82f6;
+}
+
+body.dark-mode .form-cadastro .form-label,
+body.dark-mode .form-label {
+  color: #cbd5e1;
+}
+
+body.dark-mode .form-cadastro input,
+body.dark-mode .form-cadastro select,
+body.dark-mode .form-cadastro textarea,
+body.dark-mode .form-group input,
+body.dark-mode .form-group select,
+body.dark-mode .form-group textarea {
+  background: #0f172a;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+body.dark-mode .form-cadastro input:focus,
+body.dark-mode .form-cadastro select:focus,
+body.dark-mode .form-cadastro textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+body.dark-mode .form-cadastro .form-secao {
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .form-actions {
+  border-top-color: #475569;
+}
+
+body.dark-mode .btn-secondary {
+  background: #475569;
+  color: #e2e8f0;
+}
+
+body.dark-mode .btn-secondary:hover {
+  background: #64748b;
+  color: #fff;
+}
+
+body.dark-mode .btn-icone {
+  background: #1e293b;
+  border-color: #475569;
+  color: #94a3b8;
+}
+
+body.dark-mode .btn-icone:hover {
+  background: #334155;
+  color: #93c5fd;
+  border-color: #64748b;
+}
+
+body.dark-mode .btn-icone-danger:hover:not(:disabled) {
+  background: #7f1d1d;
+  color: #fca5a5;
+  border-color: #991b1b;
+}
+
+body.dark-mode .tabs-horizontal {
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .tab-item {
+  color: #94a3b8;
+}
+
+body.dark-mode .tab-item:hover {
+  color: #e2e8f0;
+  background: #1e293b;
+}
+
+body.dark-mode .tab-item.active {
+  color: #93c5fd;
+}
+
+body.dark-mode .tab-badge {
+  background: #334155;
+  color: #94a3b8;
+}
+
+body.dark-mode .tab-item.active .tab-badge {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+
+body.dark-mode .login-page {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+}
+
+body.dark-mode .login-card {
+  background: #1e293b;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .login-card h1 {
+  color: #f1f5f9;
+}
+
+body.dark-mode .login-subtitle {
+  color: #94a3b8;
+}
+
+body.dark-mode .login-card label {
+  color: #cbd5e1;
+}
+
+body.dark-mode .login-card input {
+  background: #0f172a;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+body.dark-mode .login-card input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+/* ---------- Aba Sistemas (listagem e tabela) ---------- */
+body.dark-mode .table-wrap-scroll,
+body.dark-mode .produtos-software-list-page .table-wrap {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .table-produtos-software th {
+  background: #334155;
+  color: #cbd5e1;
+  border-bottom-color: #475569;
+}
+
+body.dark-mode .table-produtos-software td,
+body.dark-mode .table-produtos-software th {
+  border-bottom-color: #334155;
+  color: #e2e8f0;
+}
+
+body.dark-mode .table-produtos-software .th-acoes,
+body.dark-mode .table-produtos-software .td-acoes {
+  background: #1e293b;
+  box-shadow: -4px 0 6px -2px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .table-produtos-software th.th-acoes {
+  background: #334155;
+}
+
+body.dark-mode .table-produtos-software tbody tr:hover .td-acoes {
+  background: #334155;
+}
+
+body.dark-mode .table-produtos-software tbody tr td[colSpan] {
+  color: #94a3b8;
+}
+
+body.dark-mode .btn-outline {
+  color: #93c5fd;
+  border-color: #3b82f6;
+}
+
+body.dark-mode .btn-outline:hover {
+  background: rgba(59, 130, 246, 0.15);
+  color: #bfdbfe;
+}
+
+/* Modal Importar CSV (Sistemas) */
+body.dark-mode .modal-overlay {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+body.dark-mode .modal-box,
+body.dark-mode .modal-box.modal-importar-csv {
+  background: #1e293b;
+  border: 1px solid #334155;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .modal-box .modal-titulo {
+  color: #f1f5f9;
+}
+
+body.dark-mode .modal-box .modal-desc {
+  color: #94a3b8;
+}
+
+body.dark-mode .modal-box .modal-acoes {
+  border-top-color: #334155;
+}
+
+body.dark-mode .modal-box .link-download {
+  color: #93c5fd;
+}
+
+body.dark-mode .modal-box input {
+  background: #0f172a;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+/* Formulário Sistema (ProdutoSoftware) */
+body.dark-mode .form-produto,
+body.dark-mode .form-produto-page .form-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .select-com-novo select,
+body.dark-mode .form-produto select {
+  background: #0f172a;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+body.dark-mode .btn-novo-item {
+  background: #334155;
+  color: #e2e8f0;
+  border-color: #475569;
+}
+
+body.dark-mode .btn-novo-item:hover {
+  background: #475569;
+  color: #fff;
+  border-color: #64748b;
+}
+
+/* ---------- Dashboard ---------- */
+body.dark-mode .dashboard {
+  color: #e2e8f0;
+}
+
+body.dark-mode .dashboard-header h1 {
+  color: #f1f5f9;
+}
+
+body.dark-mode .dashboard > p {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .dashboard-subtitle,
+body.dark-mode .dashboard-periodo-label,
+body.dark-mode .dashboard-card-label,
+body.dark-mode .dashboard-card-hint,
+body.dark-mode .dashboard-tabela-dica,
+body.dark-mode .dashboard-grafico-legend-capex,
+body.dark-mode .dashboard-vazio,
+body.dark-mode .dashboard-grafico-vazio,
+body.dark-mode .dashboard-modal-vazio {
+  color: #94a3b8;
+}
+
+body.dark-mode .dashboard-periodo-btn {
+  background: #1e293b;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+body.dark-mode .dashboard-periodo-btn:hover {
+  background: #334155;
+  border-color: #64748b;
+  color: #f1f5f9;
+}
+
+body.dark-mode .dashboard-periodo-btn.ativo {
+  background: #1e3a8a;
+  border-color: #3b82f6;
+  color: #93c5fd;
+}
+
+body.dark-mode .dashboard-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .dashboard-card-value {
+  color: #f1f5f9;
+}
+
+body.dark-mode .dashboard-card.dashboard-card-destaque {
+  border-color: #3b82f6;
+  background: #1e293b;
+}
+
+body.dark-mode .dashboard-cards-capex .dashboard-card-acima {
+  border-color: #991b1b;
+  background: #450a0a;
+}
+
+body.dark-mode .dashboard-cards-capex .dashboard-card-acima .dashboard-card-value {
+  color: #fca5a5;
+}
+
+body.dark-mode .dashboard-cards-capex .dashboard-card-abaixo {
+  border-color: #166534;
+  background: #052e16;
+}
+
+body.dark-mode .dashboard-cards-capex .dashboard-card-abaixo .dashboard-card-value {
+  color: #86efac;
+}
+
+body.dark-mode .dashboard-cards-capex .dashboard-card-no-limite {
+  border-color: #1d4ed8;
+  background: #1e3a8a;
+}
+
+body.dark-mode .dashboard-cards-capex .dashboard-card-no-limite .dashboard-card-value {
+  color: #93c5fd;
+}
+
+body.dark-mode .dashboard-tabela-capex-wrap {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .dashboard-tabela-capex th,
+body.dark-mode .dashboard-tabela-capex td {
+  border-bottom-color: #334155;
+  color: #e2e8f0;
+}
+
+body.dark-mode .dashboard-tabela-capex th {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+body.dark-mode .dashboard-tabela-capex tbody tr:hover {
+  background: #334155;
+}
+
+body.dark-mode .dashboard-tabela-capex-row-clicavel:hover {
+  background: #1e3a8a !important;
+}
+
+body.dark-mode .dashboard-badge-acima {
+  background: #450a0a;
+  color: #fca5a5;
+}
+
+body.dark-mode .dashboard-badge-abaixo {
+  background: #052e16;
+  color: #86efac;
+}
+
+body.dark-mode .dashboard-badge-no-limite {
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+
+body.dark-mode .dashboard-badge-default {
+  background: #334155;
+  color: #94a3b8;
+}
+
+body.dark-mode .dashboard-modal {
+  background: #1e293b;
+  border: 1px solid #334155;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .dashboard-modal-header {
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .dashboard-modal-header h2 {
+  color: #f1f5f9;
+}
+
+body.dark-mode .dashboard-modal-fechar {
+  background: #334155;
+  color: #94a3b8;
+}
+
+body.dark-mode .dashboard-modal-fechar:hover {
+  background: #475569;
+  color: #f1f5f9;
+}
+
+body.dark-mode .dashboard-modal-body {
+  background: #1e293b;
+}
+
+body.dark-mode .dashboard-modal-body .dashboard-tabela-capex th,
+body.dark-mode .dashboard-modal-body .dashboard-tabela-capex td {
+  border-bottom-color: #334155;
+  color: #e2e8f0;
+}
+
+body.dark-mode .dashboard-modal-body .dashboard-tabela-capex th {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+body.dark-mode .dashboard-secao-titulo,
+body.dark-mode .dashboard-grafico-titulo {
+  color: #e2e8f0;
+  border-bottom-color: #334155;
+}
+
+body.dark-mode .dashboard-grafico-box {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .dashboard .recharts-legend-item-text {
+  color: #94a3b8;
+}
+
+body.dark-mode .dashboard .recharts-cartesian-axis-tick-value {
+  fill: #94a3b8;
+}
+
+/* Grades e linhas dos eixos dos gráficos (Recharts) */
+body.dark-mode .dashboard .recharts-cartesian-grid line {
+  stroke: #334155;
+}
+
+body.dark-mode .dashboard .recharts-cartesian-axis-line,
+body.dark-mode .dashboard .recharts-xAxis line,
+body.dark-mode .dashboard .recharts-yAxis line {
+  stroke: #475569;
+}
+
+body.dark-mode .dashboard .recharts-treemap path {
+  stroke: #334155;
+}
+
+/* ---------- Empresas ---------- */
+body.dark-mode .empresas-list-page .table-wrap {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .empresas-list-page .table-empresas th,
+body.dark-mode .empresas-list-page .table-empresas td {
+  border-bottom-color: #334155;
+  color: #e2e8f0;
+}
+
+body.dark-mode .empresas-list-page .table-empresas th {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+body.dark-mode .empresas-list-page .table-empresas tbody tr:hover {
+  background: #334155;
+}
+
+body.dark-mode .empresas-list-page .table-empresas .th-acoes,
+body.dark-mode .empresas-list-page .table-empresas .td-acoes {
+  background: #1e293b;
+  box-shadow: -6px 0 10px -4px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .empresas-list-page .table-empresas th.th-acoes {
+  background: #334155;
+}
+
+body.dark-mode .empresas-list-page .table-empresas tbody tr:hover .td-acoes {
+  background: #334155;
+}
+
+body.dark-mode .empresas-list-page .table-empresas tbody tr td[colSpan] {
+  color: #94a3b8;
+}
+
+/* ---------- Permissões ---------- */
+body.dark-mode .permissoes-card {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .permissoes-card-title {
+  color: #e2e8f0;
+  border-bottom-color: #3b82f6;
+}
+
+body.dark-mode .permissoes-card-desc {
+  color: #94a3b8;
+}
+
+body.dark-mode .permissoes-card .table-wrap {
+  background: #0f172a;
+  border: 1px solid #334155;
+}
+
+body.dark-mode .permissoes-card .table-permissoes th,
+body.dark-mode .permissoes-card .table-permissoes td {
+  border-bottom-color: #334155;
+  color: #e2e8f0;
+}
+
+body.dark-mode .permissoes-card .table-permissoes th {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+body.dark-mode .permissoes-entidade {
+  color: #e2e8f0;
+}
+
+/* Erro e sucesso (visíveis em qualquer tema) */
+body.dark-mode .erro-msg,
+body.dark-mode .importar-erros {
+  color: #fca5a5;
+}
+
+body.dark-mode .sucesso-msg {
+  color: #86efac;
 }

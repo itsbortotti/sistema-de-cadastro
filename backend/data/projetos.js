@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const FILE = path.join(__dirname, 'projetos.json');
-const CAMPOS = ['nome', 'descricao', 'empresaId', 'dataInicio', 'dataFim', 'status', 'observacoes'];
+const CAMPOS = ['nome', 'descricao', 'empresaId', 'dataInicio', 'dataFim', 'status', 'observacoes', 'produtoSoftwareIds'];
 
 function defaults() {
   return {
@@ -13,6 +13,7 @@ function defaults() {
     dataFim: null,
     status: '',
     observacoes: '',
+    produtoSoftwareIds: [],
   };
 }
 
@@ -29,6 +30,11 @@ function normalizar(item) {
   else d.dataFim = null;
   if (item.status !== undefined && item.status !== null) d.status = String(item.status).trim();
   if (item.observacoes !== undefined && item.observacoes !== null) d.observacoes = String(item.observacoes).trim();
+  if (Array.isArray(item.produtoSoftwareIds)) {
+    d.produtoSoftwareIds = item.produtoSoftwareIds.map((x) => String(x).trim()).filter(Boolean);
+  } else {
+    d.produtoSoftwareIds = [];
+  }
   return d;
 }
 
