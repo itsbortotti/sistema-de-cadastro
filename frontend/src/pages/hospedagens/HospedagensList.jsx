@@ -2,8 +2,17 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { hospedagensApi } from '../../api/client';
 import AcoesListagem from '../../components/AcoesListagem';
+import ConfigColunasModal from '../../components/ConfigColunasModal';
+import { useListColumns } from '../../hooks/useListColumns';
 import '../usuarios/Usuarios.css';
 import '../CadastroListLayout.css';
+
+const COLUNAS_HOSPEDAGENS = [
+  { id: 'nome', label: 'Nome' },
+  { id: 'tipo', label: 'Tipo' },
+  { id: 'provedor', label: 'Provedor' },
+  { id: 'descricao', label: 'Descrição' },
+];
 
 function v(val) {
   return val != null && String(val).trim() !== '' ? String(val).trim() : '—';
@@ -19,6 +28,8 @@ export default function HospedagensList() {
   const [erro, setErro] = useState('');
   const [excluindo, setExcluindo] = useState(null);
   const [busca, setBusca] = useState('');
+  const { visibleIds, setVisibleIds, allColumns } = useListColumns('hospedagens', COLUNAS_HOSPEDAGENS);
+  const [configColunasAberto, setConfigColunasAberto] = useState(false);
 
   const carregar = () => {
     setCarregando(true);
@@ -57,6 +68,7 @@ export default function HospedagensList() {
             onChange={(e) => setBusca(e.target.value)}
             aria-label="Buscar"
           />
+          <button type="button" className="btn btn-secondary btn-config-colunas" onClick={() => setConfigColunasAberto(true)} title="Escolher e ordenar colunas">⚙ Colunas</button>
           <Link to="/hospedagens/novo" className="btn btn-primary">Nova hospedagem</Link>
         </div>
       </div>
@@ -69,23 +81,25 @@ export default function HospedagensList() {
         <table className="table table-cadastro">
           <thead>
             <tr>
-              <th>Nome</th>
-              <th>Tipo</th>
-              <th>Provedor</th>
-              <th>Descrição</th>
+              {visibleIds.map((id) => (
+                <th key={id}>{COLUNAS_HOSPEDAGENS.find((c) => c.id === id)?.label}</th>
+              ))}
               <th className="th-acoes">Ações</th>
             </tr>
           </thead>
           <tbody>
             {listaFiltrada.length === 0 ? (
-              <tr><td colSpan={5}>{lista.length === 0 ? 'Nenhum cadastrado.' : 'Nenhum resultado para a busca.'}</td></tr>
+              <tr><td colSpan={visibleIds.length + 1}>{lista.length === 0 ? 'Nenhum cadastrado.' : 'Nenhum resultado para a busca.'}</td></tr>
             ) : (
               listaFiltrada.map((item) => (
                 <tr key={item.id}>
-                  <td className="td-texto" title={item.nome}>{v(item.nome)}</td>
-                  <td>{v(item.tipo)}</td>
-                  <td className="td-texto" title={item.provedor}>{v(item.provedor)}</td>
-                  <td className="td-texto" title={item.descricao}>{v(item.descricao)}</td>
+                  {visibleIds.map((id) => {
+                    if (id === 'nome') return <td key={id} className="td-texto" title={item.nome}>{v(item.nome)}</td>;
+                    if (id === 'tipo') return <td key={id}>{v(item.tipo)}</td>;
+                    if (id === 'provedor') return <td key={id} className="td-texto" title={item.provedor}>{v(item.provedor)}</td>;
+                    if (id === 'descricao') return <td key={id} className="td-texto" title={item.descricao}>{v(item.descricao)}</td>;
+                    return null;
+                  })}
                   <td className="td-acoes">
                     <AcoesListagem basePath="/hospedagens" id={item.id} onExcluir={() => handleExcluir(item.id, item.nome)} excluindo={excluindo === item.id} />
                   </td>
@@ -95,6 +109,7 @@ export default function HospedagensList() {
           </tbody>
         </table>
       </div>
+      <ConfigColunasModal open={configColunasAberto} onClose={() => setConfigColunasAberto(false)} allColumns={allColumns} visibleIds={visibleIds} onSave={setVisibleIds} />
     </div>
   );
 }

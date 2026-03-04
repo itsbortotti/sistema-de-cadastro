@@ -2,10 +2,22 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { fornecedoresApi } from '../../api/client';
 import AcoesListagem from '../../components/AcoesListagem';
+import ConfigColunasModal from '../../components/ConfigColunasModal';
+import { useListColumns } from '../../hooks/useListColumns';
 import '../usuarios/Usuarios.css';
 import '../CadastroListLayout.css';
 
 const v = (x) => (x != null && x !== '' ? String(x) : '—');
+
+const COLUNAS_FORNECEDORES = [
+  { id: 'nome', label: 'Nome / Razão Social' },
+  { id: 'nomeFantasia', label: 'Nome Fantasia' },
+  { id: 'cnpj', label: 'CNPJ' },
+  { id: 'email', label: 'E-mail' },
+  { id: 'telefone', label: 'Telefone' },
+  { id: 'cidade', label: 'Cidade' },
+  { id: 'uf', label: 'UF' },
+];
 
 function normalizarTexto(str) {
   return String(str ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -17,6 +29,8 @@ export default function FornecedoresList() {
   const [erro, setErro] = useState('');
   const [excluindo, setExcluindo] = useState(null);
   const [busca, setBusca] = useState('');
+  const { visibleIds, setVisibleIds, allColumns } = useListColumns('fornecedores', COLUNAS_FORNECEDORES);
+  const [configColunasAberto, setConfigColunasAberto] = useState(false);
 
   const carregar = () => {
     setCarregando(true);
@@ -55,6 +69,7 @@ export default function FornecedoresList() {
             onChange={(e) => setBusca(e.target.value)}
             aria-label="Buscar"
           />
+          <button type="button" className="btn btn-secondary btn-config-colunas" onClick={() => setConfigColunasAberto(true)} title="Escolher e ordenar colunas">⚙ Colunas</button>
           <Link to="/fornecedores/novo" className="btn btn-primary">Novo fornecedor</Link>
         </div>
       </div>
@@ -67,31 +82,30 @@ export default function FornecedoresList() {
         <table className="table table-cadastro">
           <thead>
             <tr>
-              <th>Nome / Razão Social</th>
-              <th>Nome Fantasia</th>
-              <th>CNPJ</th>
-              <th>E-mail</th>
-              <th>Telefone</th>
-              <th>Cidade</th>
-              <th>UF</th>
+              {visibleIds.map((id) => (
+                <th key={id}>{COLUNAS_FORNECEDORES.find((c) => c.id === id)?.label}</th>
+              ))}
               <th className="th-acoes">Ações</th>
             </tr>
           </thead>
           <tbody>
             {listaFiltrada.length === 0 ? (
               <tr>
-                <td colSpan={8}>{lista.length === 0 ? 'Nenhum fornecedor cadastrado.' : 'Nenhum resultado para a busca.'}</td>
+                <td colSpan={visibleIds.length + 1}>{lista.length === 0 ? 'Nenhum fornecedor cadastrado.' : 'Nenhum resultado para a busca.'}</td>
               </tr>
             ) : (
               listaFiltrada.map((f) => (
                 <tr key={f.id}>
-                  <td className="td-texto" title={f.nome}>{v(f.nome)}</td>
-                  <td className="td-texto" title={f.nomeFantasia}>{v(f.nomeFantasia)}</td>
-                  <td>{v(f.cnpj)}</td>
-                  <td className="td-texto" title={f.email}>{v(f.email)}</td>
-                  <td>{v(f.telefone)}</td>
-                  <td>{v(f.cidade)}</td>
-                  <td>{v(f.estado)}</td>
+                  {visibleIds.map((id) => {
+                    if (id === 'nome') return <td key={id} className="td-texto" title={f.nome}>{v(f.nome)}</td>;
+                    if (id === 'nomeFantasia') return <td key={id} className="td-texto" title={f.nomeFantasia}>{v(f.nomeFantasia)}</td>;
+                    if (id === 'cnpj') return <td key={id}>{v(f.cnpj)}</td>;
+                    if (id === 'email') return <td key={id} className="td-texto" title={f.email}>{v(f.email)}</td>;
+                    if (id === 'telefone') return <td key={id}>{v(f.telefone)}</td>;
+                    if (id === 'cidade') return <td key={id}>{v(f.cidade)}</td>;
+                    if (id === 'uf') return <td key={id}>{v(f.estado)}</td>;
+                    return null;
+                  })}
                   <td className="td-acoes">
                     <AcoesListagem basePath="/fornecedores" id={f.id} onExcluir={() => handleExcluir(f.id, f.nome)} excluindo={excluindo === f.id} />
                   </td>
@@ -101,6 +115,7 @@ export default function FornecedoresList() {
           </tbody>
         </table>
       </div>
+      <ConfigColunasModal open={configColunasAberto} onClose={() => setConfigColunasAberto(false)} allColumns={allColumns} visibleIds={visibleIds} onSave={setVisibleIds} />
     </div>
   );
 }

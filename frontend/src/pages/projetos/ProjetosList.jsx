@@ -2,8 +2,20 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { projetosApi } from '../../api/client';
 import AcoesListagem from '../../components/AcoesListagem';
+import ConfigColunasModal from '../../components/ConfigColunasModal';
+import { useListColumns } from '../../hooks/useListColumns';
 import '../usuarios/Usuarios.css';
 import '../CadastroListLayout.css';
+
+const COLUNAS_PROJETOS = [
+  { id: 'nome', label: 'Nome' },
+  { id: 'sistemas', label: 'Sistemas' },
+  { id: 'empresa', label: 'Empresa' },
+  { id: 'status', label: 'Status' },
+  { id: 'dataInicio', label: 'Data início' },
+  { id: 'dataFim', label: 'Data fim' },
+  { id: 'descricao', label: 'Descrição' },
+];
 
 function v(val) {
   return val != null && String(val).trim() !== '' ? String(val).trim() : '—';
@@ -30,6 +42,8 @@ export default function ProjetosList() {
   const [erro, setErro] = useState('');
   const [excluindo, setExcluindo] = useState(null);
   const [busca, setBusca] = useState('');
+  const { visibleIds, setVisibleIds, allColumns } = useListColumns('projetos', COLUNAS_PROJETOS);
+  const [configColunasAberto, setConfigColunasAberto] = useState(false);
 
   const carregar = () => {
     setCarregando(true);
@@ -69,6 +83,7 @@ export default function ProjetosList() {
             onChange={(e) => setBusca(e.target.value)}
             aria-label="Buscar"
           />
+          <button type="button" className="btn btn-secondary btn-config-colunas" onClick={() => setConfigColunasAberto(true)} title="Escolher e ordenar colunas">⚙ Colunas</button>
           <Link to="/projetos/novo" className="btn btn-primary">Novo projeto</Link>
         </div>
       </div>
@@ -81,29 +96,28 @@ export default function ProjetosList() {
         <table className="table table-cadastro">
           <thead>
             <tr>
-              <th>Nome</th>
-              <th>Sistemas</th>
-              <th>Empresa</th>
-              <th>Status</th>
-              <th>Data início</th>
-              <th>Data fim</th>
-              <th>Descrição</th>
+              {visibleIds.map((id) => (
+                <th key={id}>{COLUNAS_PROJETOS.find((c) => c.id === id)?.label}</th>
+              ))}
               <th className="th-acoes">Ações</th>
             </tr>
           </thead>
           <tbody>
             {listaFiltrada.length === 0 ? (
-              <tr><td colSpan={8}>{lista.length === 0 ? 'Nenhum projeto cadastrado.' : 'Nenhum resultado para a busca.'}</td></tr>
+              <tr><td colSpan={visibleIds.length + 1}>{lista.length === 0 ? 'Nenhum projeto cadastrado.' : 'Nenhum resultado para a busca.'}</td></tr>
             ) : (
               listaFiltrada.map((item) => (
                 <tr key={item.id}>
-                  <td className="td-texto" title={item.nome}>{v(item.nome)}</td>
-                  <td className="td-texto" title={(item.sistemaNomes || []).join(', ')}>{(item.sistemaNomes && item.sistemaNomes.length > 0) ? item.sistemaNomes.join(', ') : '—'}</td>
-                  <td>{v(item.empresaNome)}</td>
-                  <td>{v(item.status)}</td>
-                  <td>{formatarData(item.dataInicio)}</td>
-                  <td>{formatarData(item.dataFim)}</td>
-                  <td className="td-texto" title={item.descricao}>{v(item.descricao)}</td>
+                  {visibleIds.map((id) => {
+                    if (id === 'nome') return <td key={id} className="td-texto" title={item.nome}>{v(item.nome)}</td>;
+                    if (id === 'sistemas') return <td key={id} className="td-texto" title={(item.sistemaNomes || []).join(', ')}>{(item.sistemaNomes && item.sistemaNomes.length > 0) ? item.sistemaNomes.join(', ') : '—'}</td>;
+                    if (id === 'empresa') return <td key={id}>{v(item.empresaNome)}</td>;
+                    if (id === 'status') return <td key={id}>{v(item.status)}</td>;
+                    if (id === 'dataInicio') return <td key={id}>{formatarData(item.dataInicio)}</td>;
+                    if (id === 'dataFim') return <td key={id}>{formatarData(item.dataFim)}</td>;
+                    if (id === 'descricao') return <td key={id} className="td-texto" title={item.descricao}>{v(item.descricao)}</td>;
+                    return null;
+                  })}
                   <td className="td-acoes">
                     <AcoesListagem basePath="/projetos" id={item.id} onExcluir={() => handleExcluir(item.id, item.nome)} excluindo={excluindo === item.id} />
                   </td>
@@ -113,6 +127,7 @@ export default function ProjetosList() {
           </tbody>
         </table>
       </div>
+      <ConfigColunasModal open={configColunasAberto} onClose={() => setConfigColunasAberto(false)} allColumns={allColumns} visibleIds={visibleIds} onSave={setVisibleIds} />
     </div>
   );
 }

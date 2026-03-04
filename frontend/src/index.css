@@ -471,6 +471,36 @@ body.dark-mode .modal-box input {
   color: #f1f5f9;
 }
 
+body.dark-mode .config-colunas-modal .config-colunas-titulo,
+body.dark-mode .config-colunas-modal .config-colunas-label {
+  color: #e2e8f0;
+}
+
+body.dark-mode .config-colunas-modal .config-colunas-desc,
+body.dark-mode .config-colunas-modal .config-colunas-disponiveis-titulo,
+body.dark-mode .config-colunas-modal .config-colunas-todas {
+  color: #94a3b8;
+}
+
+body.dark-mode .config-colunas-modal .config-colunas-lista,
+body.dark-mode .config-colunas-modal .config-colunas-item {
+  border-color: #334155;
+  background: #1e293b;
+}
+
+body.dark-mode .config-colunas-modal .config-colunas-chip {
+  border-color: #02b0c6;
+  color: #87e6fb;
+}
+
+body.dark-mode .config-colunas-modal .config-colunas-chip:hover:not(:disabled) {
+  background: rgba(2, 176, 198, 0.15);
+}
+
+body.dark-mode .config-colunas-modal .config-colunas-acoes {
+  border-top-color: #334155;
+}
+
 /* Formulário Sistema (ProdutoSoftware) */
 body.dark-mode .form-produto,
 body.dark-mode .form-produto-page .form-card {

@@ -2,8 +2,17 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { areasApi } from '../../api/client';
 import AcoesListagem from '../../components/AcoesListagem';
+import ConfigColunasModal from '../../components/ConfigColunasModal';
+import { useListColumns } from '../../hooks/useListColumns';
 import '../usuarios/Usuarios.css';
 import '../CadastroListLayout.css';
+
+const COLUNAS_AREAS = [
+  { id: 'nome', label: 'Nome' },
+  { id: 'codigo', label: 'Código' },
+  { id: 'responsavel', label: 'Responsável' },
+  { id: 'descricao', label: 'Descrição' },
+];
 
 function v(val) {
   return val != null && String(val).trim() !== '' ? String(val).trim() : '—';
@@ -19,6 +28,8 @@ export default function AreasList() {
   const [erro, setErro] = useState('');
   const [excluindo, setExcluindo] = useState(null);
   const [busca, setBusca] = useState('');
+  const { visibleIds, setVisibleIds, allColumns } = useListColumns('areas', COLUNAS_AREAS);
+  const [configColunasAberto, setConfigColunasAberto] = useState(false);
 
   const carregar = () => {
     setCarregando(true);
@@ -57,6 +68,7 @@ export default function AreasList() {
             onChange={(e) => setBusca(e.target.value)}
             aria-label="Buscar"
           />
+          <button type="button" className="btn btn-secondary btn-config-colunas" onClick={() => setConfigColunasAberto(true)} title="Escolher e ordenar colunas">⚙ Colunas</button>
           <Link to="/areas/novo" className="btn btn-primary">Nova área</Link>
         </div>
       </div>
@@ -69,23 +81,25 @@ export default function AreasList() {
         <table className="table table-cadastro">
           <thead>
             <tr>
-              <th>Nome</th>
-              <th>Código</th>
-              <th>Responsável</th>
-              <th>Descrição</th>
+              {visibleIds.map((id) => (
+                <th key={id}>{COLUNAS_AREAS.find((c) => c.id === id)?.label}</th>
+              ))}
               <th className="th-acoes">Ações</th>
             </tr>
           </thead>
           <tbody>
             {listaFiltrada.length === 0 ? (
-              <tr><td colSpan={5}>{lista.length === 0 ? 'Nenhum cadastrado.' : 'Nenhum resultado para a busca.'}</td></tr>
+              <tr><td colSpan={visibleIds.length + 1}>{lista.length === 0 ? 'Nenhum cadastrado.' : 'Nenhum resultado para a busca.'}</td></tr>
             ) : (
               listaFiltrada.map((item) => (
                 <tr key={item.id}>
-                  <td className="td-texto" title={item.nome}>{v(item.nome)}</td>
-                  <td>{v(item.codigo)}</td>
-                  <td className="td-texto" title={item.responsavel}>{v(item.responsavel)}</td>
-                  <td className="td-texto" title={item.descricao}>{v(item.descricao)}</td>
+                  {visibleIds.map((id) => {
+                    if (id === 'nome') return <td key={id} className="td-texto" title={item.nome}>{v(item.nome)}</td>;
+                    if (id === 'codigo') return <td key={id}>{v(item.codigo)}</td>;
+                    if (id === 'responsavel') return <td key={id} className="td-texto" title={item.responsavel}>{v(item.responsavel)}</td>;
+                    if (id === 'descricao') return <td key={id} className="td-texto" title={item.descricao}>{v(item.descricao)}</td>;
+                    return null;
+                  })}
                   <td className="td-acoes">
                     <AcoesListagem basePath="/areas" id={item.id} onExcluir={() => handleExcluir(item.id, item.nome)} excluindo={excluindo === item.id} />
                   </td>
@@ -95,6 +109,7 @@ export default function AreasList() {
           </tbody>
         </table>
       </div>
+      <ConfigColunasModal open={configColunasAberto} onClose={() => setConfigColunasAberto(false)} allColumns={allColumns} visibleIds={visibleIds} onSave={setVisibleIds} />
     </div>
   );
 }

@@ -10,8 +10,32 @@ import {
   empresasApi,
 } from '../../api/client';
 import AcoesListagem from '../../components/AcoesListagem';
+import ConfigColunasModal from '../../components/ConfigColunasModal';
+import { useListColumns } from '../../hooks/useListColumns';
 import '../usuarios/Usuarios.css';
+import '../CadastroListLayout.css';
 import './ProdutosSoftwareList.css';
+
+const COLUNAS_SISTEMAS = [
+  { id: 'nomeSistema', label: 'Nome do Sistema' },
+  { id: 'empresaNome', label: 'Empresa' },
+  { id: 'fornecedorNome', label: 'Fornecedor / Desenvolvedor' },
+  { id: 'finalidadePrincipal', label: 'Finalidade Principal' },
+  { id: 'breveDescritivo', label: 'Breve Descritivo' },
+  { id: 'marcasAtendidas', label: 'Marcas Atendidas' },
+  { id: 'usuariosQtd', label: 'Usuários (qtd aproximada)' },
+  { id: 'areaNome', label: 'Área' },
+  { id: 'responsavelTiNome', label: 'Responsável TI' },
+  { id: 'usuarioNegocioNome', label: 'Usuário Negócio' },
+  { id: 'hospedagemNome', label: 'Hospedagem' },
+  { id: 'onPremisesSites', label: 'Se on Premises, separar por SITE' },
+  { id: 'formaAcessoNome', label: 'Forma de Acesso ao Sistema' },
+  { id: 'integracoes', label: 'Integrações' },
+  { id: 'controleAcessoPorUsuario', label: 'Controle de Acesso por Usuário?' },
+  { id: 'autenticacaoAdSso', label: 'Autenticação por AD / SSO?' },
+  { id: 'grauSatisfacao', label: 'Grau de Satisfação' },
+  { id: 'problemasEnfrentados', label: 'Problemas Enfrentados' },
+];
 
 // Parse CSV com suporte a campos entre aspas
 function parseCSV(texto) {
@@ -139,6 +163,8 @@ export default function ProdutosSoftwareList() {
   const [listasAux, setListasAux] = useState({ fornecedores: [], areas: [], empresas: [], usuarios: [], hospedagens: [], formasAcesso: [] });
   const [busca, setBusca] = useState('');
   const inputFileRef = useRef(null);
+  const { visibleIds, setVisibleIds, allColumns } = useListColumns('sistemas', COLUNAS_SISTEMAS);
+  const [configColunasAberto, setConfigColunasAberto] = useState(false);
 
   const carregar = () => {
     setCarregando(true);
@@ -309,7 +335,7 @@ export default function ProdutosSoftwareList() {
       })
     : lista;
 
-  if (carregando) return <p>Carregando...</p>;
+  if (carregando) return <p className="page-loading">Carregando...</p>;
   if (erro) return <p className="erro-msg">{erro}</p>;
 
   return (
@@ -323,74 +349,65 @@ export default function ProdutosSoftwareList() {
             placeholder="Buscar por nome, empresa, fornecedor, área..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            aria-label="Buscar projetos"
+            aria-label="Buscar"
           />
+          <button type="button" className="btn btn-secondary btn-config-colunas" onClick={() => setConfigColunasAberto(true)} title="Escolher e ordenar colunas">
+            ⚙ Colunas
+          </button>
           <button type="button" className="btn btn-outline" onClick={() => setModalImportarAberto(true)}>
             Importar CSV
           </button>
-          <Link to="/sistemas/novo" className="btn btn-primary">Novo Sistema</Link>
+          <Link to="/sistemas/novo" className="btn btn-primary">Novo sistema</Link>
         </div>
       </div>
       {termoBusca && (
         <p className="busca-resultado">
-          {listaFiltrada.length} de {lista.length} sistema(s)
+          {listaFiltrada.length} de {lista.length} registro(s)
         </p>
       )}
-      <div className="table-wrap table-wrap-scroll">
-        <table className="table table-produtos-software">
+      <div className="table-wrap">
+        <table className="table table-cadastro table-produtos-software">
           <thead>
             <tr>
-              <th>Nome do Sistema</th>
-              <th>Empresa</th>
-              <th>Fornecedor / Desenvolvedor</th>
-              <th>Finalidade Principal</th>
-              <th>Breve Descritivo</th>
-              <th>Marcas Atendidas</th>
-              <th>Usuários (qtd aproximada)</th>
-              <th>Área</th>
-              <th>Responsável TI</th>
-              <th>Usuário Negócio</th>
-              <th>Hospedagem</th>
-              <th>Se on Premises, separar por SITE</th>
-              <th>Forma de Acesso ao Sistema</th>
-              <th>Integrações</th>
-              <th>Controle de Acesso por Usuário?</th>
-              <th>Autenticação por AD / SSO?</th>
-              <th>Grau de Satisfação</th>
-              <th>Problemas Enfrentados</th>
+              {visibleIds.map((id) => (
+                <th key={id}>{COLUNAS_SISTEMAS.find((c) => c.id === id)?.label}</th>
+              ))}
               <th className="th-acoes">Ações</th>
             </tr>
           </thead>
           <tbody>
             {lista.length === 0 ? (
               <tr>
-                <td colSpan={19}>Nenhum sistema cadastrado.</td>
+                <td colSpan={visibleIds.length + 1}>Nenhum sistema cadastrado.</td>
               </tr>
             ) : listaFiltrada.length === 0 ? (
               <tr>
-                <td colSpan={19}>Nenhum resultado para a busca.</td>
+                <td colSpan={visibleIds.length + 1}>Nenhum resultado para a busca.</td>
               </tr>
             ) : (
               listaFiltrada.map((p) => (
                 <tr key={p.id}>
-                  <td>{v(p.nomeSistema)}</td>
-                  <td>{v(p.empresaNome)}</td>
-                  <td>{v(p.fornecedorNome)}</td>
-                  <td>{v(p.finalidadePrincipal)}</td>
-                  <td className="td-texto" title={p.breveDescritivo}>{v(p.breveDescritivo)}</td>
-                  <td>{v(p.marcasAtendidas)}</td>
-                  <td className="td-numero">{p.usuariosQtdAproximada != null ? p.usuariosQtdAproximada : '—'}</td>
-                  <td>{v(p.areaNome)}</td>
-                  <td>{v(p.responsavelTiNome)}</td>
-                  <td>{v(p.usuarioNegocioNome)}</td>
-                  <td>{v(p.hospedagemNome)}</td>
-                  <td className="td-texto">{v(p.onPremisesSites)}</td>
-                  <td>{v(p.formaAcessoNome)}</td>
-                  <td className="td-texto" title={p.integracoes}>{v(p.integracoes)}</td>
-                  <td>{simNao(p.controleAcessoPorUsuario)}</td>
-                  <td>{simNao(p.autenticacaoAdSso)}</td>
-                  <td>{v(p.grauSatisfacao)}</td>
-                  <td className="td-texto" title={p.problemasEnfrentados}>{v(p.problemasEnfrentados)}</td>
+                  {visibleIds.map((id) => {
+                    if (id === 'nomeSistema') return <td key={id}>{v(p.nomeSistema)}</td>;
+                    if (id === 'empresaNome') return <td key={id}>{v(p.empresaNome)}</td>;
+                    if (id === 'fornecedorNome') return <td key={id}>{v(p.fornecedorNome)}</td>;
+                    if (id === 'finalidadePrincipal') return <td key={id}>{v(p.finalidadePrincipal)}</td>;
+                    if (id === 'breveDescritivo') return <td key={id} className="td-texto" title={p.breveDescritivo}>{v(p.breveDescritivo)}</td>;
+                    if (id === 'marcasAtendidas') return <td key={id}>{v(p.marcasAtendidas)}</td>;
+                    if (id === 'usuariosQtd') return <td key={id} className="td-numero">{p.usuariosQtdAproximada != null ? p.usuariosQtdAproximada : '—'}</td>;
+                    if (id === 'areaNome') return <td key={id}>{v(p.areaNome)}</td>;
+                    if (id === 'responsavelTiNome') return <td key={id}>{v(p.responsavelTiNome)}</td>;
+                    if (id === 'usuarioNegocioNome') return <td key={id}>{v(p.usuarioNegocioNome)}</td>;
+                    if (id === 'hospedagemNome') return <td key={id}>{v(p.hospedagemNome)}</td>;
+                    if (id === 'onPremisesSites') return <td key={id} className="td-texto">{v(p.onPremisesSites)}</td>;
+                    if (id === 'formaAcessoNome') return <td key={id}>{v(p.formaAcessoNome)}</td>;
+                    if (id === 'integracoes') return <td key={id} className="td-texto" title={p.integracoes}>{v(p.integracoes)}</td>;
+                    if (id === 'controleAcessoPorUsuario') return <td key={id}>{simNao(p.controleAcessoPorUsuario)}</td>;
+                    if (id === 'autenticacaoAdSso') return <td key={id}>{simNao(p.autenticacaoAdSso)}</td>;
+                    if (id === 'grauSatisfacao') return <td key={id}>{v(p.grauSatisfacao)}</td>;
+                    if (id === 'problemasEnfrentados') return <td key={id} className="td-texto" title={p.problemasEnfrentados}>{v(p.problemasEnfrentados)}</td>;
+                    return null;
+                  })}
                   <td className="td-acoes">
                     <AcoesListagem basePath="/sistemas" id={p.id} onExcluir={() => handleExcluir(p.id, p.nomeSistema)} excluindo={excluindo === p.id} />
                   </td>
@@ -400,6 +417,7 @@ export default function ProdutosSoftwareList() {
           </tbody>
         </table>
       </div>
+      <ConfigColunasModal open={configColunasAberto} onClose={() => setConfigColunasAberto(false)} allColumns={allColumns} visibleIds={visibleIds} onSave={setVisibleIds} />
 
       <input
         ref={inputFileRef}

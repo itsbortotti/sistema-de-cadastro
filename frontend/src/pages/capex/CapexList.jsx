@@ -2,9 +2,21 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { capexApi } from '../../api/client';
 import AcoesListagem from '../../components/AcoesListagem';
+import ConfigColunasModal from '../../components/ConfigColunasModal';
+import { useListColumns } from '../../hooks/useListColumns';
 import '../usuarios/Usuarios.css';
 import '../CadastroListLayout.css';
 import './CapexList.css';
+
+const COLUNAS_CAPEX = [
+  { id: 'area', label: 'Área' },
+  { id: 'fornecedor', label: 'Fornecedor' },
+  { id: 'valor', label: 'Valor (R$)' },
+  { id: 'dataInicio', label: 'Data inicial' },
+  { id: 'dataFim', label: 'Data final' },
+  { id: 'associados', label: 'Projetos/Sistemas' },
+  { id: 'obs', label: 'OBS' },
+];
 
 function v(val) {
   return val != null && String(val).trim() !== '' ? String(val).trim() : '—';
@@ -44,6 +56,9 @@ export default function CapexList({ tipo = 'capex' }) {
   const [excluindo, setExcluindo] = useState(null);
   const [busca, setBusca] = useState('');
   const [abaAtiva, setAbaAtiva] = useState(ABA_SEM);
+  const storageKey = tipo === 'capex' ? 'capex' : 'opex';
+  const { visibleIds, setVisibleIds, allColumns } = useListColumns(storageKey, COLUNAS_CAPEX);
+  const [configColunasAberto, setConfigColunasAberto] = useState(false);
 
   const carregar = () => {
     setCarregando(true);
@@ -124,6 +139,7 @@ export default function CapexList({ tipo = 'capex' }) {
             onChange={(e) => setBusca(e.target.value)}
             aria-label="Buscar"
           />
+          <button type="button" className="btn btn-secondary btn-config-colunas" onClick={() => setConfigColunasAberto(true)} title="Escolher e ordenar colunas">⚙ Colunas</button>
           <Link to={`/${tipo}/novo`} className="btn btn-primary">Novo {labelTipo}</Link>
         </div>
       </div>
@@ -165,20 +181,18 @@ export default function CapexList({ tipo = 'capex' }) {
         <table className="table table-cadastro">
           <thead>
             <tr>
-              <th>Área</th>
-              <th>Fornecedor</th>
-              <th>Valor (R$)</th>
-              <th>Data inicial</th>
-              <th>Data final</th>
-              <th>{tipo === 'capex' ? 'Projetos' : 'Sistemas'}</th>
-              <th>OBS</th>
+              {visibleIds.map((id) => (
+                <th key={id}>
+                  {id === 'associados' ? (tipo === 'capex' ? 'Projetos' : 'Sistemas') : COLUNAS_CAPEX.find((c) => c.id === id)?.label}
+                </th>
+              ))}
               <th className="th-acoes">Ações</th>
             </tr>
           </thead>
           <tbody>
             {listaAtiva.length === 0 ? (
               <tr>
-                <td colSpan={8}>
+                <td colSpan={visibleIds.length + 1}>
                   {totalAbaAtiva === 0
                     ? (abaAtiva === ABA_SEM
                       ? `Nenhum ${labelTipo} sem valores lançados.`
@@ -191,13 +205,16 @@ export default function CapexList({ tipo = 'capex' }) {
             ) : (
               listaAtiva.map((item) => (
                 <tr key={item.id}>
-                  <td className="td-texto" title={item.areaNome}>{v(item.areaNome)}</td>
-                  <td className="td-texto" title={item.fornecedorNome}>{v(item.fornecedorNome)}</td>
-                  <td className="td-numero">{formatarMoeda(item.valor)}</td>
-                  <td>{formatarData(item.dataInicio)}</td>
-                  <td>{formatarData(item.dataFim)}</td>
-                  <td className="td-texto" title={(tipo === 'capex' ? (item.projetoNomes || []) : (item.produtoSoftwareNomes || [])).join(', ')}>{associadosTexto(item)}</td>
-                  <td className="td-texto td-obs" title={item.observacoes}>{item.observacoes ? (item.observacoes.length > 20 ? item.observacoes.slice(0, 20) + '…' : item.observacoes) : '—'}</td>
+                  {visibleIds.map((id) => {
+                    if (id === 'area') return <td key={id} className="td-texto" title={item.areaNome}>{v(item.areaNome)}</td>;
+                    if (id === 'fornecedor') return <td key={id} className="td-texto" title={item.fornecedorNome}>{v(item.fornecedorNome)}</td>;
+                    if (id === 'valor') return <td key={id} className="td-numero">{formatarMoeda(item.valor)}</td>;
+                    if (id === 'dataInicio') return <td key={id}>{formatarData(item.dataInicio)}</td>;
+                    if (id === 'dataFim') return <td key={id}>{formatarData(item.dataFim)}</td>;
+                    if (id === 'associados') return <td key={id} className="td-texto" title={(tipo === 'capex' ? (item.projetoNomes || []) : (item.produtoSoftwareNomes || [])).join(', ')}>{associadosTexto(item)}</td>;
+                    if (id === 'obs') return <td key={id} className="td-texto td-obs" title={item.observacoes}>{item.observacoes ? (item.observacoes.length > 20 ? item.observacoes.slice(0, 20) + '…' : item.observacoes) : '—'}</td>;
+                    return null;
+                  })}
                   <td className="td-acoes">
                     <AcoesListagem basePath={`/${tipo}`} id={item.id} onExcluir={() => handleExcluir(item.id, `${v(item.areaNome)} - ${formatarMoeda(item.valor)}`)} excluindo={excluindo === item.id} />
                   </td>
@@ -207,6 +224,7 @@ export default function CapexList({ tipo = 'capex' }) {
           </tbody>
         </table>
       </div>
+      <ConfigColunasModal open={configColunasAberto} onClose={() => setConfigColunasAberto(false)} allColumns={allColumns} visibleIds={visibleIds} onSave={setVisibleIds} />
     </div>
   );
 }
