@@ -5,7 +5,7 @@
 }
 
 .form-fornecedor .form-secao-titulo {
-  font-size: 0.95rem;
+  font-size: var(--ts-h3);
   font-weight: 700;
   color: var(--ts-azul);
   margin: 0 0 0.75rem 0;
@@ -24,7 +24,7 @@
   font-weight: 700;
   color: var(--ts-azul);
   margin-bottom: 0.25rem;
-  font-size: 0.9rem;
+  font-size: var(--ts-label);
 }
 
 .form-fornecedor .form-group input,
@@ -33,7 +33,7 @@
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--ts-cinza);
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: var(--ts-body);
 }
 
 .form-fornecedor .form-group input:focus,

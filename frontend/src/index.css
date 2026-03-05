@@ -15,10 +15,18 @@
   --ts-info: #02b0c6;
   --font-h1: 'Archivo Black', sans-serif;
   --font-body: 'Lato', sans-serif;
+  /* Tipografia (TSTypography – alinhado a novos-projetos) */
+  --ts-h1: 2rem;        /* 32px */
+  --ts-h2: 1.5rem;      /* 24px */
+  --ts-h3: 1.25rem;     /* 20px */
+  --ts-body: 1rem;      /* 16px */
+  --ts-caption: 0.8125rem;  /* 13px */
+  --ts-button: 0.9375rem;   /* 15px */
+  --ts-label: 0.875rem;     /* 14px */
   /* Tabelas: tamanho de célula e texto */
   --table-cell-padding: 0.625rem 1rem;
-  --table-cell-font-size: 0.9375rem;
-  --table-header-font-size: 0.8125rem;
+  --table-cell-font-size: var(--ts-body);
+  --table-header-font-size: var(--ts-caption);
   --table-line-height: 1.4;
 }
 
@@ -40,7 +48,7 @@ html, body {
 
 body {
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: var(--ts-body);
   background: var(--ts-cinza);
   color: var(--ts-azul);
   line-height: 1.5;
@@ -48,12 +56,21 @@ body {
 
 h1, .page-header h1, .cadastro-page h1 {
   font-family: var(--font-h1);
-  font-size: 1.75rem;
+  font-size: var(--ts-h1);
+  font-weight: 900;
   color: var(--ts-laranja);
 }
 
-h2, h3 {
+h2 {
   font-family: var(--font-body);
+  font-size: var(--ts-h2);
+  font-weight: 700;
+  color: var(--ts-azul);
+}
+
+h3 {
+  font-family: var(--font-body);
+  font-size: var(--ts-h3);
   font-weight: 700;
   color: var(--ts-azul);
 }
@@ -119,8 +136,8 @@ input, select, textarea {
   font-weight: 700;
   color: var(--ts-azul);
   background: var(--ts-cinza);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  text-transform: none;
+  letter-spacing: 0.02em;
   white-space: nowrap;
 }
 
@@ -173,7 +190,7 @@ input, select, textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.125rem;
+  font-size: var(--ts-body);
   color: var(--ts-cinza-escuro);
   background: var(--ts-cinza);
 }

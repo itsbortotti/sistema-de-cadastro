@@ -62,7 +62,7 @@
 }
 
 .sidebar-header h2 {
-  font-size: 1.125rem;
+  font-size: var(--ts-h3, 1.25rem);
   font-weight: 700;
   flex: 1;
   min-width: 0;
@@ -119,10 +119,10 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1.5rem;
-  font-size: 0.75rem;
+  font-size: var(--ts-caption, 0.8125rem);
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  text-transform: none;
+  letter-spacing: 0.02em;
   color: #87e6fb;
 }
 
@@ -183,7 +183,7 @@
 }
 
 .nav-link-icon {
-  font-size: 1.25rem;
+  font-size: var(--ts-h3, 1.25rem);
   line-height: 1;
   opacity: 0.9;
 }
@@ -232,7 +232,7 @@
 
 .user-name {
   display: block;
-  font-size: 0.875rem;
+  font-size: var(--ts-label, 0.875rem);
   margin-bottom: 0.5rem;
   color: #87e6fb;
 }
@@ -244,7 +244,7 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: #ffffff;
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: var(--ts-label, 0.875rem);
   font-weight: 700;
 }
 
@@ -272,6 +272,7 @@
   min-height: 0;
   overflow: auto;
   width: 100%;
+  font-size: var(--ts-body, 1rem);
   scrollbar-width: none;
   -ms-overflow-style: none;
 }

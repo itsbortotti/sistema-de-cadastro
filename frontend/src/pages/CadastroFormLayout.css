@@ -54,7 +54,7 @@
 }
 
 .form-cadastro .form-secao-titulo {
-  font-size: 1rem;
+  font-size: var(--ts-h3);
   font-weight: 700;
   color: var(--ts-azul);
   margin: 0 0 1rem 0;
@@ -74,7 +74,7 @@
   font-weight: 700;
   color: var(--ts-azul);
   margin-bottom: 0.35rem;
-  font-size: 0.9rem;
+  font-size: var(--ts-label);
 }
 
 .form-cadastro .form-group input,
@@ -84,7 +84,7 @@
   padding: 0.6rem 1rem;
   border: 1px solid var(--ts-cinza);
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: var(--ts-body);
   background: var(--ts-branco);
 }
 
@@ -148,7 +148,7 @@
 }
 
 .form-cadastro .form-hint {
-  font-size: 0.85rem;
+  font-size: var(--ts-caption);
   color: #64748b;
   margin-bottom: 0.5rem;
 }
@@ -192,7 +192,7 @@
 
 .form-cadastro .produtos-selecionados-label {
   display: block;
-  font-size: 0.8rem;
+  font-size: var(--ts-caption);
   font-weight: 600;
   color: #475569;
   margin-bottom: 0.5rem;
@@ -212,7 +212,7 @@
   background: #0f172a;
   color: #fff;
   border-radius: 6px;
-  font-size: 0.8rem;
+  font-size: var(--ts-caption);
   font-weight: 500;
 }
 
@@ -227,7 +227,7 @@
   background: rgba(255, 255, 255, 0.25);
   color: #fff;
   border-radius: 4px;
-  font-size: 1.1rem;
+  font-size: var(--ts-h3);
   line-height: 1;
   cursor: pointer;
   transition: background 0.15s;
@@ -251,7 +251,7 @@
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--ts-cinza);
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: var(--ts-body);
 }
 
 .form-cadastro .produtos-busca:focus {
@@ -327,11 +327,11 @@
 .form-cadastro .produto-card-nome {
   font-weight: 700;
   color: var(--ts-azul);
-  font-size: 0.9rem;
+  font-size: var(--ts-body);
 }
 
 .form-cadastro .produto-card-meta {
-  font-size: 0.75rem;
+  font-size: var(--ts-caption);
   color: var(--ts-cinza-escuro);
 }
 
@@ -365,7 +365,7 @@
 .form-cadastro .entradas-tabela th,
 .form-cadastro .entradas-tabela td {
   padding: 0.5rem 0.75rem;
-  font-size: 0.9rem;
+  font-size: var(--ts-body);
 }
 
 .form-cadastro .entradas-tabela .th-acoes,

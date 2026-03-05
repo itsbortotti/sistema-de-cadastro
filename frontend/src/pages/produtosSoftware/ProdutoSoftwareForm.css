@@ -43,7 +43,7 @@
 }
 
 .form-secao-titulo {
-  font-size: 1rem;
+  font-size: var(--ts-body);
   font-weight: 700;
   color: var(--ts-azul);
   margin: 0 0 1rem 0;
@@ -63,7 +63,7 @@
   font-weight: 700;
   color: var(--ts-azul);
   margin-bottom: 0.35rem;
-  font-size: 0.9rem;
+  font-size: var(--ts-body);
 }
 
 .form-group input,
@@ -73,7 +73,7 @@
   padding: 0.6rem 1rem;
   border: 1px solid var(--ts-cinza);
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: var(--ts-body);
   background: var(--ts-branco);
 }
 
@@ -116,7 +116,7 @@
 .btn-novo-item {
   flex-shrink: 0;
   padding: 0.5rem 0.9rem;
-  font-size: 0.85rem;
+  font-size: var(--ts-caption);
   background: #f1f5f9;
   color: #475569;
   border: 1px solid var(--ts-cinza);
@@ -181,7 +181,7 @@
 
 .modal-titulo {
   margin: 0 0 1.25rem 0;
-  font-size: 1.125rem;
+  font-size: var(--ts-h3);
   font-weight: 600;
   color: #1e293b;
 }
@@ -196,7 +196,7 @@
   font-weight: 500;
   color: #475569;
   margin-bottom: 0.35rem;
-  font-size: 0.9rem;
+  font-size: var(--ts-body);
 }
 
 .modal-box input {
@@ -204,7 +204,7 @@
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--ts-cinza);
   border-radius: 6px;
-  font-size: 1rem;
+  font-size: var(--ts-body);
 }
 
 .modal-box input:focus {

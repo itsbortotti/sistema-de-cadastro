@@ -9,13 +9,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell,
-  Treemap,
-  RadialBarChart,
-  RadialBar,
   Legend,
-  ComposedChart,
-  Line,
 } from 'recharts';
 
 import './Dashboard.css';
@@ -25,19 +19,18 @@ function formatarMoeda(valor) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(valor);
 }
 
-/** Trunca texto para caber nos eixos dos gráficos; mantém nomeCompleto para tooltip. */
 function truncar(str, max = 18) {
   if (!str || typeof str !== 'string') return str ?? '—';
   return str.length <= max ? str : str.slice(0, max - 1).trim() + '…';
 }
 
-const CORES = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1'];
-
-/** Cores para indicativo Capex vs custo real */
+const CORES = ['#02b0c6', '#131b71', '#ff401a', '#2E7D32', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#84cc16', '#6366f1'];
+const COR_CAPEX = '#131b71';
+const COR_OPEX = '#02b0c6';
 const CORES_CAPEX = {
-  acima: '#dc2626',      /* estourou - vermelho */
-  abaixo: '#16a34a',    /* abaixo - verde */
-  no_limite: '#2563eb', /* bateu certinho - azul */
+  acima: '#dc2626',
+  abaixo: '#16a34a',
+  no_limite: '#2563eb',
   default: '#94a3b8',
 };
 
@@ -110,16 +103,6 @@ export default function Dashboard() {
         if (!Number.isNaN(y)) set.add(y);
       }
     });
-    projetos.forEach((p) => {
-      if (p.dataInicio) {
-        const y = parseInt(String(p.dataInicio).substring(0, 4), 10);
-        if (!Number.isNaN(y)) set.add(y);
-      }
-      if (p.dataFim) {
-        const y = parseInt(String(p.dataFim).substring(0, 4), 10);
-        if (!Number.isNaN(y)) set.add(y);
-      }
-    });
     (capexList || []).forEach((c) => {
       if (c.dataInicio) {
         const y = parseInt(String(c.dataInicio).substring(0, 4), 10);
@@ -127,7 +110,7 @@ export default function Dashboard() {
       }
     });
     return [...set].sort((a, b) => a - b);
-  }, [produtos, projetos, capexList]);
+  }, [produtos, capexList]);
 
   const produtoAplicaAoAno = (p, anoNum) => {
     if (p.ano != null && Number(p.ano) === anoNum) return true;
@@ -141,8 +124,7 @@ export default function Dashboard() {
 
   const produtosFiltrados = useMemo(() => {
     if (!anoFiltro || anoFiltro === '') return produtos;
-    const anoNum = Number(anoFiltro);
-    return produtos.filter((p) => produtoAplicaAoAno(p, anoNum));
+    return produtos.filter((p) => produtoAplicaAoAno(p, Number(anoFiltro)));
   }, [produtos, anoFiltro]);
 
   const projetoAplicaAoAno = (p, anoNum) => {
@@ -155,11 +137,246 @@ export default function Dashboard() {
 
   const projetosFiltrados = useMemo(() => {
     if (!anoFiltro || anoFiltro === '') return projetos;
-    const anoNum = Number(anoFiltro);
-    return projetos.filter((p) => projetoAplicaAoAno(p, anoNum));
+    return projetos.filter((p) => projetoAplicaAoAno(p, Number(anoFiltro)));
   }, [projetos, anoFiltro]);
 
-  /** Comparativo Capex vs custo real por área (só Capex, não Opex; só quando ano está selecionado). */
+  const capexAplicaAoAno = (c, ano) => {
+    if (c.ano != null && c.ano === ano) return true;
+    if (c.dataInicio && c.dataFim) {
+      const yIni = parseInt(String(c.dataInicio).substring(0, 4), 10);
+      const yFim = parseInt(String(c.dataFim).substring(0, 4), 10);
+      return !Number.isNaN(yIni) && !Number.isNaN(yFim) && ano >= yIni && ano <= yFim;
+    }
+    return false;
+  };
+
+  /** Totais e dados por sistema/produto para insights OPEX e CAPEX */
+  const insightsOpexCapex = useMemo(() => {
+    const anoNum = anoFiltro ? Number(anoFiltro) : null;
+    const listaCapex = (capexList || []).filter((c) => !anoNum || capexAplicaAoAno(c, anoNum));
+
+    let totalOpexSistemas = 0;   // OPEX real (infra) dos sistemas
+    let totalCapexSistemas = 0;  // CAPEX real (licenças) dos sistemas
+    let totalOpexPlanejado = 0;  // soma registros tipo opex
+    let totalCapexPlanejado = 0; // soma registros tipo capex
+
+    const opexPorSistema = {};
+    const capexPorSistema = {};
+    const opexPlanejadoPorSistema = {};
+    const capexPlanejadoPorProjeto = {};
+    const mapaProjetos = {};
+    projetos.forEach((pr) => { mapaProjetos[pr.id] = pr.nome || pr.id; });
+
+    produtosFiltrados.forEach((p) => {
+      const nome = p.nomeSistema || p.id || '—';
+      const opex = Number(p.custoMensalInfraestrutura) || 0;
+      const capex = Number(p.custoMensalSistema) || 0;
+      totalOpexSistemas += opex;
+      totalCapexSistemas += capex;
+      opexPorSistema[p.id] = { id: p.id, nome, nomeCompleto: nome, valor: opex * mult };
+      if (!capexPorSistema[p.id]) capexPorSistema[p.id] = { id: p.id, nome: truncar(nome, 20), nomeCompleto: nome, valor: 0 };
+      capexPorSistema[p.id].valor += capex * mult;
+    });
+
+    listaCapex.forEach((c) => {
+      const valor = Number(c.valor) || 0;
+      if ((c.classificacao || 'capex') === 'opex') {
+        totalOpexPlanejado += valor;
+        const ids = c.produtoSoftwareIds || [];
+        const n = Math.max(ids.length, 1);
+        ids.forEach((sid) => {
+          const id = String(sid).trim();
+          if (!id) return;
+          opexPlanejadoPorSistema[id] = (opexPlanejadoPorSistema[id] || 0) + valor / n;
+        });
+      } else {
+        totalCapexPlanejado += valor;
+        const ids = c.projetoIds || [];
+        const n = Math.max(ids.length, 1);
+        ids.forEach((pid) => {
+          const id = String(pid).trim();
+          if (!id) return;
+          capexPlanejadoPorProjeto[id] = (capexPlanejadoPorProjeto[id] || 0) + valor / n;
+        });
+      }
+    });
+
+    const opexPorSistemaArray = Object.values(opexPorSistema)
+      .filter((x) => x.valor > 0)
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, 15)
+      .map((x) => ({ ...x, nome: truncar(x.nomeCompleto, 22) }));
+
+    const capexPorSistemaArray = Object.values(capexPorSistema)
+      .filter((x) => x.valor > 0)
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, 15)
+      .map((x) => ({ ...x, nome: truncar(x.nomeCompleto, 22) }));
+
+    const opexPlanejadoPorSistemaArray = Object.entries(opexPlanejadoPorSistema)
+      .map(([id, valor]) => {
+        const p = produtos.find((x) => String(x.id) === id);
+        const nome = p?.nomeSistema || id;
+        return { id, nome: truncar(nome, 22), nomeCompleto: nome, valor };
+      })
+      .filter((x) => x.valor > 0)
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, 15);
+
+    const capexPlanejadoPorProjetoArray = Object.entries(capexPlanejadoPorProjeto)
+      .map(([id, valor]) => ({ id, nome: truncar(mapaProjetos[id] || id, 22), nomeCompleto: mapaProjetos[id] || id, valor }))
+      .filter((x) => x.valor > 0)
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, 12);
+
+    const comparativoPorSistema = produtosFiltrados
+      .map((p) => {
+        const nome = p.nomeSistema || p.id || '—';
+        const opex = (Number(p.custoMensalInfraestrutura) || 0) * mult;
+        const capex = (Number(p.custoMensalSistema) || 0) * mult;
+        return {
+          id: p.id,
+          nome: truncar(nome, 18),
+          nomeCompleto: nome,
+          opex,
+          capex,
+          total: opex + capex,
+        };
+      })
+      .filter((x) => x.total > 0)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 12);
+
+    /** Comparativo OPEX cadastrado (orçamento) vs usado (custo real) – em base anual */
+    const opexUsadoAnualPorSistema = {};
+    produtosFiltrados.forEach((p) => {
+      const id = String(p.id);
+      const usadoAnual = (Number(p.custoMensalInfraestrutura) || 0) * 12;
+      opexUsadoAnualPorSistema[id] = { id, nome: p.nomeSistema || p.id || '—', usadoAnual };
+    });
+    const TOLERANCIA_OPEX = 0.02;
+    const TOLERANCIA_OPEX_ABS = 50;
+    const idsOpex = new Set([...Object.keys(opexUsadoAnualPorSistema), ...Object.keys(opexPlanejadoPorSistema)]);
+    const comparativoOpexCadastradoVsUsado = [];
+    let totaisOpexComparativo = { cadastrado: 0, usado: 0, acima: 0, abaixo: 0, noLimite: 0 };
+    idsOpex.forEach((id) => {
+      const cadastrado = opexPlanejadoPorSistema[id] || 0;
+      const usado = opexUsadoAnualPorSistema[id]?.usadoAnual ?? 0;
+      if (cadastrado === 0 && usado === 0) return;
+      const p = produtosFiltrados.find((x) => String(x.id) === id);
+      const nomeCompleto = p?.nomeSistema || id;
+      totaisOpexComparativo.cadastrado += cadastrado;
+      totaisOpexComparativo.usado += usado;
+      const diferenca = usado - cadastrado;
+      let status = null;
+      if (cadastrado > 0) {
+        const threshold = Math.max(cadastrado * TOLERANCIA_OPEX, TOLERANCIA_OPEX_ABS);
+        if (Math.abs(diferenca) <= threshold) {
+          status = 'no_limite';
+          totaisOpexComparativo.noLimite += 1;
+        } else if (diferenca > 0) {
+          status = 'acima';
+          totaisOpexComparativo.acima += 1;
+        } else {
+          status = 'abaixo';
+          totaisOpexComparativo.abaixo += 1;
+        }
+      }
+      comparativoOpexCadastradoVsUsado.push({
+        id,
+        nome: truncar(nomeCompleto, 22),
+        nomeCompleto,
+        opexCadastrado: cadastrado,
+        opexUsado: usado,
+        diferenca,
+        status,
+      });
+    });
+    comparativoOpexCadastradoVsUsado.sort((a, b) => Math.abs(b.diferenca) - Math.abs(a.diferenca));
+    const comparativoOpexParaGrafico = comparativoOpexCadastradoVsUsado.slice(0, 12);
+    const anoRefOpex = anoFiltro || 'Todos';
+
+    /** Comparativo Capex por projeto: cadastrado (orçamento) vs usado (custo real dos sistemas do projeto) – base anual */
+    const capexUsadoPorProjeto = {};
+    projetosFiltrados.forEach((proj) => {
+      const ids = proj.produtoSoftwareIds || [];
+      let usadoAnual = 0;
+      ids.forEach((pid) => {
+        const prod = produtosFiltrados.find((x) => String(x.id) === String(pid));
+        if (prod) {
+          const sis = Number(prod.custoMensalSistema) || 0;
+          const inf = Number(prod.custoMensalInfraestrutura) || 0;
+          usadoAnual += (sis + inf) * 12;
+        }
+      });
+      if (usadoAnual > 0 || (capexPlanejadoPorProjeto[proj.id] || 0) > 0) {
+        capexUsadoPorProjeto[proj.id] = usadoAnual;
+      }
+    });
+    const TOLERANCIA_CAPEX_PROJ = 0.02;
+    const TOLERANCIA_CAPEX_PROJ_ABS = 50;
+    const comparativoCapexCadastradoVsUsadoProjeto = [];
+    let totaisCapexProjetoComparativo = { cadastrado: 0, usado: 0, acima: 0, abaixo: 0, noLimite: 0 };
+    const idsProjetosComparativo = new Set([...Object.keys(capexPlanejadoPorProjeto), ...Object.keys(capexUsadoPorProjeto)]);
+    idsProjetosComparativo.forEach((id) => {
+      const cadastrado = capexPlanejadoPorProjeto[id] || 0;
+      const usado = capexUsadoPorProjeto[id] ?? 0;
+      if (cadastrado === 0 && usado === 0) return;
+      const proj = projetos.find((x) => String(x.id) === id);
+      const nomeCompleto = proj?.nome || id;
+      totaisCapexProjetoComparativo.cadastrado += cadastrado;
+      totaisCapexProjetoComparativo.usado += usado;
+      const diferenca = usado - cadastrado;
+      let status = null;
+      if (cadastrado > 0) {
+        const threshold = Math.max(cadastrado * TOLERANCIA_CAPEX_PROJ, TOLERANCIA_CAPEX_PROJ_ABS);
+        if (Math.abs(diferenca) <= threshold) {
+          status = 'no_limite';
+          totaisCapexProjetoComparativo.noLimite += 1;
+        } else if (diferenca > 0) {
+          status = 'acima';
+          totaisCapexProjetoComparativo.acima += 1;
+        } else {
+          status = 'abaixo';
+          totaisCapexProjetoComparativo.abaixo += 1;
+        }
+      }
+      comparativoCapexCadastradoVsUsadoProjeto.push({
+        id,
+        nome: truncar(nomeCompleto, 22),
+        nomeCompleto,
+        capexCadastrado: cadastrado,
+        capexUsado: usado,
+        diferenca,
+        status,
+      });
+    });
+    comparativoCapexCadastradoVsUsadoProjeto.sort((a, b) => Math.abs(b.diferenca) - Math.abs(a.diferenca));
+    const comparativoCapexProjetoParaGrafico = comparativoCapexCadastradoVsUsadoProjeto.slice(0, 12);
+    const anoRefCapexProjeto = anoFiltro || 'Todos';
+
+    return {
+      totalOpexSistemas: totalOpexSistemas * mult,
+      totalCapexSistemas: totalCapexSistemas * mult,
+      totalOpexPlanejado,
+      totalCapexPlanejado,
+      opexPorSistema: opexPorSistemaArray,
+      capexPorSistema: capexPorSistemaArray,
+      opexPlanejadoPorSistema: opexPlanejadoPorSistemaArray,
+      capexPlanejadoPorProjeto: capexPlanejadoPorProjetoArray,
+      comparativoPorSistema,
+      comparativoOpexCadastradoVsUsado,
+      comparativoOpexParaGrafico,
+      totaisOpexComparativo,
+      anoRefOpex,
+      comparativoCapexCadastradoVsUsadoProjeto,
+      comparativoCapexProjetoParaGrafico,
+      totaisCapexProjetoComparativo,
+      anoRefCapexProjeto,
+    };
+  }, [produtosFiltrados, produtos, capexList, projetos, projetosFiltrados, anoFiltro, mult]);
+
+  /** Comparativo Capex vs custo real por área (ano selecionado) */
   const comparativoCapex = useMemo(() => {
     if (!anoFiltro || anoFiltro === '') return { porArea: [], totais: { acima: 0, abaixo: 0, noLimite: 0 }, porAreaNome: {} };
     const anoNum = Number(anoFiltro);
@@ -171,18 +388,8 @@ export default function Dashboard() {
       const inf = Number(p.custoMensalInfraestrutura) || 0;
       const custoAnual = (sis + inf) * 12;
       if (!custoPorAreaId[areaId]) custoPorAreaId[areaId] = { areaNome: nome, custoReal: 0 };
-      custoPorAreaId[areaId].areaNome = nome;
       custoPorAreaId[areaId].custoReal += custoAnual;
     });
-    const capexAplicaAoAno = (c, ano) => {
-      if (c.ano != null && c.ano === ano) return true;
-      if (c.dataInicio && c.dataFim) {
-        const yIni = parseInt(String(c.dataInicio).substring(0, 4), 10);
-        const yFim = parseInt(String(c.dataFim).substring(0, 4), 10);
-        return !Number.isNaN(yIni) && !Number.isNaN(yFim) && ano >= yIni && ano <= yFim;
-      }
-      return false;
-    };
     const capexPorAreaId = {};
     (capexList || [])
       .filter((c) => (c.classificacao || 'capex') === 'capex' && capexAplicaAoAno(c, anoNum))
@@ -223,193 +430,7 @@ export default function Dashboard() {
     return { porArea, totais, porAreaNome };
   }, [produtosFiltrados, capexList, anoFiltro]);
 
-  const dadosGraficos = useMemo(() => {
-    const porArea = {};
-    const porHospedagem = {};
-    const porSatisfacao = {};
-    const porFornecedor = {};
-    const custoPorProduto = [];
-    const custoPorArea = {};
-    const custoPorAreaSistemaInfra = {};
-    const custoPorFornecedor = {};
-    let custoSistema = 0;
-    let custoInfra = 0;
-
-    produtosFiltrados.forEach((p) => {
-      const sis = p.custoMensalSistema != null ? Number(p.custoMensalSistema) : 0;
-      const inf = p.custoMensalInfraestrutura != null ? Number(p.custoMensalInfraestrutura) : 0;
-      custoSistema += sis;
-      custoInfra += inf;
-      const custoTotalProd = sis + inf;
-
-      const area = p.areaNome || 'Não informado';
-      porArea[area] = (porArea[area] || 0) + 1;
-      custoPorArea[area] = (custoPorArea[area] || 0) + custoTotalProd;
-      if (!custoPorAreaSistemaInfra[area]) custoPorAreaSistemaInfra[area] = { custoSistema: 0, custoInfra: 0 };
-      custoPorAreaSistemaInfra[area].custoSistema += sis;
-      custoPorAreaSistemaInfra[area].custoInfra += inf;
-
-      const hosp = p.hospedagemNome || 'Não informado';
-      porHospedagem[hosp] = (porHospedagem[hosp] || 0) + 1;
-
-      const sat = p.grauSatisfacao ? `Nota ${p.grauSatisfacao}` : 'Não informado';
-      porSatisfacao[sat] = (porSatisfacao[sat] || 0) + 1;
-
-      const forn = p.fornecedorNome || 'Não informado';
-      porFornecedor[forn] = (porFornecedor[forn] || 0) + 1;
-      custoPorFornecedor[forn] = (custoPorFornecedor[forn] || 0) + custoTotalProd;
-
-      if (custoTotalProd > 0) {
-        custoPorProduto.push({
-          id: p.id,
-          nome: truncar(p.nomeSistema, 24),
-          nomeCompleto: p.nomeSistema || '—',
-          custoMensal: custoTotalProd,
-          custoSistema: sis,
-          custoInfra: inf,
-        });
-      }
-    });
-
-    const areaData = Object.entries(porArea)
-      .map(([nome, total]) => ({ nome: truncar(nome, 20), total, nomeCompleto: nome }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 12);
-
-    const hospedagemData = Object.entries(porHospedagem)
-      .map(([nome, value]) => ({ nome: truncar(nome, 20), nomeCompleto: nome, value }))
-      .sort((a, b) => b.value - a.value);
-
-    const satisfacaoData = Object.entries(porSatisfacao)
-      .sort((a, b) => String(a[0]).localeCompare(String(b[0])))
-      .map(([name, value]) => ({ nome: truncar(name, 20), nomeCompleto: name, value }));
-
-    const fornecedorData = Object.entries(porFornecedor)
-      .map(([nome, total]) => ({ nome: truncar(nome, 20), total, nomeCompleto: nome }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 10);
-
-    const topCustoProdutos = [...custoPorProduto]
-      .sort((a, b) => b.custoMensal - a.custoMensal)
-      .slice(0, 15)
-      .map((item) => ({
-        ...item,
-        custoNoPeriodo: item.custoMensal * mult,
-      }));
-
-    const sistemaVsInfra = [
-      { name: 'Sistema (licenças)', value: custoSistema * mult, valor: custoSistema * mult },
-      { name: 'Infraestrutura', value: custoInfra * mult, valor: custoInfra * mult },
-    ].filter((d) => d.value > 0);
-
-    const custoPorAreaData = Object.entries(custoPorArea)
-      .map(([nome, custo]) => ({
-        nome: truncar(nome, 20),
-        nomeCompleto: nome,
-        custo: custo * mult,
-      }))
-      .sort((a, b) => b.custo - a.custo)
-      .slice(0, 12);
-
-    const custoPorFornecedorData = Object.entries(custoPorFornecedor)
-      .map(([nome, custo]) => ({
-        nome: truncar(nome, 20),
-        nomeCompleto: nome,
-        custo: custo * mult,
-      }))
-      .sort((a, b) => b.custo - a.custo)
-      .slice(0, 10);
-
-    const custoPorAreaStackedData = Object.entries(custoPorAreaSistemaInfra)
-      .map(([nome, o]) => ({
-        nome: truncar(nome, 18),
-        nomeCompleto: nome,
-        custoSistema: o.custoSistema * mult,
-        custoInfra: o.custoInfra * mult,
-        total: (o.custoSistema + o.custoInfra) * mult,
-      }))
-      .filter((d) => d.total > 0)
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 10);
-
-    const treemapCustoArea = Object.entries(custoPorArea)
-      .map(([nome, custo], i) => ({ name: nome, value: custo * mult, fill: CORES[i % CORES.length] }))
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 10);
-
-    const top5CustoOrdenado = [...custoPorProduto]
-      .sort((a, b) => b.custoMensal - a.custoMensal)
-      .slice(0, 5);
-    const maxCustoTop5 = top5CustoOrdenado.length > 0 ? Math.max(...top5CustoOrdenado.map((i) => i.custoMensal * mult)) : 1;
-    const top5Radial = top5CustoOrdenado.map((item, i) => ({
-      name: truncar(item.nomeCompleto, 18),
-      nomeCompleto: item.nomeCompleto,
-      value: Math.round((item.custoMensal * mult) / maxCustoTop5 * 100),
-      valorReal: item.custoMensal * mult,
-      fill: CORES[i % CORES.length],
-    }));
-
-    const totalCustoGeral = custoSistema * mult + custoInfra * mult;
-    let acum = 0;
-    const top10CustoAcumulado = [...custoPorProduto]
-      .sort((a, b) => b.custoMensal - a.custoMensal)
-      .slice(0, 10)
-      .map((item) => {
-        acum += item.custoMensal * mult;
-        return {
-          nome: truncar(item.nomeCompleto, 16),
-          nomeCompleto: item.nomeCompleto,
-          custo: item.custoMensal * mult,
-          acumulado: totalCustoGeral > 0 ? Math.round((acum / totalCustoGeral) * 100) : 0,
-        };
-      });
-
-    return {
-      porArea: areaData,
-      porHospedagem: hospedagemData,
-      porSatisfacao: satisfacaoData,
-      porFornecedor: fornecedorData,
-      totalProdutos: produtosFiltrados.length,
-      custoSistema: custoSistema * mult,
-      custoInfra: custoInfra * mult,
-      custoTotal: (custoSistema + custoInfra) * mult,
-      topCustoProdutos,
-      sistemaVsInfra,
-      custoPorAreaData,
-      custoPorFornecedorData,
-      custoPorAreaStackedData,
-      treemapCustoArea,
-      top5Radial,
-      top10CustoAcumulado,
-    };
-  }, [produtosFiltrados, mult]);
-
-  const d = dadosGraficos || {};
-  const porArea = d.porArea ?? [];
-  const porHospedagem = d.porHospedagem ?? [];
-  const porSatisfacao = d.porSatisfacao ?? [];
-  const porFornecedor = d.porFornecedor ?? [];
-  const totalProdutos = d.totalProdutos ?? 0;
-  const custoTotal = d.custoTotal ?? 0;
-  const custoSistema = d.custoSistema ?? 0;
-  const custoInfra = d.custoInfra ?? 0;
-  const topCustoProdutos = d.topCustoProdutos ?? [];
-  const sistemaVsInfra = d.sistemaVsInfra ?? [];
-  const custoPorAreaData = d.custoPorAreaData ?? [];
-  const custoPorFornecedorData = d.custoPorFornecedorData ?? [];
-  const custoPorAreaStackedData = d.custoPorAreaStackedData ?? [];
-  const treemapCustoArea = d.treemapCustoArea ?? [];
-  const top5Radial = d.top5Radial ?? [];
-  const top10CustoAcumulado = d.top10CustoAcumulado ?? [];
-
-  const custoPorAreaComCapex = useMemo(() => {
-    const mapa = (comparativoCapex && comparativoCapex.porAreaNome) || {};
-    return (custoPorAreaData || []).map((item) => ({
-      ...item,
-      status: mapa[item.nomeCompleto] ?? null,
-    }));
-  }, [custoPorAreaData, comparativoCapex]);
-
+  const ins = insightsOpexCapex || {};
   const temFiltroAno = Boolean(anoFiltro);
   const totaisCapex = (comparativoCapex && comparativoCapex.totais) || { acima: 0, abaixo: 0, noLimite: 0 };
 
@@ -437,7 +458,7 @@ export default function Dashboard() {
         <div className="dashboard-header-top">
           <div>
             <h1>Bem-vindo, {usuario?.nome || usuario?.login}</h1>
-            <p className="dashboard-subtitle">Visão geral dos sistemas, projetos e custos por período</p>
+            <p className="dashboard-subtitle">Insights de OPEX e CAPEX por produtos e sistemas</p>
           </div>
           <div className="dashboard-filtros">
             <div className="dashboard-periodo">
@@ -487,25 +508,58 @@ export default function Dashboard() {
       <section className="dashboard-cards">
         <div className="dashboard-card">
           <span className="dashboard-card-label">Total de sistemas</span>
-          <span className="dashboard-card-value">{totalProdutos}</span>
+          <span className="dashboard-card-value">{produtosFiltrados.length}</span>
         </div>
         <div className="dashboard-card">
-          <span className="dashboard-card-label">Total de projetos</span>
-          <span className="dashboard-card-value">{projetosFiltrados.length}</span>
+          <span className="dashboard-card-label">OPEX – Infraestrutura ({periodoAtual.label.toLowerCase()})</span>
+          <span className="dashboard-card-value dashboard-card-moeda">{formatarMoeda(ins.totalOpexSistemas)}</span>
+          <span className="dashboard-card-hint">Custo infra dos sistemas</span>
+        </div>
+        <div className="dashboard-card">
+          <span className="dashboard-card-label">CAPEX – Licenças ({periodoAtual.label.toLowerCase()})</span>
+          <span className="dashboard-card-value dashboard-card-moeda">{formatarMoeda(ins.totalCapexSistemas)}</span>
+          <span className="dashboard-card-hint">Custo sistema dos sistemas</span>
         </div>
         <div className="dashboard-card dashboard-card-destaque">
-          <span className="dashboard-card-label">Custo total ({periodoAtual.label.toLowerCase()})</span>
-          <span className="dashboard-card-value dashboard-card-moeda">{formatarMoeda(custoTotal)}</span>
+          <span className="dashboard-card-label">Custo total sistemas ({periodoAtual.label.toLowerCase()})</span>
+          <span className="dashboard-card-value dashboard-card-moeda">{formatarMoeda((ins.totalOpexSistemas || 0) + (ins.totalCapexSistemas || 0))}</span>
         </div>
         <div className="dashboard-card">
-          <span className="dashboard-card-label">Custo sistema ({periodoAtual.label.toLowerCase()})</span>
-          <span className="dashboard-card-value dashboard-card-moeda">{formatarMoeda(custoSistema)}</span>
+          <span className="dashboard-card-label">OPEX planejado (cadastro)</span>
+          <span className="dashboard-card-value dashboard-card-moeda">{formatarMoeda(ins.totalOpexPlanejado)}</span>
+          <span className="dashboard-card-hint">Soma registros Opex</span>
         </div>
         <div className="dashboard-card">
-          <span className="dashboard-card-label">Custo infraestrutura ({periodoAtual.label.toLowerCase()})</span>
-          <span className="dashboard-card-value dashboard-card-moeda">{formatarMoeda(custoInfra)}</span>
+          <span className="dashboard-card-label">Capex planejado (cadastro)</span>
+          <span className="dashboard-card-value dashboard-card-moeda">{formatarMoeda(ins.totalCapexPlanejado)}</span>
+          <span className="dashboard-card-hint">Soma registros Capex</span>
         </div>
       </section>
+
+      {ins.comparativoOpexCadastradoVsUsado?.length > 0 && (
+        <section className="dashboard-cards dashboard-cards-opex-comparativo">
+          <div className="dashboard-card">
+            <span className="dashboard-card-label">OPEX cadastrado (anual)</span>
+            <span className="dashboard-card-value dashboard-card-moeda">{formatarMoeda(ins.totaisOpexComparativo?.cadastrado ?? 0)}</span>
+            <span className="dashboard-card-hint">Orçamento nos registros Opex</span>
+          </div>
+          <div className="dashboard-card">
+            <span className="dashboard-card-label">OPEX usado (anual)</span>
+            <span className="dashboard-card-value dashboard-card-moeda">{formatarMoeda(ins.totaisOpexComparativo?.usado ?? 0)}</span>
+            <span className="dashboard-card-hint">Custo infra dos sistemas</span>
+          </div>
+          <div className="dashboard-card dashboard-card-acima">
+            <span className="dashboard-card-label">Sistemas acima do orçamento</span>
+            <span className="dashboard-card-value">{ins.totaisOpexComparativo?.acima ?? 0}</span>
+            <span className="dashboard-card-hint">Usado &gt; cadastrado</span>
+          </div>
+          <div className="dashboard-card dashboard-card-abaixo">
+            <span className="dashboard-card-label">Sistemas abaixo do orçamento</span>
+            <span className="dashboard-card-value">{ins.totaisOpexComparativo?.abaixo ?? 0}</span>
+            <span className="dashboard-card-hint">Usado &lt; cadastrado</span>
+          </div>
+        </section>
+      )}
 
       {temFiltroAno && (totaisCapex.acima > 0 || totaisCapex.abaixo > 0 || totaisCapex.noLimite > 0) && (
         <section className="dashboard-cards dashboard-cards-capex">
@@ -527,18 +581,19 @@ export default function Dashboard() {
         </section>
       )}
 
-      {totalProdutos === 0 ? (
-        <p className="dashboard-vazio">Nenhum sistema cadastrado. Os gráficos de custo aparecerão aqui quando houver sistemas com custos.</p>
+      {produtosFiltrados.length === 0 ? (
+        <p className="dashboard-vazio">Nenhum sistema cadastrado. Os insights de OPEX e CAPEX aparecerão aqui quando houver sistemas.</p>
       ) : (
         <>
           {temFiltroAno && comparativoCapex.porArea.length > 0 && (
             <section className="dashboard-secao dashboard-capex-tabela">
               <h2 className="dashboard-secao-titulo">Capex vs custo real por área (ano {anoFiltro})</h2>
-              <p className="dashboard-tabela-dica">Clique em uma área para ver os sistemas vinculados a ela.</p>
+              <p className="dashboard-tabela-dica">Clique em uma área para ver os sistemas vinculados.</p>
               <div className="dashboard-tabela-capex-wrap">
                 <table className="dashboard-tabela-capex">
                   <thead>
                     <tr>
+                      <th>Ano de referência</th>
                       <th>Área</th>
                       <th>Capex (anual)</th>
                       <th>Custo real (anual)</th>
@@ -559,6 +614,7 @@ export default function Dashboard() {
                           onKeyDown={(ev) => ev.key === 'Enter' && setDetalheArea({ areaId: r.areaId, areaNome: r.areaNome, status: r.status })}
                           title="Clique para ver os sistemas desta área"
                         >
+                          <td>{anoFiltro}</td>
                           <td>{r.areaNome}</td>
                           <td>{formatarMoeda(r.capexTotal)}</td>
                           <td>{formatarMoeda(r.custoReal)}</td>
@@ -567,6 +623,156 @@ export default function Dashboard() {
                             {r.status === 'abaixo' && <span className="dashboard-badge dashboard-badge-abaixo">Abaixo do Capex</span>}
                             {r.status === 'no_limite' && <span className="dashboard-badge dashboard-badge-no-limite">No limite</span>}
                             {!r.status && r.capexTotal === 0 && <span className="dashboard-badge dashboard-badge-default">Sem Capex</span>}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
+          {ins.comparativoOpexCadastradoVsUsado?.length > 0 && (
+            <section className="dashboard-secao dashboard-capex-tabela">
+              <h2 className="dashboard-secao-titulo">Comparativo OPEX: cadastrado vs usado (anual) – Ano de referência: {ins.anoRefOpex ?? (anoFiltro || 'Todos')}</h2>
+              <p className="dashboard-tabela-dica">Orçamento cadastrado nos registros Opex vs custo real de infraestrutura dos sistemas. Valores em base anual.</p>
+              <div className="dashboard-graficos" style={{ marginBottom: '1.5rem' }}>
+                <div className="dashboard-grafico-box dashboard-grafico-full">
+                  <h3 className="dashboard-grafico-titulo">OPEX cadastrado vs usado por sistema (top 12)</h3>
+                  <div className="dashboard-grafico-container">
+                    <ResponsiveContainer width="100%" height={320}>
+                      <BarChart data={ins.comparativoOpexParaGrafico} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }} barCategoryGap="20%">
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => formatarMoeda(v)} />
+                        <YAxis type="category" dataKey="nome" width={200} tick={{ fontSize: 11 }} />
+                        <Tooltip
+                          formatter={(value, name) => [formatarMoeda(value), name === 'opexCadastrado' ? 'OPEX cadastrado' : 'OPEX usado']}
+                          labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _}
+                        />
+                        <Legend />
+                        <Bar dataKey="opexCadastrado" fill="#6366f1" name="OPEX cadastrado" radius={[0, 4, 4, 0]} />
+                        <Bar dataKey="opexUsado" fill={COR_OPEX} name="OPEX usado" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+              <div className="dashboard-tabela-capex-wrap">
+                <table className="dashboard-tabela-capex">
+                  <thead>
+                    <tr>
+                      <th>Ano de referência</th>
+                      <th>Sistema</th>
+                      <th>OPEX cadastrado (anual)</th>
+                      <th>OPEX usado (anual)</th>
+                      <th>Diferença</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ins.comparativoOpexCadastradoVsUsado
+                      .sort((a, b) => Math.abs(b.diferenca) - Math.abs(a.diferenca))
+                      .map((r) => (
+                        <tr key={r.id}>
+                          <td>{ins.anoRefOpex ?? (anoFiltro || 'Todos')}</td>
+                          <td title={r.nomeCompleto}>{r.nomeCompleto}</td>
+                          <td>{formatarMoeda(r.opexCadastrado)}</td>
+                          <td>{formatarMoeda(r.opexUsado)}</td>
+                          <td>
+                            {r.opexCadastrado > 0 || r.opexUsado > 0
+                              ? (r.diferenca >= 0 ? '+' : '') + formatarMoeda(r.diferenca)
+                              : '—'}
+                          </td>
+                          <td>
+                            {r.status === 'acima' && <span className="dashboard-badge dashboard-badge-acima">Acima (estourou)</span>}
+                            {r.status === 'abaixo' && <span className="dashboard-badge dashboard-badge-abaixo">Abaixo (economia)</span>}
+                            {r.status === 'no_limite' && <span className="dashboard-badge dashboard-badge-no-limite">No limite</span>}
+                            {!r.status && r.opexCadastrado === 0 && r.opexUsado > 0 && <span className="dashboard-badge dashboard-badge-default">Sem orçamento cadastrado</span>}
+                            {!r.status && r.opexCadastrado > 0 && r.opexUsado === 0 && <span className="dashboard-badge dashboard-badge-default">Sem custo usado</span>}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
+          {ins.comparativoCapexCadastradoVsUsadoProjeto?.length > 0 && (
+            <section className="dashboard-secao dashboard-capex-tabela">
+              <h2 className="dashboard-secao-titulo">Comparativo Capex por projeto: cadastrado vs usado (anual) – Ano de referência: {ins.anoRefCapexProjeto ?? (anoFiltro || 'Todos')}</h2>
+              <p className="dashboard-tabela-dica">Orçamento cadastrado nos registros Capex vs custo real (sistema + infra) dos sistemas vinculados ao projeto. Valores em base anual.</p>
+              <div className="dashboard-cards dashboard-cards-opex-comparativo" style={{ marginBottom: '1rem' }}>
+                <div className="dashboard-card">
+                  <span className="dashboard-card-label">Capex cadastrado (anual)</span>
+                  <span className="dashboard-card-value dashboard-card-moeda">{formatarMoeda(ins.totaisCapexProjetoComparativo?.cadastrado ?? 0)}</span>
+                </div>
+                <div className="dashboard-card">
+                  <span className="dashboard-card-label">Capex usado (anual)</span>
+                  <span className="dashboard-card-value dashboard-card-moeda">{formatarMoeda(ins.totaisCapexProjetoComparativo?.usado ?? 0)}</span>
+                </div>
+                <div className="dashboard-card dashboard-card-acima">
+                  <span className="dashboard-card-label">Projetos acima do orçamento</span>
+                  <span className="dashboard-card-value">{ins.totaisCapexProjetoComparativo?.acima ?? 0}</span>
+                </div>
+                <div className="dashboard-card dashboard-card-abaixo">
+                  <span className="dashboard-card-label">Projetos abaixo do orçamento</span>
+                  <span className="dashboard-card-value">{ins.totaisCapexProjetoComparativo?.abaixo ?? 0}</span>
+                </div>
+              </div>
+              <div className="dashboard-graficos" style={{ marginBottom: '1.5rem' }}>
+                <div className="dashboard-grafico-box dashboard-grafico-full">
+                  <h3 className="dashboard-grafico-titulo">Capex cadastrado vs usado por projeto (top 12) – Ano de referência: {ins.anoRefCapexProjeto}</h3>
+                  <div className="dashboard-grafico-container">
+                    <ResponsiveContainer width="100%" height={320}>
+                      <BarChart data={ins.comparativoCapexProjetoParaGrafico} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }} barCategoryGap="20%">
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => formatarMoeda(v)} />
+                        <YAxis type="category" dataKey="nome" width={200} tick={{ fontSize: 11 }} />
+                        <Tooltip
+                          formatter={(value, name) => [formatarMoeda(value), name === 'capexCadastrado' ? 'Capex cadastrado' : 'Capex usado']}
+                          labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _}
+                        />
+                        <Legend />
+                        <Bar dataKey="capexCadastrado" fill="#6366f1" name="Capex cadastrado" radius={[0, 4, 4, 0]} />
+                        <Bar dataKey="capexUsado" fill={COR_CAPEX} name="Capex usado" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+              <div className="dashboard-tabela-capex-wrap">
+                <table className="dashboard-tabela-capex">
+                  <thead>
+                    <tr>
+                      <th>Ano de referência</th>
+                      <th>Projeto</th>
+                      <th>Capex cadastrado (anual)</th>
+                      <th>Capex usado (anual)</th>
+                      <th>Diferença</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ins.comparativoCapexCadastradoVsUsadoProjeto
+                      .sort((a, b) => Math.abs(b.diferenca) - Math.abs(a.diferenca))
+                      .map((r) => (
+                        <tr key={r.id}>
+                          <td>{ins.anoRefCapexProjeto ?? (anoFiltro || 'Todos')}</td>
+                          <td title={r.nomeCompleto}>{r.nomeCompleto}</td>
+                          <td>{formatarMoeda(r.capexCadastrado)}</td>
+                          <td>{formatarMoeda(r.capexUsado)}</td>
+                          <td>
+                            {r.capexCadastrado > 0 || r.capexUsado > 0
+                              ? (r.diferenca >= 0 ? '+' : '') + formatarMoeda(r.diferenca)
+                              : '—'}
+                          </td>
+                          <td>
+                            {r.status === 'acima' && <span className="dashboard-badge dashboard-badge-acima">Acima (estourou)</span>}
+                            {r.status === 'abaixo' && <span className="dashboard-badge dashboard-badge-abaixo">Abaixo (economia)</span>}
+                            {r.status === 'no_limite' && <span className="dashboard-badge dashboard-badge-no-limite">No limite</span>}
+                            {!r.status && r.capexCadastrado === 0 && r.capexUsado > 0 && <span className="dashboard-badge dashboard-badge-default">Sem orçamento cadastrado</span>}
+                            {!r.status && r.capexCadastrado > 0 && r.capexUsado === 0 && <span className="dashboard-badge dashboard-badge-default">Sem custo usado</span>}
                           </td>
                         </tr>
                       ))}
@@ -599,8 +805,8 @@ export default function Dashboard() {
                         <thead>
                           <tr>
                             <th>Sistema</th>
-                            <th>Custo mensal Sistema</th>
-                            <th>Custo mensal Infra</th>
+                            <th>CAPEX (licença)</th>
+                            <th>OPEX (infra)</th>
                             <th>Custo anual (total)</th>
                           </tr>
                         </thead>
@@ -627,284 +833,111 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* ——— Bloco: Insights de custo (dinâmicos por período) ——— */}
           <section className="dashboard-secao">
-            <h2 className="dashboard-secao-titulo">Insights de custo ({periodoAtual.label.toLowerCase()})</h2>
+            <h2 className="dashboard-secao-titulo">OPEX e CAPEX por sistema ({periodoAtual.label.toLowerCase()})</h2>
             <div className="dashboard-graficos">
               <div className="dashboard-grafico-box dashboard-grafico-full">
-                <h3 className="dashboard-grafico-titulo">Sistemas que mais gastam (top 15)</h3>
+                <h3 className="dashboard-grafico-titulo">OPEX (infraestrutura) por sistema – Top 15</h3>
                 <div className="dashboard-grafico-container">
-                  <ResponsiveContainer width="100%" height={320}>
-                    <BarChart
-                      data={topCustoProdutos}
-                      layout="vertical"
-                      margin={{ top: 8, right: 24, left: 8, bottom: 8 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => formatarMoeda(v)} />
-                      <YAxis type="category" dataKey="nome" width={200} tick={{ fontSize: 11 }} />
-                      <Tooltip
-                        formatter={(value) => [formatarMoeda(value), 'Custo no período']}
-                        labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _}
-                      />
-                      <Bar dataKey="custoNoPeriodo" fill={CORES[0]} name="Custo" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              <div className="dashboard-grafico-box">
-                <h3 className="dashboard-grafico-titulo">Sistema vs Infraestrutura</h3>
-                <div className="dashboard-grafico-container">
-                  {sistemaVsInfra.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={260}>
-                      <BarChart data={sistemaVsInfra} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
+                  {ins.opexPorSistema?.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={320}>
+                      <BarChart data={ins.opexPorSistema} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                         <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => formatarMoeda(v)} />
-                        <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 11 }} />
-                        <Tooltip formatter={(value) => [formatarMoeda(value), 'Custo']} />
-                        <Bar dataKey="value" name="Custo" radius={[0, 4, 4, 0]}>
-                          {sistemaVsInfra.map((_, i) => (
-                            <Cell key={i} fill={CORES[i % CORES.length]} />
-                          ))}
-                        </Bar>
+                        <YAxis type="category" dataKey="nome" width={200} tick={{ fontSize: 11 }} />
+                        <Tooltip formatter={(v) => [formatarMoeda(v), 'OPEX']} labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _} />
+                        <Bar dataKey="valor" fill={COR_OPEX} name="OPEX" radius={[0, 4, 4, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
-                    <p className="dashboard-grafico-vazio">Sem dados de custo</p>
+                    <p className="dashboard-grafico-vazio">Nenhum custo de infraestrutura nos sistemas.</p>
                   )}
                 </div>
               </div>
 
-              <div className="dashboard-grafico-box">
-                <h3 className="dashboard-grafico-titulo">
-                  Custo por área
-                  {temFiltroAno && (
-                    <span className="dashboard-grafico-legend-capex">
-                      <span className="dot dot-acima" /> Acima Capex
-                      <span className="dot dot-abaixo" /> Abaixo
-                      <span className="dot dot-no-limite" /> No limite
-                    </span>
-                  )}
-                </h3>
+              <div className="dashboard-grafico-box dashboard-grafico-full">
+                <h3 className="dashboard-grafico-titulo">CAPEX (licenças) por sistema – Top 15</h3>
                 <div className="dashboard-grafico-container">
-                  {custoPorAreaComCapex.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={280}>
-                      <BarChart data={custoPorAreaComCapex} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
+                  {ins.capexPorSistema?.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={320}>
+                      <BarChart data={ins.capexPorSistema} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => formatarMoeda(v)} />
+                        <YAxis type="category" dataKey="nome" width={200} tick={{ fontSize: 11 }} />
+                        <Tooltip formatter={(v) => [formatarMoeda(v), 'CAPEX']} labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _} />
+                        <Bar dataKey="valor" fill={COR_CAPEX} name="CAPEX" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <p className="dashboard-grafico-vazio">Nenhum custo de licença nos sistemas.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="dashboard-grafico-box dashboard-grafico-full">
+                <h3 className="dashboard-grafico-titulo">Comparativo CAPEX vs OPEX por sistema (top 12)</h3>
+                <div className="dashboard-grafico-container">
+                  {ins.comparativoPorSistema?.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={320}>
+                      <BarChart data={ins.comparativoPorSistema} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }} stackOffset="sign">
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                         <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => formatarMoeda(v)} />
                         <YAxis type="category" dataKey="nome" width={180} tick={{ fontSize: 11 }} />
                         <Tooltip
-                          formatter={(value, name, props) => {
-                            const payload = props?.payload;
-                            const statusLabel = payload?.status === 'acima' ? ' (acima do Capex)' : payload?.status === 'abaixo' ? ' (abaixo do Capex)' : payload?.status === 'no_limite' ? ' (no limite do Capex)' : '';
-                            return [formatarMoeda(value), `Custo${statusLabel}`];
-                          }}
+                          formatter={(v, name) => [formatarMoeda(v), name === 'capex' ? 'CAPEX (licença)' : 'OPEX (infra)']}
                           labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _}
                         />
-                        <Bar dataKey="custo" name="Custo" radius={[0, 4, 4, 0]}>
-                          {custoPorAreaComCapex.map((entry, i) => (
-                            <Cell key={entry.nomeCompleto ?? i} fill={entry.status ? CORES_CAPEX[entry.status] : CORES[2]} />
-                          ))}
-                        </Bar>
+                        <Legend />
+                        <Bar dataKey="capex" stackId="a" fill={COR_CAPEX} name="CAPEX (licença)" radius={[0, 0, 0, 0]} />
+                        <Bar dataKey="opex" stackId="a" fill={COR_OPEX} name="OPEX (infra)" radius={[0, 4, 4, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
-                    <p className="dashboard-grafico-vazio">Sem dados de custo por área</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="dashboard-grafico-box">
-                <h3 className="dashboard-grafico-titulo">Custo por fornecedor (top 10)</h3>
-                <div className="dashboard-grafico-container">
-                  {custoPorFornecedorData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={280}>
-                      <BarChart data={custoPorFornecedorData} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => formatarMoeda(v)} />
-                        <YAxis type="category" dataKey="nome" width={180} tick={{ fontSize: 11 }} />
-                        <Tooltip
-                          formatter={(value) => [formatarMoeda(value), 'Custo']}
-                          labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _}
-                        />
-                        <Bar dataKey="custo" fill={CORES[3]} name="Custo" radius={[0, 4, 4, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <p className="dashboard-grafico-vazio">Sem dados de custo por fornecedor</p>
+                    <p className="dashboard-grafico-vazio">Sem dados para comparativo.</p>
                   )}
                 </div>
               </div>
             </div>
           </section>
 
-          {/* ——— Bloco: Mais visualizações (treemap, radial, stacked, composto) ——— */}
           <section className="dashboard-secao">
-            <h2 className="dashboard-secao-titulo">Mais visualizações ({periodoAtual.label.toLowerCase()})</h2>
+            <h2 className="dashboard-secao-titulo">Orçamento planejado – Opex e Capex (cadastro)</h2>
             <div className="dashboard-graficos">
-              {treemapCustoArea.length > 0 && (
-                <div className="dashboard-grafico-box">
-                  <h3 className="dashboard-grafico-titulo">Custo por área (treemap)</h3>
-                  <div className="dashboard-grafico-container dashboard-grafico-treemap">
-                    <ResponsiveContainer width="100%" height={280}>
-                      <Treemap
-                        data={[{ name: 'Áreas', children: treemapCustoArea }]}
-                        dataKey="value"
-                        nameKey="name"
-                        aspectRatio={4 / 3}
-                        stroke="#fff"
-                      >
-                        <Tooltip formatter={(value) => [formatarMoeda(value), 'Custo']} />
-                      </Treemap>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              )}
-
-              {top5Radial.length > 0 && (
-                <div className="dashboard-grafico-box">
-                  <h3 className="dashboard-grafico-titulo">Top 5 sistemas por custo (radial)</h3>
-                  <div className="dashboard-grafico-container">
-                    <ResponsiveContainer width="100%" height={280}>
-                      <RadialBarChart data={top5Radial} innerRadius="20%" outerRadius="90%" startAngle={180} endAngle={0}>
-                        <RadialBar dataKey="value" nameKey="name" background />
-                        <Legend formatter={(value, entry) => entry?.payload?.nomeCompleto ?? value} />
-                        <Tooltip formatter={(_, name, props) => [formatarMoeda(props.payload?.valorReal), name ?? props.payload?.nomeCompleto]} />
-                      </RadialBarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              )}
-
-              {custoPorAreaStackedData.length > 0 && (
-                <div className="dashboard-grafico-box">
-                  <h3 className="dashboard-grafico-titulo">Custo Sistema vs Infra por área (barras empilhadas)</h3>
-                  <div className="dashboard-grafico-container">
+              <div className="dashboard-grafico-box">
+                <h3 className="dashboard-grafico-titulo">OPEX planejado por sistema (top 15)</h3>
+                <div className="dashboard-grafico-container">
+                  {ins.opexPlanejadoPorSistema?.length > 0 ? (
                     <ResponsiveContainer width="100%" height={300}>
-                      <BarChart data={custoPorAreaStackedData} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
+                      <BarChart data={ins.opexPlanejadoPorSistema} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                         <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => formatarMoeda(v)} />
-                        <YAxis type="category" dataKey="nome" width={160} tick={{ fontSize: 11 }} />
-                        <Tooltip
-                          formatter={(value, name) => [formatarMoeda(value), name === 'custoSistema' ? 'Sistema (licenças)' : 'Infraestrutura']}
-                          labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _}
-                        />
-                        <Legend />
-                        <Bar dataKey="custoSistema" stackId="a" fill={CORES[0]} name="Sistema (licenças)" radius={[0, 0, 0, 0]} />
-                        <Bar dataKey="custoInfra" stackId="a" fill={CORES[1]} name="Infraestrutura" radius={[0, 4, 4, 0]} />
+                        <YAxis type="category" dataKey="nome" width={180} tick={{ fontSize: 11 }} />
+                        <Tooltip formatter={(v) => [formatarMoeda(v), 'OPEX planejado']} labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _} />
+                        <Bar dataKey="valor" fill={COR_OPEX} name="OPEX planejado" radius={[0, 4, 4, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
-                  </div>
+                  ) : (
+                    <p className="dashboard-grafico-vazio">Nenhum registro Opex associado a sistemas.</p>
+                  )}
                 </div>
-              )}
+              </div>
 
-              {top10CustoAcumulado.length > 0 && (
-                <div className="dashboard-grafico-box dashboard-grafico-full">
-                  <h3 className="dashboard-grafico-titulo">Top 10 sistemas: custo e participação acumulada (%)</h3>
-                  <div className="dashboard-grafico-container">
+              <div className="dashboard-grafico-box">
+                <h3 className="dashboard-grafico-titulo">Capex planejado por projeto (top 12)</h3>
+                <div className="dashboard-grafico-container">
+                  {ins.capexPlanejadoPorProjeto?.length > 0 ? (
                     <ResponsiveContainer width="100%" height={300}>
-                      <ComposedChart data={top10CustoAcumulado} margin={{ top: 8, right: 48, left: 8, bottom: 8 }}>
+                      <BarChart data={ins.capexPlanejadoPorProjeto} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                        <XAxis dataKey="nome" tick={{ fontSize: 10 }} angle={-25} textAnchor="end" height={60} />
-                        <YAxis yAxisId="left" tick={{ fontSize: 11 }} tickFormatter={(v) => formatarMoeda(v)} />
-                        <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
-                        <Tooltip
-                          formatter={(value, name) => [name === 'acumulado' ? `${value}%` : formatarMoeda(value), name === 'acumulado' ? 'Acumulado' : 'Custo']}
-                          labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _}
-                        />
-                        <Legend />
-                        <Bar yAxisId="left" dataKey="custo" fill={CORES[0]} name="Custo" radius={[4, 4, 0, 0]} />
-                        <Line yAxisId="right" type="monotone" dataKey="acumulado" stroke={CORES[1]} strokeWidth={2} name="Participação acumulada (%)" dot={{ r: 4 }} />
-                      </ComposedChart>
+                        <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={(v) => formatarMoeda(v)} />
+                        <YAxis type="category" dataKey="nome" width={180} tick={{ fontSize: 11 }} />
+                        <Tooltip formatter={(v) => [formatarMoeda(v), 'Capex planejado']} labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _} />
+                        <Bar dataKey="valor" fill={COR_CAPEX} name="Capex planejado" radius={[0, 4, 4, 0]} />
+                      </BarChart>
                     </ResponsiveContainer>
-                  </div>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* ——— Bloco: Distribuição (quantidade) ——— */}
-          <section className="dashboard-secao">
-            <h2 className="dashboard-secao-titulo">Distribuição por quantidade</h2>
-            <div className="dashboard-graficos">
-              <div className="dashboard-grafico-box">
-                <h3 className="dashboard-grafico-titulo">Sistemas por área</h3>
-                <div className="dashboard-grafico-container">
-                  <ResponsiveContainer width="100%" height={280}>
-                    <BarChart data={porArea} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
-                      <YAxis type="category" dataKey="nome" width={180} tick={{ fontSize: 11 }} />
-                      <Tooltip
-                        formatter={(value) => [value, 'Sistemas']}
-                        labelFormatter={(_, payload) => payload[0]?.payload?.nomeCompleto ?? _}
-                      />
-                      <Bar dataKey="total" fill={CORES[0]} name="Sistemas" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              <div className="dashboard-grafico-box">
-                <h3 className="dashboard-grafico-titulo">Sistemas por hospedagem</h3>
-                <div className="dashboard-grafico-container">
-                  <ResponsiveContainer width="100%" height={280}>
-                    <BarChart data={porHospedagem} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
-                      <YAxis type="category" dataKey="nome" width={180} tick={{ fontSize: 11 }} />
-                      <Tooltip
-                        formatter={(value) => [value, 'Sistemas']}
-                        labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _}
-                      />
-                      <Bar dataKey="value" name="Sistemas" radius={[0, 4, 4, 0]}>
-                        {porHospedagem.map((_, i) => (
-                          <Cell key={i} fill={CORES[i % CORES.length]} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              <div className="dashboard-grafico-box">
-                <h3 className="dashboard-grafico-titulo">Grau de satisfação</h3>
-                <div className="dashboard-grafico-container">
-                  <ResponsiveContainer width="100%" height={280}>
-                    <BarChart data={porSatisfacao} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
-                      <YAxis type="category" dataKey="nome" width={180} tick={{ fontSize: 11 }} />
-                      <Tooltip
-                        formatter={(value) => [value, 'Sistemas']}
-                        labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _}
-                      />
-                      <Bar dataKey="value" name="Sistemas" radius={[0, 4, 4, 0]}>
-                        {porSatisfacao.map((_, i) => (
-                          <Cell key={i} fill={CORES[i % CORES.length]} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              <div className="dashboard-grafico-box dashboard-grafico-full">
-                <h3 className="dashboard-grafico-titulo">Top 10 fornecedores (quantidade de sistemas)</h3>
-                <div className="dashboard-grafico-container">
-                  <ResponsiveContainer width="100%" height={280}>
-                    <BarChart data={porFornecedor} layout="vertical" margin={{ top: 8, right: 24, left: 8, bottom: 8 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
-                      <YAxis type="category" dataKey="nome" width={180} tick={{ fontSize: 11 }} />
-                      <Tooltip
-                        formatter={(value) => [value, 'Sistemas']}
-                        labelFormatter={(_, payload) => payload?.[0]?.payload?.nomeCompleto ?? _}
-                      />
-                      <Bar dataKey="total" fill={CORES[1]} name="Sistemas" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  ) : (
+                    <p className="dashboard-grafico-vazio">Nenhum registro Capex associado a projetos.</p>
+                  )}
                 </div>
               </div>
             </div>

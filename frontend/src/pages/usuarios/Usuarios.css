@@ -19,9 +19,10 @@
 }
 
 .page-header h1 {
-  font-size: 1.5rem;
+  font-size: var(--ts-h2);
   color: var(--ts-laranja);
   font-family: var(--font-h1);
+  font-weight: 900;
 }
 
 .page-header-actions {
@@ -42,7 +43,7 @@
   padding: 0.5rem 0.75rem 0.5rem 2rem;
   border: 1px solid var(--ts-cinza);
   border-radius: 8px;
-  font-size: 0.95rem;
+  font-size: var(--ts-body);
   background: var(--ts-branco) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666666' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E") no-repeat 0.6rem center;
   min-width: 220px;
   max-width: 360px;
@@ -59,7 +60,7 @@
 }
 
 .busca-resultado {
-  font-size: 0.875rem;
+  font-size: var(--ts-label);
   color: var(--ts-cinza-escuro);
   margin: 0;
 }
@@ -67,7 +68,7 @@
 .erro-msg {
   color: var(--ts-erro);
   margin-bottom: 1rem;
-  font-size: 0.9rem;
+  font-size: var(--ts-body);
 }
 
 .page-loading {
@@ -78,13 +79,13 @@
 .sucesso-msg {
   color: var(--ts-sucesso);
   margin-bottom: 1rem;
-  font-size: 0.9rem;
+  font-size: var(--ts-body);
 }
 
 .page-desc {
   color: var(--ts-cinza-escuro);
   margin-bottom: 1.5rem;
-  font-size: 0.95rem;
+  font-size: var(--ts-body);
 }
 
 .table-permissoes th,
@@ -107,7 +108,7 @@
   display: inline-block;
   padding: 0.5rem 1.25rem;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: var(--ts-body);
   font-weight: 700;
   font-family: var(--font-body);
   border: none;
@@ -138,7 +139,7 @@
 
 .btn-sm {
   padding: 0.35rem 0.75rem;
-  font-size: 0.8rem;
+  font-size: var(--ts-caption);
   margin-right: 0.5rem;
 }
 
@@ -198,7 +199,7 @@
 }
 
 .btn-icone-loading {
-  font-size: 0.75rem;
+  font-size: var(--ts-caption);
   font-weight: 600;
 }
 
@@ -255,7 +256,7 @@
   margin-top: 0.35rem;
   border: 1px solid var(--ts-cinza);
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: var(--ts-body);
   background: var(--ts-branco);
 }
 
@@ -273,7 +274,7 @@
   margin-top: 0.35rem;
   border: 1px solid var(--ts-cinza);
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: var(--ts-body);
   font-family: inherit;
   resize: vertical;
 }
