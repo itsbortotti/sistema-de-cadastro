@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { produtosSoftwareApi, capexApi, projetosApi } from '../api/client';
+import { produtosSoftwareApi, capexApi, projetosApi, empresasApi } from '../api/client';
 import {
   BarChart,
   Bar,
@@ -48,6 +48,8 @@ export default function Dashboard() {
   const [erro, setErro] = useState(null);
   const [periodoId, setPeriodoId] = useState('mensal');
   const [anoFiltro, setAnoFiltro] = useState('');
+  const [empresaFiltro, setEmpresaFiltro] = useState('');
+  const [empresas, setEmpresas] = useState([]);
   const [capexList, setCapexList] = useState([]);
   const [detalheArea, setDetalheArea] = useState(null);
 
@@ -63,13 +65,15 @@ export default function Dashboard() {
       produtosSoftwareApi.listar(),
       capexApi.listar(),
       projetosApi.listar().catch(() => []),
+      empresasApi.listar().catch(() => []),
     ])
-      .then(([listaProd, listaCapex, listaProjetos]) => {
+      .then(([listaProd, listaCapex, listaProjetos, listaEmpresas]) => {
         if (!cancel) {
           setErro(null);
           setProdutos(Array.isArray(listaProd) ? listaProd : []);
           setCapexList(Array.isArray(listaCapex) ? listaCapex : []);
           setProjetos(Array.isArray(listaProjetos) ? listaProjetos : []);
+          setEmpresas(Array.isArray(listaEmpresas) ? listaEmpresas : []);
         }
       })
       .catch((e) => {
@@ -123,9 +127,15 @@ export default function Dashboard() {
   };
 
   const produtosFiltrados = useMemo(() => {
-    if (!anoFiltro || anoFiltro === '') return produtos;
-    return produtos.filter((p) => produtoAplicaAoAno(p, Number(anoFiltro)));
-  }, [produtos, anoFiltro]);
+    let lista = produtos;
+    if (anoFiltro && anoFiltro !== '') {
+      lista = lista.filter((p) => produtoAplicaAoAno(p, Number(anoFiltro)));
+    }
+    if (empresaFiltro && empresaFiltro !== '') {
+      lista = lista.filter((p) => String(p.empresaId || '') === String(empresaFiltro));
+    }
+    return lista;
+  }, [produtos, anoFiltro, empresaFiltro]);
 
   const projetoAplicaAoAno = (p, anoNum) => {
     if (!p) return false;
@@ -136,9 +146,15 @@ export default function Dashboard() {
   };
 
   const projetosFiltrados = useMemo(() => {
-    if (!anoFiltro || anoFiltro === '') return projetos;
-    return projetos.filter((p) => projetoAplicaAoAno(p, Number(anoFiltro)));
-  }, [projetos, anoFiltro]);
+    let lista = projetos;
+    if (anoFiltro && anoFiltro !== '') {
+      lista = lista.filter((p) => projetoAplicaAoAno(p, Number(anoFiltro)));
+    }
+    if (empresaFiltro && empresaFiltro !== '') {
+      lista = lista.filter((p) => String(p.empresaId || '') === String(empresaFiltro));
+    }
+    return lista;
+  }, [projetos, anoFiltro, empresaFiltro]);
 
   const capexAplicaAoAno = (c, ano) => {
     if (c.ano != null && c.ano === ano) return true;
@@ -150,10 +166,30 @@ export default function Dashboard() {
     return false;
   };
 
-  /** Totais e dados por sistema/produto para insights OPEX e CAPEX */
+  /** Lista de Capex/Opex atrelada à empresa: Opex via sistemas (empresaId), Capex via projetos (empresaId) */
+  const capexListFiltradoPorEmpresa = useMemo(() => {
+    if (!empresaFiltro || empresaFiltro === '') return capexList || [];
+    const list = (capexList || []).filter((c) => {
+      if ((c.classificacao || 'capex') === 'opex') {
+        const ids = c.produtoSoftwareIds || [];
+        return ids.some((sid) => {
+          const p = produtos.find((x) => String(x.id) === String(sid));
+          return p && String(p.empresaId || '') === String(empresaFiltro);
+        });
+      }
+      const ids = c.projetoIds || [];
+      return ids.some((pid) => {
+        const pr = projetos.find((x) => String(x.id) === String(pid));
+        return pr && String(pr.empresaId || '') === String(empresaFiltro);
+      });
+    });
+    return list;
+  }, [capexList, produtos, projetos, empresaFiltro]);
+
+  /** Totais e dados por sistema/produto para insights OPEX e CAPEX (empresa + ano + período) */
   const insightsOpexCapex = useMemo(() => {
     const anoNum = anoFiltro ? Number(anoFiltro) : null;
-    const listaCapex = (capexList || []).filter((c) => !anoNum || capexAplicaAoAno(c, anoNum));
+    const listaCapex = capexListFiltradoPorEmpresa.filter((c) => !anoNum || capexAplicaAoAno(c, anoNum));
 
     let totalOpexSistemas = 0;   // OPEX real (infra) dos sistemas
     let totalCapexSistemas = 0;  // CAPEX real (licenças) dos sistemas
@@ -374,7 +410,7 @@ export default function Dashboard() {
       totaisCapexProjetoComparativo,
       anoRefCapexProjeto,
     };
-  }, [produtosFiltrados, produtos, capexList, projetos, projetosFiltrados, anoFiltro, mult]);
+  }, [produtosFiltrados, produtos, capexListFiltradoPorEmpresa, projetos, projetosFiltrados, anoFiltro, mult]);
 
   /** Comparativo Capex vs custo real por área (ano selecionado) */
   const comparativoCapex = useMemo(() => {
@@ -391,7 +427,7 @@ export default function Dashboard() {
       custoPorAreaId[areaId].custoReal += custoAnual;
     });
     const capexPorAreaId = {};
-    (capexList || [])
+    (capexListFiltradoPorEmpresa || [])
       .filter((c) => (c.classificacao || 'capex') === 'capex' && capexAplicaAoAno(c, anoNum))
       .forEach((c) => {
         const areaId = c.areaId ? String(c.areaId) : null;
@@ -428,11 +464,14 @@ export default function Dashboard() {
       porAreaNome[nome] = status;
     });
     return { porArea, totais, porAreaNome };
-  }, [produtosFiltrados, capexList, anoFiltro]);
+  }, [produtosFiltrados, capexListFiltradoPorEmpresa, anoFiltro]);
 
   const ins = insightsOpexCapex || {};
   const temFiltroAno = Boolean(anoFiltro);
   const totaisCapex = (comparativoCapex && comparativoCapex.totais) || { acima: 0, abaixo: 0, noLimite: 0 };
+
+  const nomeEmpresaAtiva = empresaFiltro ? (empresas.find((e) => String(e.id) === String(empresaFiltro))?.nomeFantasia || empresas.find((e) => String(e.id) === String(empresaFiltro))?.razaoSocial || empresaFiltro) : null;
+  const resumoFiltros = [nomeEmpresaAtiva && `Empresa: ${truncar(nomeEmpresaAtiva, 30)}`, anoFiltro && `Ano: ${anoFiltro}`, periodoAtual && `Período: ${periodoAtual.label}`].filter(Boolean).join(' | ');
 
   if (carregando) {
     return (
@@ -458,23 +497,37 @@ export default function Dashboard() {
         <div className="dashboard-header-top">
           <div>
             <h1>Bem-vindo, {usuario?.nome || usuario?.login}</h1>
-            <p className="dashboard-subtitle">Insights de OPEX e CAPEX por produtos e sistemas</p>
+            <p className="dashboard-subtitle">
+              Insights de OPEX e CAPEX atrelados à empresa, ano e período
+              {resumoFiltros && <span className="dashboard-filtros-ativo"> — {resumoFiltros}</span>}
+            </p>
           </div>
           <div className="dashboard-filtros">
-            <div className="dashboard-periodo">
-              <span className="dashboard-periodo-label">Período dos custos:</span>
-              <div className="dashboard-periodo-btns">
-                {PERIODOS.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    className={`dashboard-periodo-btn ${periodoId === p.id ? 'ativo' : ''}`}
-                    onClick={() => setPeriodoId(p.id)}
-                    title={p.descricao}
-                  >
-                    {p.label}
-                  </button>
-                ))}
+            <div className="dashboard-periodo dashboard-empresa">
+              <span className="dashboard-periodo-label">Empresa:</span>
+              <div className="dashboard-periodo-btns dashboard-periodo-btns-empresa">
+                <button
+                  type="button"
+                  className={`dashboard-periodo-btn ${empresaFiltro === '' ? 'ativo' : ''}`}
+                  onClick={() => setEmpresaFiltro('')}
+                  title="Exibir todas as empresas"
+                >
+                  Todas
+                </button>
+                {empresas.map((e) => {
+                  const nome = e.nomeFantasia || e.razaoSocial || e.id;
+                  return (
+                    <button
+                      key={e.id}
+                      type="button"
+                      className={`dashboard-periodo-btn ${empresaFiltro === String(e.id) ? 'ativo' : ''}`}
+                      onClick={() => setEmpresaFiltro(String(e.id))}
+                      title={`Filtrar por ${nome}`}
+                    >
+                      {truncar(nome, 20)}
+                    </button>
+                  );
+                })}
               </div>
             </div>
             <div className="dashboard-periodo dashboard-ano">
@@ -497,6 +550,22 @@ export default function Dashboard() {
                     title={`Filtrar por ano ${a}`}
                   >
                     {a}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="dashboard-periodo">
+              <span className="dashboard-periodo-label">Período dos custos:</span>
+              <div className="dashboard-periodo-btns">
+                {PERIODOS.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    className={`dashboard-periodo-btn ${periodoId === p.id ? 'ativo' : ''}`}
+                    onClick={() => setPeriodoId(p.id)}
+                    title={p.descricao}
+                  >
+                    {p.label}
                   </button>
                 ))}
               </div>
