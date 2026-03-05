@@ -73,7 +73,6 @@ export default function ProjetosList() {
   return (
     <div className="cadastro-page cadastro-list-page">
       <div className="page-header">
-        <h1>Projetos</h1>
         <div className="page-header-actions">
           <input
             type="search"

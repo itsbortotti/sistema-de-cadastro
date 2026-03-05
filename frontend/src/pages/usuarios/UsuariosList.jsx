@@ -66,7 +66,6 @@ export default function UsuariosList() {
   return (
     <div className="cadastro-page cadastro-list-page">
       <div className="page-header">
-        <h1>Cadastro de Usuários</h1>
         <div className="page-header-actions">
           <input
             type="search"

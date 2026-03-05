@@ -65,7 +65,6 @@ export default function EmpresasList() {
   return (
     <div className="cadastro-page cadastro-list-page empresas-list-page">
       <div className="page-header">
-        <h1>Empresas</h1>
         <div className="page-header-actions">
           <input
             type="search"

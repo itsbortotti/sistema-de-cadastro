@@ -341,7 +341,6 @@ export default function ProdutosSoftwareList() {
   return (
     <div className="cadastro-page cadastro-list-page produtos-software-list-page">
       <div className="page-header">
-        <h1>Sistemas</h1>
         <div className="page-header-actions">
           <input
             type="search"

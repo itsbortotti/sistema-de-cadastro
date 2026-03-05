@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
-import { useNavigate, NavLink } from 'react-router-dom';
+import { useState, useMemo } from 'react';
+import { Outlet, useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { usePermissoes } from '../context/PermissoesContext';
 import { useTheme } from '../context/ThemeContext';
 import { ErrorBoundary } from './ErrorBoundary';
+import logoPrincipalBranco from '../../assets/images/logo_principal_branco.png';
+import logoBlocoAzul from '../../assets/images/logo_bloco_azul.png';
 import './Layout.css';
 
 const iconDashboard = (
@@ -87,6 +88,11 @@ const iconChevronRight = (
     <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
   </svg>
 );
+const iconChevronLeft = (
+  <svg className="nav-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+  </svg>
+);
 const iconLua = (
   <svg className="nav-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
     <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z" />
@@ -102,15 +108,50 @@ const iconProjetos = (
     <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
   </svg>
 );
+const iconFinanceiro = (
+  <svg className="nav-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z" />
+  </svg>
+);
+const iconSair = (
+  <svg className="topbar-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
+  </svg>
+);
+
+const ROTA_TITULO = {
+  '/': 'Dashboard',
+  '/usuarios': 'Usuários',
+  '/fornecedores': 'Fornecedores',
+  '/areas': 'Áreas',
+  '/hospedagens': 'Hospedagens',
+  '/formas-acesso': 'Formas de Acesso',
+  '/sistemas': 'Sistemas',
+  '/projetos': 'Projetos',
+  '/capex': 'Capex',
+  '/opex': 'Opex',
+  '/empresas': 'Empresas',
+  '/configuracoes': 'Permissões',
+};
+
+function getTituloPagina(pathname) {
+  const base = pathname.split('/').filter(Boolean)[0] || '';
+  const key = base ? `/${base}` : '/';
+  return ROTA_TITULO[key] ?? (base ? base.charAt(0).toUpperCase() + base.slice(1) : 'Dashboard');
+}
 
 export default function Layout() {
   const { usuario, logout } = useAuth();
   const { can, isAdmin } = usePermissoes();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuAberto, setMenuAberto] = useState(true);
+  const [financeiroAberto, setFinanceiroAberto] = useState(true);
   const [cadastrosAberto, setCadastrosAberto] = useState(true);
   const [configuracoesAberto, setConfiguracoesAberto] = useState(true);
+
+  const tituloPagina = useMemo(() => getTituloPagina(location.pathname), [location.pathname]);
 
   const handleLogout = async () => {
     await logout();
@@ -142,13 +183,45 @@ export default function Layout() {
           >
             {menuAberto ? iconFechar : iconMenu}
           </button>
-          <h2>Governança Financeira de Projetos</h2>
+          <img
+            src={logoPrincipalBranco}
+            alt="Gestão de Portfólio"
+            className="sidebar-logo"
+          />
         </div>
         <nav className="sidebar-nav">
           <NavLink to="/" end className={({ isActive }) => (isActive ? 'nav-link active nav-link-home' : 'nav-link nav-link-home')}>
             {iconDashboard}
             <span>DASHBOARD</span>
           </NavLink>
+
+          <div className="nav-group">
+            <button
+              type="button"
+              className={`nav-label nav-label-toggle ${financeiroAberto ? 'aberto' : ''}`}
+              onClick={() => setFinanceiroAberto((a) => !a)}
+              aria-expanded={financeiroAberto}
+              aria-label={financeiroAberto ? 'Recolher Financeiro' : 'Expandir Financeiro'}
+            >
+              {iconFinanceiro}
+              <span>Financeiro</span>
+              {financeiroAberto ? iconChevronDown : iconChevronRight}
+            </button>
+            <div className={`nav-group-itens ${financeiroAberto ? '' : 'recolhido'}`}>
+              <NavLink to="/capex" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                {iconCapex}
+                <span>Capex</span>
+              </NavLink>
+              <NavLink to="/opex" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                {iconCapex}
+                <span>Opex</span>
+              </NavLink>
+              <NavLink to="/projetos" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                {iconProjetos}
+                <span>Projetos</span>
+              </NavLink>
+            </div>
+          </div>
 
           <div className="nav-group">
             <button
@@ -167,10 +240,6 @@ export default function Layout() {
                 {iconAreas}
                 <span>Áreas</span>
               </NavLink>
-              <NavLink to="/capex" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
-                {iconCapex}
-                <span>Capex</span>
-              </NavLink>
               <NavLink to="/empresas" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
                 {iconEmpresas}
                 <span>Empresas</span>
@@ -186,14 +255,6 @@ export default function Layout() {
               <NavLink to="/hospedagens" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
                 {iconHospedagens}
                 <span>Hospedagens</span>
-              </NavLink>
-              <NavLink to="/opex" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
-                {iconCapex}
-                <span>Opex</span>
-              </NavLink>
-              <NavLink to="/projetos" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
-                {iconProjetos}
-                <span>Projetos</span>
               </NavLink>
               <NavLink to="/sistemas" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
                 {iconProdutosSoftware}
@@ -227,25 +288,46 @@ export default function Layout() {
           </div>
         </nav>
         <div className="sidebar-footer">
-          <button
-            type="button"
-            className="btn-toggle-theme"
-            onClick={toggleTheme}
-            aria-label={isDark ? 'Desativar modo escuro' : 'Ativar modo escuro'}
-            title={isDark ? 'Modo claro' : 'Modo escuro'}
-          >
-            {isDark ? iconSol : iconLua}
-          </button>
-          <span className="user-name">{usuario?.nome || usuario?.login}</span>
-          <button type="button" onClick={handleLogout} className="btn-logout">
-            Sair
-          </button>
+          <div className="sidebar-footer-powered">
+            <p className="sidebar-powered-text">Powered by</p>
+            <div className="sidebar-powered-logo-wrap">
+              <img src={logoPrincipalBranco} alt="Tecnosolve" className="sidebar-powered-logo-img" />
+            </div>
+            <button
+              type="button"
+              className="btn-chevron-sidebar"
+              onClick={() => setMenuAberto(false)}
+              aria-label="Recolher menu"
+            >
+              {iconChevronLeft}
+            </button>
+          </div>
         </div>
       </aside>
       <main className="main-content">
-        <ErrorBoundary>
-          <Outlet />
-        </ErrorBoundary>
+        <header className="topbar">
+          <h1 className="topbar-title">{tituloPagina}</h1>
+          <div className="topbar-actions">
+            <button
+              type="button"
+              className="topbar-btn topbar-btn-theme"
+              onClick={toggleTheme}
+              aria-label={isDark ? 'Desativar modo escuro' : 'Ativar modo escuro'}
+              title={isDark ? 'Modo claro' : 'Modo escuro'}
+            >
+              {isDark ? iconSol : iconLua}
+            </button>
+            <span className="topbar-user">{usuario?.nome || usuario?.login}</span>
+            <button type="button" onClick={handleLogout} className="topbar-btn topbar-btn-sair" aria-label="Sair">
+              {iconSair}
+            </button>
+          </div>
+        </header>
+        <div className="main-content-inner">
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
+        </div>
       </main>
     </div>
   );

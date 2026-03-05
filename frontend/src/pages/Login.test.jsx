@@ -19,7 +19,7 @@ describe('Login', () => {
         <Login />
       </MemoryRouter>
     );
-    expect(screen.getByRole('heading', { name: /Governança Financeira de Projetos/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Gestão de Portfólio/i })).toBeInTheDocument();
     expect(screen.getByText(/Entre com seu usuário e senha/)).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Login')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Senha')).toBeInTheDocument();

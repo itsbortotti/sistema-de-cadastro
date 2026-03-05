@@ -8,17 +8,22 @@
   min-height: 0;
 }
 
+.cadastro-list-page .page-header {
+  margin-top: 1.25rem;
+}
+
 .cadastro-list-page .page-header-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+  margin-left: auto;
 }
 
 .cadastro-list-page .page-header-actions .input-busca {
-  flex: 1;
   min-width: 200px;
   max-width: 320px;
+  width: 220px;
 }
 
 .cadastro-list-page .table-wrap {

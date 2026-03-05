@@ -57,7 +57,6 @@ export default function TimesList() {
   return (
     <div className="cadastro-page cadastro-list-page">
       <div className="page-header">
-        <h1>Times</h1>
         <div className="page-header-actions">
           <input
             type="search"

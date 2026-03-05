@@ -144,7 +144,6 @@ export default function PermissoesPage() {
     return (
       <div className="usuarios-page permissoes-page">
         <div className="page-header">
-          <h1>Configurações — Permissões</h1>
           <Link to="/" className="btn btn-secondary">Voltar ao início</Link>
         </div>
         <div className="permissoes-acesso-negado">
@@ -158,7 +157,6 @@ export default function PermissoesPage() {
     return (
       <div className="usuarios-page permissoes-page">
         <div className="page-header">
-          <h1>Configurações — Permissões</h1>
           <Link to="/" className="btn btn-secondary">Voltar ao início</Link>
         </div>
         <p className="erro-msg">{erro}</p>
@@ -169,7 +167,6 @@ export default function PermissoesPage() {
   return (
     <div className="usuarios-page permissoes-page">
       <div className="page-header">
-        <h1>Configurações — Permissões</h1>
         <Link to="/" className="btn btn-secondary">Voltar ao início</Link>
       </div>
       <p className="page-desc">

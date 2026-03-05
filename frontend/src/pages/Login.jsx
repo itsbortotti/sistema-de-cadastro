@@ -30,7 +30,7 @@ export default function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1>Governança Financeira de Projetos</h1>
+        <h1>Gestão de Portfólio</h1>
         <p className="login-subtitle">Entre com seu usuário e senha</p>
         <form onSubmit={handleSubmit}>
           <label>

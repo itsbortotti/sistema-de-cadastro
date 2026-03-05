@@ -129,7 +129,6 @@ export default function CapexList({ tipo = 'capex' }) {
   return (
     <div className="cadastro-page cadastro-list-page capex-list-page">
       <div className="page-header">
-        <h1>{labelTipo}</h1>
         <div className="page-header-actions">
           <input
             type="search"
