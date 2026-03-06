@@ -8,10 +8,13 @@ import {
   hospedagensApi,
   formasAcessoApi,
   empresasApi,
+  timesApi,
+  marcasAtendidasApi,
 } from '../../api/client';
 import AcoesListagem from '../../components/AcoesListagem';
 import ConfigColunasModal from '../../components/ConfigColunasModal';
 import { useListColumns } from '../../hooks/useListColumns';
+import { usePermissoes } from '../../context/PermissoesContext';
 import '../usuarios/Usuarios.css';
 import '../CadastroListLayout.css';
 import './ProdutosSoftwareList.css';
@@ -34,6 +37,7 @@ const COLUNAS_SISTEMAS = [
   { id: 'controleAcessoPorUsuario', label: 'Controle de Acesso por Usuário?' },
   { id: 'autenticacaoAdSso', label: 'Autenticação por AD / SSO?' },
   { id: 'grauSatisfacao', label: 'Grau de Satisfação' },
+  { id: 'tiMe', label: 'TI ME' },
   { id: 'problemasEnfrentados', label: 'Problemas Enfrentados' },
 ];
 
@@ -106,6 +110,7 @@ const MAPEAMENTO_CSV = {
   'hospedagem': 'hospedagemNome',
   'on premises': 'onPremisesSites',
   'se on premises, separar por site': 'onPremisesSites',
+  'se on premises separar por site': 'onPremisesSites',
   'forma de acesso': 'formaAcessoNome',
   'forma de acesso ao sistema': 'formaAcessoNome',
   'integrações': 'integracoes',
@@ -117,6 +122,7 @@ const MAPEAMENTO_CSV = {
   'autenticacao por ad / sso': 'autenticacaoAdSso',
   'grau de satisfação': 'grauSatisfacao',
   'grau de satisfacao': 'grauSatisfacao',
+  'ti me': 'tiMe',
   'problemas enfrentados': 'problemasEnfrentados',
   'custo mensal sistema': 'custoMensalSistema',
   'custo mensal infraestrutura': 'custoMensalInfraestrutura',
@@ -133,6 +139,8 @@ const MAPEAMENTO_CSV = {
   'data fim': 'dataFim',
   'início': 'dataInicio',
   'fim': 'dataFim',
+  'time': 'timeNome',
+  'times': 'timeNome',
 };
 
 function normalizarHeader(h) {
@@ -160,10 +168,11 @@ export default function ProdutosSoftwareList() {
   const [arquivoPreview, setArquivoPreview] = useState(null);
   const [importando, setImportando] = useState(false);
   const [resultadoImportacao, setResultadoImportacao] = useState(null);
-  const [listasAux, setListasAux] = useState({ fornecedores: [], areas: [], empresas: [], usuarios: [], hospedagens: [], formasAcesso: [] });
+  const [listasAux, setListasAux] = useState({ fornecedores: [], areas: [], empresas: [], usuarios: [], hospedagens: [], formasAcesso: [], times: [], marcasAtendidas: [] });
   const [busca, setBusca] = useState('');
   const inputFileRef = useRef(null);
   const { visibleIds, setVisibleIds, allColumns } = useListColumns('sistemas', COLUNAS_SISTEMAS);
+  const { can } = usePermissoes();
   const [configColunasAberto, setConfigColunasAberto] = useState(false);
 
   const carregar = () => {
@@ -175,16 +184,28 @@ export default function ProdutosSoftwareList() {
 
   useEffect(() => {
     if (modalImportarAberto) {
-      Promise.all([
+      Promise.allSettled([
         fornecedoresApi.listar(),
         areasApi.listar(),
         empresasApi.listar(),
         usuariosApi.listar(),
         hospedagensApi.listar(),
         formasAcessoApi.listar(),
-      ])
-        .then(([f, a, emp, u, h, fa]) => setListasAux({ fornecedores: f, areas: a, empresas: Array.isArray(emp) ? emp : [], usuarios: u, hospedagens: h, formasAcesso: fa }))
-        .catch(() => {});
+        timesApi.listar(),
+        marcasAtendidasApi.listar(),
+      ]).then((results) => {
+        const [f, a, emp, u, h, fa, t, marcas] = results.map((r) => (r.status === 'fulfilled' ? r.value : []));
+        setListasAux({
+          fornecedores: Array.isArray(f) ? f : [],
+          areas: Array.isArray(a) ? a : [],
+          empresas: Array.isArray(emp) ? emp : [],
+          usuarios: Array.isArray(u) ? u : [],
+          hospedagens: Array.isArray(h) ? h : [],
+          formasAcesso: Array.isArray(fa) ? fa : [],
+          times: Array.isArray(t) ? t : [],
+          marcasAtendidas: Array.isArray(marcas) ? marcas : [],
+        });
+      });
     }
   }, [modalImportarAberto]);
 
@@ -243,6 +264,7 @@ export default function ProdutosSoftwareList() {
       else if (key === 'usuarioNegocioNome') obj.usuarioNegocioId = buscarPorNome(listas.usuarios, valor) || null;
       else if (key === 'hospedagemNome') obj.hospedagemId = buscarPorNome(listas.hospedagens, valor) || null;
       else if (key === 'formaAcessoNome') obj.formaAcessoId = buscarPorNome(listas.formasAcesso, valor) || null;
+      else if (key === 'timeNome') obj.timeId = buscarPorNome(listas.times, valor) || null;
       else if (key === 'controleAcessoPorUsuario') obj.controleAcessoPorUsuario = simNaoValor(valor);
       else if (key === 'autenticacaoAdSso') obj.autenticacaoAdSso = simNaoValor(valor);
       else if (key === 'usuariosQtdAproximada') obj.usuariosQtdAproximada = valor === '' ? null : Number(valor);
@@ -252,7 +274,13 @@ export default function ProdutosSoftwareList() {
       else if (key === 'dataInicio') obj.dataInicio = valor === '' ? null : valor;
       else if (key === 'dataFim') obj.dataFim = valor === '' ? null : valor;
       else if (key === 'grauSatisfacao') obj.grauSatisfacao = valor === '' ? null : valor;
-      else obj[key] = valor;
+      else if (key === 'tiMe') {
+        const v = String(valor).toLowerCase().trim();
+        obj.tiMe = ['tolerar', 'investir', 'migrar', 'eliminar'].includes(v) ? v : null;
+      } else if (key === 'marcasAtendidas') {
+        const nomes = String(valor).split(/[,;]/).map((n) => n.trim()).filter(Boolean);
+        obj.marcasAtendidasIds = nomes.map((n) => buscarPorNome(listas.marcasAtendidas, n)).filter(Boolean);
+      } else obj[key] = valor;
     });
     return {
       nomeSistema: obj.nomeSistema || '',
@@ -260,7 +288,7 @@ export default function ProdutosSoftwareList() {
       fornecedorId: obj.fornecedorId ?? null,
       finalidadePrincipal: obj.finalidadePrincipal || '',
       breveDescritivo: obj.breveDescritivo || '',
-      marcasAtendidas: obj.marcasAtendidas || '',
+      marcasAtendidasIds: obj.marcasAtendidasIds ?? [],
       usuariosQtdAproximada: obj.usuariosQtdAproximada ?? null,
       areaId: obj.areaId ?? null,
       responsavelTiId: obj.responsavelTiId ?? null,
@@ -268,10 +296,12 @@ export default function ProdutosSoftwareList() {
       hospedagemId: obj.hospedagemId ?? null,
       onPremisesSites: obj.onPremisesSites || '',
       formaAcessoId: obj.formaAcessoId ?? null,
+      timeId: obj.timeId ?? null,
       integracoes: obj.integracoes || '',
       controleAcessoPorUsuario: Boolean(obj.controleAcessoPorUsuario),
       autenticacaoAdSso: Boolean(obj.autenticacaoAdSso),
       grauSatisfacao: obj.grauSatisfacao ?? null,
+      tiMe: obj.tiMe ?? null,
       problemasEnfrentados: obj.problemasEnfrentados || '',
       custoMensalSistema: obj.custoMensalSistema ?? null,
       custoMensalInfraestrutura: obj.custoMensalInfraestrutura ?? null,
@@ -329,6 +359,7 @@ export default function ProdutosSoftwareList() {
             p.hospedagemNome,
             p.formaAcessoNome,
             p.integracoes,
+            p.tiMe,
             p.problemasEnfrentados,
           ].join(' ') || '';
         return normalizarTexto(texto).includes(termoBusca);
@@ -353,9 +384,11 @@ export default function ProdutosSoftwareList() {
           <button type="button" className="btn btn-secondary btn-config-colunas" onClick={() => setConfigColunasAberto(true)} title="Escolher e ordenar colunas">
             ⚙ Colunas
           </button>
-          <button type="button" className="btn btn-outline" onClick={() => setModalImportarAberto(true)}>
-            Importar CSV
-          </button>
+          {can('produtos-software', 'criar') && (
+            <button type="button" className="btn btn-outline" onClick={() => setModalImportarAberto(true)}>
+              Importar CSV
+            </button>
+          )}
           <Link to="/sistemas/novo" className="btn btn-primary">Novo sistema</Link>
         </div>
       </div>
@@ -392,7 +425,7 @@ export default function ProdutosSoftwareList() {
                     if (id === 'fornecedorNome') return <td key={id}>{v(p.fornecedorNome)}</td>;
                     if (id === 'finalidadePrincipal') return <td key={id}>{v(p.finalidadePrincipal)}</td>;
                     if (id === 'breveDescritivo') return <td key={id} className="td-texto" title={p.breveDescritivo}>{v(p.breveDescritivo)}</td>;
-                    if (id === 'marcasAtendidas') return <td key={id}>{v(p.marcasAtendidas)}</td>;
+                    if (id === 'marcasAtendidas') return <td key={id} className="td-texto" title={p.marcasAtendidasNomes}>{v(p.marcasAtendidasNomes)}</td>;
                     if (id === 'usuariosQtd') return <td key={id} className="td-numero">{p.usuariosQtdAproximada != null ? p.usuariosQtdAproximada : '—'}</td>;
                     if (id === 'areaNome') return <td key={id}>{v(p.areaNome)}</td>;
                     if (id === 'responsavelTiNome') return <td key={id}>{v(p.responsavelTiNome)}</td>;
@@ -404,8 +437,9 @@ export default function ProdutosSoftwareList() {
                     if (id === 'controleAcessoPorUsuario') return <td key={id}>{simNao(p.controleAcessoPorUsuario)}</td>;
                     if (id === 'autenticacaoAdSso') return <td key={id}>{simNao(p.autenticacaoAdSso)}</td>;
                     if (id === 'grauSatisfacao') return <td key={id}>{v(p.grauSatisfacao)}</td>;
+                    if (id === 'tiMe') return <td key={id}>{p.tiMe ? String(p.tiMe).charAt(0).toUpperCase() + String(p.tiMe).slice(1) : '—'}</td>;
                     if (id === 'problemasEnfrentados') return <td key={id} className="td-texto" title={p.problemasEnfrentados}>{v(p.problemasEnfrentados)}</td>;
-                    return null;
+                    return <td key={id}>{v(p[id])}</td>;
                   })}
                   <td className="td-acoes">
                     <AcoesListagem basePath="/sistemas" id={p.id} onExcluir={() => handleExcluir(p.id, p.nomeSistema)} excluindo={excluindo === p.id} />
@@ -433,6 +467,9 @@ export default function ProdutosSoftwareList() {
             <p className="modal-desc">
               Selecione um arquivo CSV com a primeira linha contendo os nomes das colunas. Use vírgula ou ponto e vírgula como separador.
               Campos com texto que contém vírgula devem estar entre aspas.
+            </p>
+            <p className="modal-desc">
+              Coluna <strong>TI ME</strong>: use um dos valores <strong>Tolerar</strong>, <strong>Investir</strong>, <strong>Migrar</strong> ou <strong>Eliminar</strong> (ou deixe em branco).
             </p>
             <p className="modal-desc">
               <a href="/exemplo-produtos-software.csv" download className="link-download">Baixar CSV de exemplo</a>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import BtnVoltarHeader from '../../components/BtnVoltarHeader';
 import { hospedagensApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
 import '../CadastroFormLayout.css';
@@ -52,10 +53,8 @@ export default function HospedagemForm({ somenteLeitura = false }) {
   return (
     <div className="cadastro-page form-cadastro-page">
       <div className="page-header">
-        <h1>{readOnly ? 'Ver hospedagem' : isEdicao ? 'Editar hospedagem' : 'Nova hospedagem'}</h1>
-        <div className="page-header-actions">
-          <Link to="/hospedagens" className="btn btn-secondary">Voltar</Link>
-        </div>
+        <BtnVoltarHeader to="/hospedagens" />
+        <h1>{readOnly ? 'Ver hospedagem' : isEdicao ? 'Editar hospedagem' : ''}</h1>
       </div>
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}

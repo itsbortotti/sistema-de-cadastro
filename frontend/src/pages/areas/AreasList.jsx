@@ -47,7 +47,8 @@ export default function AreasList() {
   const termoBusca = normalizarTexto(busca).trim();
   const listaFiltrada = termoBusca
     ? lista.filter((item) => {
-        const texto = [item.nome, item.codigo, item.responsavel, item.descricao].join(' ');
+        const resp = item.responsavelNome ?? item.responsavel ?? '';
+        const texto = [item.nome, item.codigo, resp, item.descricao].join(' ');
         return normalizarTexto(texto).includes(termoBusca);
       })
     : lista;
@@ -95,7 +96,7 @@ export default function AreasList() {
                   {visibleIds.map((id) => {
                     if (id === 'nome') return <td key={id} className="td-texto" title={item.nome}>{v(item.nome)}</td>;
                     if (id === 'codigo') return <td key={id}>{v(item.codigo)}</td>;
-                    if (id === 'responsavel') return <td key={id} className="td-texto" title={item.responsavel}>{v(item.responsavel)}</td>;
+                    if (id === 'responsavel') return <td key={id} className="td-texto" title={item.responsavelNome ?? item.responsavel}>{v(item.responsavelNome ?? item.responsavel)}</td>;
                     if (id === 'descricao') return <td key={id} className="td-texto" title={item.descricao}>{v(item.descricao)}</td>;
                     return null;
                   })}

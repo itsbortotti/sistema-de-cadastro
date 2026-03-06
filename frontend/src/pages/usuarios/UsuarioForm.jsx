@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { usuariosApi } from '../../api/client';
+import BtnVoltarHeader from '../../components/BtnVoltarHeader';
+import { usuariosApi, perfisApi } from '../../api/client';
 import './Usuarios.css';
 import '../CadastroFormLayout.css';
 
@@ -13,9 +14,14 @@ export default function UsuarioForm({ somenteLeitura = false }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [senhaConfirma, setSenhaConfirma] = useState('');
-  const [tipo, setTipo] = useState('membro');
+  const [perfilId, setPerfilId] = useState('');
+  const [perfis, setPerfis] = useState([]);
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
+
+  useEffect(() => {
+    perfisApi.listar().then(setPerfis).catch(() => setPerfis([]));
+  }, []);
 
   useEffect(() => {
     if (isEdicao) {
@@ -25,11 +31,14 @@ export default function UsuarioForm({ somenteLeitura = false }) {
           setNome(u.nome);
           setLogin(u.login);
           setEmail(u.email || '');
-          setTipo(u.tipo || 'membro');
+          setPerfilId(u.perfilId || '');
         })
         .catch((e) => setErro(e.message));
+    } else if (!isEdicao && perfis.length > 0 && !perfilId) {
+      const membro = perfis.find((p) => p.nome === 'Membro');
+      setPerfilId(membro ? membro.id : perfis[0].id);
     }
-  }, [id, isEdicao]);
+  }, [id, isEdicao, perfis]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,11 +58,11 @@ export default function UsuarioForm({ somenteLeitura = false }) {
           nome,
           login,
           email,
-          tipo,
+          perfilId: perfilId || undefined,
           ...(senha ? { senha } : {}),
         });
       } else {
-        await usuariosApi.criar({ nome, login, email, senha, tipo });
+        await usuariosApi.criar({ nome, login, email, senha, perfilId: perfilId || undefined });
       }
       navigate('/usuarios');
     } catch (err) {
@@ -67,10 +76,8 @@ export default function UsuarioForm({ somenteLeitura = false }) {
   return (
     <div className="cadastro-page form-cadastro-page">
       <div className="page-header">
-        <h1>{readOnly ? 'Ver usuário' : isEdicao ? 'Editar usuário' : 'Novo usuário'}</h1>
-        <div className="page-header-actions">
-          <Link to="/usuarios" className="btn btn-secondary">Voltar</Link>
-        </div>
+        <BtnVoltarHeader to="/usuarios" />
+        <h1>{readOnly ? 'Ver usuário' : isEdicao ? 'Editar usuário' : ''}</h1>
       </div>
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
@@ -91,10 +98,11 @@ export default function UsuarioForm({ somenteLeitura = false }) {
           </label>
           <label className="form-group">
             <span className="form-label">Perfil</span>
-            <select value={tipo} onChange={(e) => setTipo(e.target.value)} disabled={readOnly}>
-              <option value="admin">Administrador</option>
-              <option value="membro">Membro</option>
-              <option value="visualizacao">Apenas visualização</option>
+            <select value={perfilId} onChange={(e) => setPerfilId(e.target.value)} disabled={readOnly}>
+              <option value="">Selecione um perfil</option>
+              {perfis.map((p) => (
+                <option key={p.id} value={p.id}>{p.nome}</option>
+              ))}
             </select>
           </label>
         </section>

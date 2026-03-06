@@ -1,8 +1,70 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import BtnVoltarHeader from '../../components/BtnVoltarHeader';
 import { capexApi, areasApi, fornecedoresApi, produtosSoftwareApi, projetosApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
 import '../CadastroFormLayout.css';
+
+function ModalNovo({ titulo, labelCampo = 'Nome', aberto, onFechar, onSalvar, salvando }) {
+  const [nome, setNome] = useState('');
+  useEffect(() => {
+    if (aberto) setNome('');
+  }, [aberto]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const n = nome.trim();
+    if (!n) return;
+    await onSalvar(n);
+    onFechar();
+  };
+
+  if (!aberto) return null;
+  return (
+    <div className="modal-overlay" onClick={onFechar} role="dialog" aria-modal="true" aria-labelledby="modal-capex-novo-titulo">
+      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+        <h2 id="modal-capex-novo-titulo" className="modal-titulo">{titulo}</h2>
+        <form onSubmit={handleSubmit}>
+          <label className="form-group">
+            <span className="form-label">{labelCampo}</span>
+            <input
+              type="text"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              placeholder={`Digite o ${labelCampo.toLowerCase()}...`}
+              autoFocus
+            />
+          </label>
+          <div className="modal-acoes">
+            <button type="button" className="btn btn-secondary" onClick={onFechar}>Cancelar</button>
+            <button type="submit" className="btn btn-primary" disabled={salvando || !nome.trim()}>
+              {salvando ? 'Salvando...' : 'Cadastrar'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function SelectComNovo({ label, value, onChange, opcoes, onAbrirNovo, placeholder = '— Selecione —', required }) {
+  return (
+    <label className="form-group">
+      <span className="form-label">{label}</span>
+      <div className="select-com-novo">
+        <select value={value} onChange={(e) => onChange(e.target.value)} required={required}>
+          <option value="">{placeholder}</option>
+          {opcoes.map((o) => (
+            <option key={o.id} value={o.id}>{o.nome}</option>
+          ))}
+        </select>
+        <button type="button" className="btn btn-novo-item" onClick={onAbrirNovo} title={`Cadastrar nova ${label}`}>
+          + Novo
+        </button>
+      </div>
+    </label>
+  );
+}
 
 export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
   const { id } = useParams();
@@ -32,8 +94,11 @@ export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
 
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
+  const [popupTipo, setPopupTipo] = useState(null);
+  const [popupSalvando, setPopupSalvando] = useState(false);
 
   const mapaAreaNome = areas.reduce((acc, a) => ({ ...acc, [a.id]: a.nome || '' }), {});
+
   const busca = buscaAssociados.trim().toLowerCase();
   const produtosFiltrados = tipo === 'opex'
     ? (busca ? produtos.filter((p) => (p.nomeSistema || '').toLowerCase().includes(busca)) : produtos)
@@ -61,7 +126,14 @@ export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
   const produtosSelecionados = produtos.filter((p) => produtoSoftwareIds.includes(p.id));
   const projetosSelecionados = projetos.filter((p) => projetoIds.includes(p.id));
 
-  const valorTotal = valor !== '' && !Number.isNaN(Number(valor)) ? Number(valor) : 0;
+  /** Sistemas associados aos projetos selecionados (API retorna sistemaNomes no projeto) — somente leitura */
+  const sistemasDosProjetosSelecionados = useMemo(() => {
+    if (tipo !== 'capex' || projetosSelecionados.length === 0) return [];
+    const nomes = projetosSelecionados.flatMap((p) => p.sistemaNomes || []).filter(Boolean);
+    return [...new Set(nomes)];
+  }, [tipo, projetosSelecionados]);
+
+  const valorTotal = parseMoedaBRL(valor) ?? 0;
   const totalEntradas = entradas.reduce((acc, e) => acc + (Number(e.valor) || 0), 0);
   const saldoDisponivel = valorTotal - totalEntradas;
 
@@ -85,6 +157,34 @@ export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
   function formatarMoeda(n) {
     if (n == null || Number.isNaN(n)) return '—';
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(n);
+  }
+
+  /** Formata o valor digitado no input como moeda BRL (ex.: 1234,56 ou 1.234,56) */
+  function formatarMoedaInput(value) {
+    const s = String(value ?? '').replace(/[^\d,]/g, '');
+    if (!s) return '';
+    const idx = s.indexOf(',');
+    const intPart = idx >= 0 ? s.slice(0, idx) : s;
+    const decPart = idx >= 0 ? s.slice(idx + 1).slice(0, 2) : '';
+    const intFormatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.') || '0';
+    return decPart ? `${intFormatted},${decPart}` : intFormatted;
+  }
+
+  /** Converte string em formato BRL (1.234,56) para número */
+  function parseMoedaBRL(str) {
+    if (str == null || String(str).trim() === '') return null;
+    const s = String(str).trim().replace(/\./g, '').replace(',', '.');
+    const n = parseFloat(s);
+    return Number.isNaN(n) ? null : n;
+  }
+
+  /** Converte número para string no formato do input (BRL) */
+  function numeroParaInputMoeda(n) {
+    if (n == null || Number.isNaN(n)) return '';
+    const fixed = Number(n).toFixed(2);
+    const [intPart, decPart] = fixed.split('.');
+    const intFormatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${intFormatted},${decPart}`;
   }
 
   /** Lista de meses entre dataInicio e dataFim (YYYY-MM-DD), no formato { value: 'MM/YYYY', label: 'Jan/2025' } */
@@ -137,7 +237,7 @@ export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
           setAreaId(c.areaId ?? '');
           setClassificacao(classif);
           setFornecedorId(c.fornecedorId ?? '');
-          setValor(c.valor != null ? String(c.valor) : '');
+          setValor(c.valor != null ? numeroParaInputMoeda(c.valor) : '');
           setDataInicio(c.dataInicio ?? (c.ano ? `${c.ano}-01-01` : ''));
           setDataFim(c.dataFim ?? (c.ano ? `${c.ano}-12-31` : ''));
           setProdutoSoftwareIds(Array.isArray(c.produtoSoftwareIds) ? c.produtoSoftwareIds : []);
@@ -185,6 +285,27 @@ export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
     }
   };
 
+  const handleSalvarPopup = async (nomeVal) => {
+    setPopupSalvando(true);
+    setErro('');
+    try {
+      if (popupTipo === 'area') {
+        const novo = await areasApi.criar({ nome: nomeVal.trim() });
+        setAreas((prev) => [...prev, novo]);
+        setAreaId(novo.id);
+      } else if (popupTipo === 'fornecedor') {
+        const novo = await fornecedoresApi.criar({ nome: nomeVal.trim() });
+        setFornecedores((prev) => [...prev, novo]);
+        setFornecedorId(novo.id);
+      }
+    } catch (e) {
+      setErro(e?.message || 'Erro ao cadastrar');
+    } finally {
+      setPopupSalvando(false);
+      setPopupTipo(null);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErro('');
@@ -200,11 +321,7 @@ export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
       setErro('Selecione pelo menos um sistema associado ao Opex.');
       return;
     }
-    const valorNum = valor === '' ? null : Number(valor);
-    if (valorNum != null && Number.isNaN(valorNum)) {
-      setErro('Valor deve ser um número.');
-      return;
-    }
+    const valorNum = parseMoedaBRL(valor);
     const ini = dataInicio.trim() || null;
     const fim = dataFim.trim() || null;
     if (ini && fim) {
@@ -249,10 +366,8 @@ export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
   return (
     <div className="cadastro-page form-cadastro-page">
       <div className="page-header">
-        <h1>{readOnly ? `Ver ${labelTipo}` : isEdicao ? `Editar ${labelTipo}` : `Novo ${labelTipo}`}</h1>
-        <div className="page-header-actions">
-          <Link to={`/${tipo}`} className="btn btn-secondary">Voltar</Link>
-        </div>
+        <BtnVoltarHeader to={`/${tipo}`} />
+        <h1>{readOnly ? `Ver ${labelTipo}` : isEdicao ? `Editar ${labelTipo}` : ''}</h1>
       </div>
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
@@ -293,6 +408,12 @@ export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
                   </label>
                 ))}
               </div>
+              {sistemasDosProjetosSelecionados.length > 0 && (
+                <div className="capex-sistemas-projeto-wrap" aria-readonly>
+                  <span className="form-label capex-sistemas-projeto-label">Sistemas associados ao(s) projeto(s) selecionado(s)</span>
+                  <p className="capex-sistemas-projeto-lista">{sistemasDosProjetosSelecionados.join(', ')}</p>
+                </div>
+              )}
             </>
           ) : (
             <>
@@ -338,33 +459,32 @@ export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
 
         <section className="form-secao">
           <h2 className="form-secao-titulo">Dados do {labelTipo}</h2>
-          <label className="form-group">
-            <span className="form-label">Área *</span>
-            <select value={areaId} onChange={(e) => setAreaId(e.target.value)} required>
-              <option value="">— Selecione a área —</option>
-              {areas.map((a) => (
-                <option key={a.id} value={a.id}>{a.nome}</option>
-              ))}
-            </select>
-          </label>
-          <label className="form-group">
-            <span className="form-label">Fornecedor</span>
-            <select value={fornecedorId} onChange={(e) => setFornecedorId(e.target.value)}>
-              <option value="">— Nenhum / Selecione —</option>
-              {fornecedores.map((f) => (
-                <option key={f.id} value={f.id}>{f.nome}</option>
-              ))}
-            </select>
-          </label>
+          <SelectComNovo
+            label="Área *"
+            value={areaId}
+            onChange={setAreaId}
+            opcoes={areas}
+            onAbrirNovo={() => setPopupTipo('area')}
+            placeholder="— Selecione a área —"
+            required
+          />
+          <SelectComNovo
+            label="Fornecedor"
+            value={fornecedorId}
+            onChange={setFornecedorId}
+            opcoes={fornecedores}
+            onAbrirNovo={() => setPopupTipo('fornecedor')}
+            placeholder="— Nenhum / Selecione —"
+          />
           <label className="form-group">
             <span className="form-label">Valor (R$)</span>
             <input
-              type="number"
-              step="0.01"
-              min={0}
+              type="text"
+              inputMode="decimal"
               value={valor}
-              onChange={(e) => setValor(e.target.value)}
+              onChange={(e) => setValor(formatarMoedaInput(e.target.value))}
               placeholder="0,00"
+              className="input-moeda"
             />
           </label>
         </section>
@@ -512,6 +632,23 @@ export default function CapexForm({ tipo = 'capex', somenteLeitura = false }) {
         </div>
         )}
       </form>
+
+      <ModalNovo
+        titulo="Nova Área"
+        labelCampo="Nome"
+        aberto={popupTipo === 'area'}
+        onFechar={() => setPopupTipo(null)}
+        onSalvar={handleSalvarPopup}
+        salvando={popupSalvando}
+      />
+      <ModalNovo
+        titulo="Novo Fornecedor"
+        labelCampo="Nome"
+        aberto={popupTipo === 'fornecedor'}
+        onFechar={() => setPopupTipo(null)}
+        onSalvar={handleSalvarPopup}
+        salvando={popupSalvando}
+      />
     </div>
   );
 }

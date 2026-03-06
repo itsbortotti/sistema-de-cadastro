@@ -1,8 +1,72 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { areasApi } from '../../api/client';
+import BtnVoltarHeader from '../../components/BtnVoltarHeader';
+import { areasApi, pessoasApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
 import '../CadastroFormLayout.css';
+
+function ModalNovaPessoa({ aberto, onFechar, onSalvar, salvando }) {
+  const [nome, setNome] = useState('');
+  useEffect(() => {
+    if (aberto) setNome('');
+  }, [aberto]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const n = nome.trim();
+    if (!n) return;
+    await onSalvar(n);
+    onFechar();
+  };
+
+  if (!aberto) return null;
+  return (
+    <div className="modal-overlay" onClick={onFechar} role="dialog" aria-modal="true" aria-labelledby="modal-area-pessoa-titulo">
+      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+        <h2 id="modal-area-pessoa-titulo" className="modal-titulo">Nova pessoa</h2>
+        <form onSubmit={handleSubmit}>
+          <label className="form-group">
+            <span className="form-label">Nome *</span>
+            <input
+              type="text"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              placeholder="Nome completo"
+              autoFocus
+            />
+          </label>
+          <div className="modal-acoes">
+            <button type="button" className="btn btn-secondary" onClick={onFechar}>Cancelar</button>
+            <button type="submit" className="btn btn-primary" disabled={salvando || !nome.trim()}>
+              {salvando ? 'Salvando...' : 'Cadastrar'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function SelectComNovo({ label, value, onChange, opcoes, onAbrirNovo, placeholder = '— Selecione —', readOnly }) {
+  return (
+    <label className="form-group">
+      <span className="form-label">{label}</span>
+      <div className="select-com-novo">
+        <select value={value} onChange={(e) => onChange(e.target.value)} disabled={readOnly} readOnly={readOnly}>
+          <option value="">{placeholder}</option>
+          {opcoes.map((o) => (
+            <option key={o.id} value={o.id}>{o.nome}</option>
+          ))}
+        </select>
+        {!readOnly && (
+          <button type="button" className="btn btn-novo-item" onClick={onAbrirNovo} title="Cadastrar nova pessoa">
+            + Novo
+          </button>
+        )}
+      </div>
+    </label>
+  );
+}
 
 export default function AreaForm({ somenteLeitura = false }) {
   const { id } = useParams();
@@ -10,13 +74,20 @@ export default function AreaForm({ somenteLeitura = false }) {
   const isEdicao = Boolean(id);
   const readOnly = somenteLeitura;
 
+  const [pessoas, setPessoas] = useState([]);
   const [nome, setNome] = useState('');
   const [codigo, setCodigo] = useState('');
   const [descricao, setDescricao] = useState('');
-  const [responsavel, setResponsavel] = useState('');
+  const [responsavelId, setResponsavelId] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
+  const [popupAberto, setPopupAberto] = useState(false);
+  const [popupSalvando, setPopupSalvando] = useState(false);
+
+  useEffect(() => {
+    pessoasApi.listar().then(setPessoas).catch((e) => setErro(e.message));
+  }, []);
 
   useEffect(() => {
     if (isEdicao && id) {
@@ -26,19 +97,34 @@ export default function AreaForm({ somenteLeitura = false }) {
           setNome(a.nome || '');
           setCodigo(a.codigo || '');
           setDescricao(a.descricao || '');
-          setResponsavel(a.responsavel || '');
+          setResponsavelId(a.responsavelId || '');
           setObservacoes(a.observacoes || '');
         })
         .catch((e) => setErro(e.message));
     }
   }, [id, isEdicao]);
 
+  const handleSalvarNovaPessoa = async (nomeVal) => {
+    setPopupSalvando(true);
+    setErro('');
+    try {
+      const nova = await pessoasApi.criar({ nome: nomeVal.trim() });
+      setPessoas((prev) => [...prev, nova]);
+      setResponsavelId(nova.id);
+    } catch (e) {
+      setErro(e?.message || 'Erro ao cadastrar pessoa');
+    } finally {
+      setPopupSalvando(false);
+      setPopupAberto(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErro('');
     setEnviando(true);
     try {
-      const payload = { nome, codigo, descricao, responsavel, observacoes };
+      const payload = { nome, codigo, descricao, responsavelId: responsavelId || null, observacoes };
       if (isEdicao) await areasApi.atualizar(id, payload);
       else await areasApi.criar(payload);
       navigate('/areas');
@@ -52,10 +138,8 @@ export default function AreaForm({ somenteLeitura = false }) {
   return (
     <div className="cadastro-page form-cadastro-page">
       <div className="page-header">
-        <h1>{readOnly ? 'Ver área' : isEdicao ? 'Editar área' : 'Nova área'}</h1>
-        <div className="page-header-actions">
-          <Link to="/areas" className="btn btn-secondary">Voltar</Link>
-        </div>
+        <BtnVoltarHeader to="/areas" />
+        <h1>{readOnly ? 'Ver área' : isEdicao ? 'Editar área' : ''}</h1>
       </div>
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
@@ -74,10 +158,15 @@ export default function AreaForm({ somenteLeitura = false }) {
             <span className="form-label">Descrição</span>
             <input type="text" value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="Breve descrição" readOnly={readOnly} disabled={readOnly} />
           </label>
-          <label className="form-group">
-            <span className="form-label">Responsável</span>
-            <input type="text" value={responsavel} onChange={(e) => setResponsavel(e.target.value)} placeholder="Nome do responsável" readOnly={readOnly} disabled={readOnly} />
-          </label>
+          <SelectComNovo
+            label="Responsável"
+            value={responsavelId}
+            onChange={setResponsavelId}
+            opcoes={pessoas}
+            onAbrirNovo={() => setPopupAberto(true)}
+            placeholder="— Selecione uma pessoa —"
+            readOnly={readOnly}
+          />
         </section>
 
         <section className="form-secao">
@@ -97,6 +186,13 @@ export default function AreaForm({ somenteLeitura = false }) {
           </div>
         )}
       </form>
+
+      <ModalNovaPessoa
+        aberto={popupAberto}
+        onFechar={() => setPopupAberto(false)}
+        onSalvar={handleSalvarNovaPessoa}
+        salvando={popupSalvando}
+      />
     </div>
   );
 }

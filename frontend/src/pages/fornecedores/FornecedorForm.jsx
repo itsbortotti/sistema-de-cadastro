@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import BtnVoltarHeader from '../../components/BtnVoltarHeader';
 import { fornecedoresApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
 import '../CadastroFormLayout.css';
+import './FornecedorForm.css';
 
 export default function FornecedorForm({ somenteLeitura = false }) {
   const { id } = useParams();
@@ -31,6 +33,37 @@ export default function FornecedorForm({ somenteLeitura = false }) {
 
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
+  const [buscandoCep, setBuscandoCep] = useState(false);
+  const [erroCep, setErroCep] = useState('');
+
+  const VIA_CEP_URL = 'https://viacep.com.br/ws';
+
+  const buscarEnderecoPorCep = async () => {
+    const apenasDigitos = (cep || '').replace(/\D/g, '');
+    if (apenasDigitos.length !== 8) {
+      setErroCep(apenasDigitos.length > 0 ? 'CEP deve ter 8 dígitos.' : '');
+      return;
+    }
+    setErroCep('');
+    setBuscandoCep(true);
+    try {
+      const res = await fetch(`${VIA_CEP_URL}/${apenasDigitos}/json/`);
+      const data = await res.json();
+      if (data.erro) {
+        setErroCep('CEP não encontrado.');
+        return;
+      }
+      setEndereco(data.logradouro || '');
+      setBairro(data.bairro || '');
+      setCidade(data.localidade || '');
+      setEstado((data.uf || '').toUpperCase().slice(0, 2));
+      if (data.cep) setCep(data.cep);
+    } catch (_e) {
+      setErroCep('Não foi possível buscar o CEP. Verifique a conexão.');
+    } finally {
+      setBuscandoCep(false);
+    }
+  };
 
   useEffect(() => {
     if (isEdicao && id) {
@@ -96,12 +129,10 @@ export default function FornecedorForm({ somenteLeitura = false }) {
   };
 
   return (
-    <div className="cadastro-page form-cadastro-page">
+    <div className="cadastro-page form-cadastro-page fornecedores-form-page">
       <div className="page-header">
-        <h1>{readOnly ? 'Ver fornecedor' : isEdicao ? 'Editar fornecedor' : 'Novo fornecedor'}</h1>
-        <div className="page-header-actions">
-          <Link to="/fornecedores" className="btn btn-secondary">Voltar</Link>
-        </div>
+        <BtnVoltarHeader to="/fornecedores" />
+        <h1>{readOnly ? 'Ver fornecedor' : isEdicao ? 'Editar fornecedor' : ''}</h1>
       </div>
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
@@ -154,33 +185,56 @@ export default function FornecedorForm({ somenteLeitura = false }) {
           </label>
         </section>
 
-        <section className="form-secao">
+        <section className="form-secao form-secao-endereco">
           <h2 className="form-secao-titulo">Endereço</h2>
-          <label className="form-group">
+          <div className="form-group form-group-cep">
             <span className="form-label">CEP</span>
-            <input type="text" value={cep} onChange={(e) => setCep(e.target.value)} placeholder="00000-000" />
-          </label>
-          <label className="form-group">
+            <div className="cep-busca-wrap">
+              <input
+                type="text"
+                value={cep}
+                onChange={(e) => setCep(e.target.value)}
+                onBlur={() => !readOnly && (cep || '').replace(/\D/g, '').length === 8 && buscarEnderecoPorCep()}
+                placeholder="00000-000"
+                maxLength={9}
+                disabled={readOnly}
+                aria-describedby={erroCep ? 'erro-cep-fornecedor' : undefined}
+              />
+              {!readOnly && (
+                <button
+                  type="button"
+                  className="btn btn-buscar-cep"
+                  onClick={buscarEnderecoPorCep}
+                  disabled={buscandoCep || (cep || '').replace(/\D/g, '').length !== 8}
+                  title="Buscar endereço pelo CEP"
+                >
+                  {buscandoCep ? 'Buscando...' : 'Buscar'}
+                </button>
+              )}
+            </div>
+            {erroCep && <p id="erro-cep-fornecedor" className="form-hint form-hint-erro">{erroCep}</p>}
+          </div>
+          <label className="form-group form-group-logradouro">
             <span className="form-label">Logradouro</span>
             <input type="text" value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder="Rua, avenida..." />
           </label>
-          <label className="form-group form-group-inline">
+          <label className="form-group form-group-numero">
             <span className="form-label">Número</span>
             <input type="text" value={numero} onChange={(e) => setNumero(e.target.value)} placeholder="Nº" />
           </label>
-          <label className="form-group">
+          <label className="form-group form-group-complemento">
             <span className="form-label">Complemento</span>
             <input type="text" value={complemento} onChange={(e) => setComplemento(e.target.value)} placeholder="Sala, andar..." />
           </label>
-          <label className="form-group">
+          <label className="form-group form-group-bairro">
             <span className="form-label">Bairro</span>
             <input type="text" value={bairro} onChange={(e) => setBairro(e.target.value)} placeholder="Bairro" />
           </label>
-          <label className="form-group form-group-inline">
+          <label className="form-group form-group-cidade">
             <span className="form-label">Cidade</span>
             <input type="text" value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Cidade" />
           </label>
-          <label className="form-group form-group-inline form-group-uf">
+          <label className="form-group form-group-uf">
             <span className="form-label">UF</span>
             <input type="text" value={estado} onChange={(e) => setEstado(e.target.value)} placeholder="UF" maxLength={2} />
           </label>

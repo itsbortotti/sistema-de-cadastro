@@ -1,112 +1,57 @@
-const fs = require('fs');
-const path = require('path');
-
-const FILE = path.join(__dirname, 'fornecedores.json');
+const { prisma } = require('../lib/prisma');
 
 const CAMPOS = [
-  'nome',
-  'razaoSocial',
-  'nomeFantasia',
-  'cnpj',
-  'cpf',
-  'email',
-  'telefone',
-  'celular',
-  'endereco',
-  'numero',
-  'complemento',
-  'bairro',
-  'cidade',
-  'estado',
-  'cep',
-  'site',
-  'contato',
-  'observacoes',
+  'nome', 'razaoSocial', 'nomeFantasia', 'cnpj', 'cpf', 'email', 'telefone', 'celular',
+  'endereco', 'numero', 'complemento', 'bairro', 'cidade', 'estado', 'cep', 'site', 'contato', 'observacoes',
 ];
 
 function defaults() {
-  return {
-    nome: '',
-    razaoSocial: '',
-    nomeFantasia: '',
-    cnpj: '',
-    cpf: '',
-    email: '',
-    telefone: '',
-    celular: '',
-    endereco: '',
-    numero: '',
-    complemento: '',
-    bairro: '',
-    cidade: '',
-    estado: '',
-    cep: '',
-    site: '',
-    contato: '',
-    observacoes: '',
-  };
+  return Object.fromEntries(CAMPOS.map((c) => [c, '']));
 }
 
-function normalizar(item) {
+function normalizar(dados) {
   const d = defaults();
-  if (!item || typeof item !== 'object') return d;
+  if (!dados || typeof dados !== 'object') return d;
   CAMPOS.forEach((c) => {
-    if (item[c] !== undefined && item[c] !== null) d[c] = String(item[c]).trim();
+    if (dados[c] !== undefined && dados[c] !== null) d[c] = String(dados[c]).trim();
   });
-  if (item.nome !== undefined && item.nome !== null) d.nome = String(item.nome).trim();
   return d;
 }
 
-function read() {
-  try {
-    const data = JSON.parse(fs.readFileSync(FILE, 'utf8'));
-    return Array.isArray(data) ? data.map((x) => ({ ...defaults(), ...x, ...normalizar(x) })) : [];
-  } catch {
-    fs.writeFileSync(FILE, '[]');
-    return [];
-  }
+async function listar() {
+  const rows = await prisma.fornecedor.findMany({ orderBy: { nome: 'asc' } });
+  return rows.map((r) => ({ ...defaults(), ...r }));
 }
 
-function write(data) {
-  fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
+async function getById(id) {
+  const r = await prisma.fornecedor.findUnique({ where: { id } });
+  return r ? { ...defaults(), ...r } : null;
 }
 
-function listar() {
-  return read();
+async function criar(dados) {
+  const data = normalizar(dados);
+  const novo = await prisma.fornecedor.create({ data });
+  return { ...defaults(), ...novo };
 }
 
-function getById(id) {
-  const item = read().find((x) => x.id === id);
-  return item ? { ...defaults(), ...item } : null;
-}
-
-function criar(dados) {
-  const lista = read();
-  const id = String(Date.now());
-  const novo = { id, ...defaults(), ...normalizar(dados) };
-  lista.push(novo);
-  write(lista);
-  return novo;
-}
-
-function atualizar(id, dados) {
-  const lista = read();
-  const idx = lista.findIndex((x) => x.id === id);
-  if (idx === -1) return null;
-  const atual = lista[idx];
+async function atualizar(id, dados) {
+  const existente = await prisma.fornecedor.findUnique({ where: { id } });
+  if (!existente) return null;
+  const updateData = {};
   CAMPOS.forEach((c) => {
-    if (dados[c] !== undefined) atual[c] = String(dados[c]).trim();
+    if (dados[c] !== undefined) updateData[c] = String(dados[c]).trim();
   });
-  if (dados.nome !== undefined) atual.nome = String(dados.nome).trim();
-  write(lista);
-  return { ...defaults(), ...atual };
+  const atualizado = await prisma.fornecedor.update({ where: { id }, data: updateData });
+  return { ...defaults(), ...atualizado };
 }
 
-function remover(id) {
-  const lista = read().filter((x) => x.id !== id);
-  if (lista.length === read().length) return false;
-  write(lista);
-  return true;
+async function remover(id) {
+  try {
+    await prisma.fornecedor.delete({ where: { id } });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 module.exports = { listar, getById, criar, atualizar, remover };

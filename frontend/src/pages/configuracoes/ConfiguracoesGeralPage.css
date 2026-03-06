@@ -1,0 +1,102 @@
+.configuracoes-geral-page .page-desc {
+  margin-bottom: 1.5rem;
+}
+
+.config-geral-card {
+  background: var(--ts-branco);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--ts-cinza);
+  padding: 1.5rem 2rem;
+  max-width: 640px;
+}
+
+.config-geral-secao {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--ts-cinza);
+}
+
+.config-geral-secao:last-of-type {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.config-geral-titulo {
+  font-size: var(--ts-h3);
+  font-weight: 700;
+  color: var(--ts-azul);
+  margin: 0 0 1rem 0;
+}
+
+.config-geral-preview-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.config-geral-preview {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border: 1px dashed var(--ts-cinza);
+  border-radius: 8px;
+}
+
+.config-geral-preview-logo {
+  width: 200px;
+  height: 80px;
+}
+
+.config-geral-logo-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.config-geral-preview-favicon {
+  width: 64px;
+  height: 64px;
+}
+
+.config-geral-favicon-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.config-geral-placeholder {
+  font-size: var(--ts-caption);
+  color: var(--ts-cinza-escuro);
+  text-align: center;
+  padding: 0 0.5rem;
+}
+
+.config-geral-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.config-geral-input-file {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.config-geral-footer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ts-cinza);
+}
+
+.config-geral-footer .btn {
+  margin-right: 0.5rem;
+}

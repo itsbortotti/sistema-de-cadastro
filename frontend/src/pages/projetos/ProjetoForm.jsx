@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import BtnVoltarHeader from '../../components/BtnVoltarHeader';
 import { projetosApi, empresasApi, produtosSoftwareApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
 import '../CadastroFormLayout.css';
@@ -105,10 +106,8 @@ export default function ProjetoForm({ somenteLeitura = false }) {
   return (
     <div className="cadastro-page form-cadastro-page">
       <div className="page-header">
-        <h1>{readOnly ? 'Ver projeto' : isEdicao ? 'Editar projeto' : 'Novo projeto'}</h1>
-        <div className="page-header-actions">
-          <Link to="/projetos" className="btn btn-secondary">Voltar</Link>
-        </div>
+        <BtnVoltarHeader to="/projetos" />
+        <h1>{readOnly ? 'Ver projeto' : isEdicao ? 'Editar projeto' : ''}</h1>
       </div>
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}

@@ -1,4 +1,4 @@
-/* Layout compartilhado dos cadastros (igual ao Fornecedores) */
+/* Layout compartilhado dos cadastros – todas as telas de novo/editar iguais */
 .form-cadastro-page {
   max-width: none;
   width: 100%;
@@ -8,6 +8,10 @@
   min-height: 0;
 }
 
+.form-cadastro-page .page-header {
+  margin-bottom: 1.5rem;
+}
+
 .form-cadastro-page .form-card {
   max-width: 100%;
   width: 100%;
@@ -15,6 +19,13 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+
+/* Card do formulário: largura máxima única para todos os cadastros */
+.form-cadastro-page .form-card.form-cadastro {
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .form-cadastro {
@@ -385,4 +396,59 @@
   .form-cadastro .entradas-nova {
     grid-template-columns: 1fr;
   }
+}
+
+/* Select com botão "+ Novo" (Área, Fornecedor, etc.) */
+.select-com-novo {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+.select-com-novo select {
+  flex: 1;
+  min-width: 0;
+}
+.btn-novo-item {
+  flex-shrink: 0;
+  padding: 0.5rem 0.9rem;
+  font-size: var(--ts-caption);
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid var(--ts-cinza);
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.btn-novo-item:hover {
+  background: var(--ts-cinza);
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+/* Capex: sistemas dos projetos selecionados (somente leitura) */
+.capex-sistemas-projeto-wrap {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--ts-cinza);
+  border-radius: 8px;
+  border: 1px solid var(--ts-cinza);
+}
+.capex-sistemas-projeto-label {
+  display: block;
+  font-size: var(--ts-caption);
+  font-weight: 600;
+  color: var(--ts-cinza-escuro);
+  margin-bottom: 0.35rem;
+}
+.capex-sistemas-projeto-lista {
+  margin: 0;
+  font-size: var(--ts-body);
+  color: var(--ts-azul);
+  line-height: 1.4;
+}
+
+/* Input valor em moeda (formatação ao digitar) */
+.input-moeda {
+  max-width: 12rem;
 }

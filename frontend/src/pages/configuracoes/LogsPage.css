@@ -1,0 +1,69 @@
+/* Header sem título: só filtro de tipo */
+.logs-page-header {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  justify-content: flex-end;
+}
+.logs-filtro-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ts-cinza-escuro, #374151);
+  margin-right: 0.5rem;
+}
+.logs-filtro-tipo {
+  min-width: 180px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--ts-cinza, #d1d5db);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: var(--ts-branco, #fff);
+  cursor: pointer;
+}
+.logs-filtro-tipo:focus {
+  outline: none;
+  border-color: var(--ts-azul, #2563eb);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.logs-datetime {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Badges de tipo: visual mais definido */
+.logs-tipo {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+}
+.logs-tipo-login {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+.logs-tipo-edicao {
+  background: #fef3c7;
+  color: #b45309;
+  border-color: #fcd34d;
+}
+.logs-tipo-criacao {
+  background: #d1fae5;
+  color: #047857;
+  border-color: #6ee7b7;
+}
+.logs-tipo-exclusao {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+.logs-page .empty-cell {
+  color: var(--ts-cinza-escuro);
+  font-style: italic;
+  padding: 1.5rem;
+}

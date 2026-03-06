@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { usePermissoes } from '../context/PermissoesContext';
 import { useTheme } from '../context/ThemeContext';
+import { useConfiguracoesGeralOptional } from '../context/ConfiguracoesGeralContext';
 import { ErrorBoundary } from './ErrorBoundary';
 import logoPrincipalBranco from '../../assets/images/logo_principal_branco.png';
 import logoBlocoAzul from '../../assets/images/logo_bloco_azul.png';
@@ -78,6 +79,16 @@ const iconPermissoes = (
     <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
   </svg>
 );
+const iconLogs = (
+  <svg className="nav-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z" />
+  </svg>
+);
+const iconManual = (
+  <svg className="nav-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z" />
+  </svg>
+);
 const iconChevronDown = (
   <svg className="nav-svg nav-chevron" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
     <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
@@ -126,12 +137,18 @@ const ROTA_TITULO = {
   '/areas': 'Áreas',
   '/hospedagens': 'Hospedagens',
   '/formas-acesso': 'Formas de Acesso',
+  '/marcas-atendidas': 'Marcas Atendidas',
+  '/pessoas': 'Pessoas',
   '/sistemas': 'Sistemas',
   '/projetos': 'Projetos',
   '/capex': 'Capex',
   '/opex': 'Opex',
   '/empresas': 'Empresas',
-  '/configuracoes': 'Permissões',
+  '/configuracoes': 'Geral',
+  '/geral': 'Geral',
+  '/perfis': 'Perfis',
+  '/logs': 'Logs',
+  '/manual': 'Manual',
 };
 
 function getTituloPagina(pathname) {
@@ -144,12 +161,14 @@ export default function Layout() {
   const { usuario, logout } = useAuth();
   const { can, isAdmin } = usePermissoes();
   const { isDark, toggleTheme } = useTheme();
+  const configuracoesGeral = useConfiguracoesGeralOptional();
+  const logoUrl = configuracoesGeral?.logoHeader || logoPrincipalBranco;
   const navigate = useNavigate();
   const location = useLocation();
-  const [menuAberto, setMenuAberto] = useState(true);
-  const [financeiroAberto, setFinanceiroAberto] = useState(true);
-  const [cadastrosAberto, setCadastrosAberto] = useState(true);
-  const [configuracoesAberto, setConfiguracoesAberto] = useState(true);
+  const [menuAberto, setMenuAberto] = useState(false);
+  const [financeiroAberto, setFinanceiroAberto] = useState(false);
+  const [cadastrosAberto, setCadastrosAberto] = useState(false);
+  const [configuracoesAberto, setConfiguracoesAberto] = useState(false);
 
   const tituloPagina = useMemo(() => getTituloPagina(location.pathname), [location.pathname]);
 
@@ -184,16 +203,18 @@ export default function Layout() {
             {menuAberto ? iconFechar : iconMenu}
           </button>
           <img
-            src={logoPrincipalBranco}
+            src={logoUrl}
             alt="Gestão de Portfólio"
             className="sidebar-logo"
           />
         </div>
         <nav className="sidebar-nav">
-          <NavLink to="/" end className={({ isActive }) => (isActive ? 'nav-link active nav-link-home' : 'nav-link nav-link-home')}>
-            {iconDashboard}
-            <span>DASHBOARD</span>
-          </NavLink>
+          {can('dashboard', 'visualizar') && (
+            <NavLink to="/" end className={({ isActive }) => (isActive ? 'nav-link active nav-link-home' : 'nav-link nav-link-home')}>
+              {iconDashboard}
+              <span>DASHBOARD</span>
+            </NavLink>
+          )}
 
           <div className="nav-group">
             <button
@@ -256,6 +277,14 @@ export default function Layout() {
                 {iconHospedagens}
                 <span>Hospedagens</span>
               </NavLink>
+              <NavLink to="/marcas-atendidas" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                {iconAreas}
+                <span>Marcas Atendidas</span>
+              </NavLink>
+              <NavLink to="/pessoas" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                {iconUsuarios}
+                <span>Pessoas</span>
+              </NavLink>
               <NavLink to="/sistemas" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
                 {iconProdutosSoftware}
                 <span>Sistemas</span>
@@ -267,31 +296,47 @@ export default function Layout() {
             </div>
           </div>
 
-          <div className="nav-group nav-group-config">
-            <button
-              type="button"
-              className={`nav-label nav-label-toggle ${configuracoesAberto ? 'aberto' : ''}`}
-              onClick={() => setConfiguracoesAberto((a) => !a)}
-              aria-expanded={configuracoesAberto}
-              aria-label={configuracoesAberto ? 'Recolher Configurações' : 'Expandir Configurações'}
-            >
-              {iconConfiguracoes}
-              <span>Configurações</span>
-              {configuracoesAberto ? iconChevronDown : iconChevronRight}
-            </button>
-            <div className={`nav-group-itens ${configuracoesAberto ? '' : 'recolhido'}`}>
-              <NavLink to="/configuracoes" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
-                {iconPermissoes}
-                <span>Permissões</span>
-              </NavLink>
+          {can('configuracoes', 'visualizar') && (
+            <div className="nav-group nav-group-config">
+              <button
+                type="button"
+                className={`nav-label nav-label-toggle ${configuracoesAberto ? 'aberto' : ''}`}
+                onClick={() => setConfiguracoesAberto((a) => !a)}
+                aria-expanded={configuracoesAberto}
+                aria-label={configuracoesAberto ? 'Recolher Configurações' : 'Expandir Configurações'}
+              >
+                {iconConfiguracoes}
+                <span>Configurações</span>
+                {configuracoesAberto ? iconChevronDown : iconChevronRight}
+              </button>
+              <div className={`nav-group-itens ${configuracoesAberto ? '' : 'recolhido'}`}>
+                <NavLink to="/geral" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                  {iconConfiguracoes}
+                  <span>Geral</span>
+                </NavLink>
+                <NavLink to="/perfis" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                  {iconPermissoes}
+                  <span>Perfis</span>
+                </NavLink>
+                {can('logs', 'visualizar') && (
+                  <NavLink to="/logs" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                    {iconLogs}
+                    <span>Logs</span>
+                  </NavLink>
+                )}
+                <NavLink to="/manual" className={({ isActive }) => (isActive ? 'nav-link active nav-link-sub' : 'nav-link nav-link-sub')}>
+                  {iconManual}
+                  <span>Manual</span>
+                </NavLink>
+              </div>
             </div>
-          </div>
+          )}
         </nav>
         <div className="sidebar-footer">
           <div className="sidebar-footer-powered">
             <p className="sidebar-powered-text">Powered by</p>
             <div className="sidebar-powered-logo-wrap">
-              <img src={logoPrincipalBranco} alt="Tecnosolve" className="sidebar-powered-logo-img" />
+              <img src={logoUrl} alt="Tecnosolve" className="sidebar-powered-logo-img" />
             </div>
             <button
               type="button"

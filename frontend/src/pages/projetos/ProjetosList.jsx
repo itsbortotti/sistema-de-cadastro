@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { projetosApi } from '../../api/client';
+import { projetosApi, empresasApi, produtosSoftwareApi } from '../../api/client';
 import AcoesListagem from '../../components/AcoesListagem';
 import ConfigColunasModal from '../../components/ConfigColunasModal';
 import { useListColumns } from '../../hooks/useListColumns';
+import { usePermissoes } from '../../context/PermissoesContext';
 import '../usuarios/Usuarios.css';
 import '../CadastroListLayout.css';
 
@@ -36,14 +37,79 @@ function normalizarTexto(str) {
   return String(str ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
+// Parse CSV com suporte a campos entre aspas
+function parseCSV(texto) {
+  const linhas = [];
+  const linhasRaw = texto.split(/\r?\n/).filter((l) => l.trim());
+  if (linhasRaw.length === 0) return { headers: [], rows: [] };
+  for (const linha of linhasRaw) {
+    const campos = [];
+    let campo = '';
+    let dentroAspas = false;
+    for (let i = 0; i < linha.length; i++) {
+      const c = linha[i];
+      if (c === '"') {
+        dentroAspas = !dentroAspas;
+      } else if ((c === ',' && !dentroAspas) || (c === ';' && !dentroAspas)) {
+        campos.push(campo.trim());
+        campo = '';
+      } else {
+        campo += c;
+      }
+    }
+    campos.push(campo.trim());
+    linhas.push(campos);
+  }
+  const headers = linhas[0] || [];
+  const rows = linhas.slice(1);
+  return { headers, rows };
+}
+
+const MAPEAMENTO_CSV = {
+  'nome': 'nome',
+  'nome do projeto': 'nome',
+  'projeto': 'nome',
+  'descricao': 'descricao',
+  'descrição': 'descricao',
+  'empresa': 'empresaNome',
+  'sistemas': 'sistemas',
+  'sistema': 'sistemas',
+  'data inicio': 'dataInicio',
+  'data início': 'dataInicio',
+  'periodo inicial': 'dataInicio',
+  'período inicial': 'dataInicio',
+  'data fim': 'dataFim',
+  'periodo final': 'dataFim',
+  'período final': 'dataFim',
+  'status': 'status',
+  'observacoes': 'observacoes',
+  'observações': 'observacoes',
+};
+
+function normalizarHeader(h) {
+  return String(h || '')
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ');
+}
+
 export default function ProjetosList() {
   const [lista, setLista] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
   const [excluindo, setExcluindo] = useState(null);
   const [busca, setBusca] = useState('');
+  const [modalImportarAberto, setModalImportarAberto] = useState(false);
+  const [arquivoPreview, setArquivoPreview] = useState(null);
+  const [importando, setImportando] = useState(false);
+  const [resultadoImportacao, setResultadoImportacao] = useState(null);
+  const [listasAux, setListasAux] = useState({ empresas: [], produtosSoftware: [] });
+  const inputFileRef = useRef(null);
   const { visibleIds, setVisibleIds, allColumns } = useListColumns('projetos', COLUNAS_PROJETOS);
   const [configColunasAberto, setConfigColunasAberto] = useState(false);
+  const { can } = usePermissoes();
 
   const carregar = () => {
     setCarregando(true);
@@ -52,10 +118,119 @@ export default function ProjetosList() {
   };
   useEffect(() => carregar(), []);
 
+  useEffect(() => {
+    if (modalImportarAberto) {
+      Promise.allSettled([empresasApi.listar(), produtosSoftwareApi.listar()]).then(([rEmp, rSist]) => {
+        const empresas = rEmp.status === 'fulfilled' && Array.isArray(rEmp.value) ? rEmp.value : [];
+        const produtosSoftware = rSist.status === 'fulfilled' && Array.isArray(rSist.value) ? rSist.value : [];
+        setListasAux({ empresas, produtosSoftware });
+      });
+    }
+  }, [modalImportarAberto]);
+
   const handleExcluir = (id, nome) => {
     if (!window.confirm(`Excluir o projeto "${nome || 'sem nome'}"?`)) return;
     setExcluindo(id);
     projetosApi.remover(id).then(carregar).catch((e) => setErro(e.message)).finally(() => setExcluindo(null));
+  };
+
+  const abrirSeletorArquivo = () => {
+    setArquivoPreview(null);
+    setResultadoImportacao(null);
+    inputFileRef.current?.click();
+  };
+
+  const handleArquivoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const texto = ev.target?.result || '';
+        const { headers, rows } = parseCSV(texto);
+        setArquivoPreview({ headers, rows, nome: file.name });
+      } catch (err) {
+        setErro('Erro ao ler o arquivo CSV.');
+      }
+    };
+    reader.readAsText(file, 'UTF-8');
+    e.target.value = '';
+  };
+
+  const buscarEmpresaPorNome = (listaEmpresas, nome) => {
+    if (!nome || !listaEmpresas?.length) return null;
+    const n = String(nome).trim().toLowerCase();
+    const found = listaEmpresas.find(
+      (x) =>
+        String(x.nomeFantasia || '').trim().toLowerCase() === n ||
+        String(x.razaoSocial || '').trim().toLowerCase() === n
+    );
+    return found ? found.id : null;
+  };
+
+  /** Resolve string "Sistema A; Sistema B" ou "Sistema A, Sistema B" para array de IDs por nomeSistema */
+  const resolverSistemasPorNomes = (listaSistemas, texto) => {
+    if (!texto || !listaSistemas?.length) return [];
+    const nomes = String(texto)
+      .split(/[,;]/)
+      .map((s) => String(s).trim())
+      .filter(Boolean);
+    const ids = [];
+    const lower = (s) => String(s ?? '').toLowerCase();
+    for (const nome of nomes) {
+      const n = lower(nome);
+      const found = listaSistemas.find((s) => lower(s.nomeSistema) === n);
+      if (found) ids.push(found.id);
+    }
+    return ids;
+  };
+
+  const processarLinhaParaPayload = (headers, valores, listas) => {
+    const obj = {};
+    headers.forEach((h, i) => {
+      const key = MAPEAMENTO_CSV[normalizarHeader(h)];
+      if (!key) return;
+      const valor = valores[i] != null ? String(valores[i]).trim() : '';
+      if (key === 'empresaNome') obj.empresaId = buscarEmpresaPorNome(listas.empresas, valor) || null;
+      else if (key === 'sistemas') obj.produtoSoftwareIds = resolverSistemasPorNomes(listas.produtosSoftware, valor);
+      else if (key === 'dataInicio') obj.dataInicio = valor === '' ? null : valor;
+      else if (key === 'dataFim') obj.dataFim = valor === '' ? null : valor;
+      else obj[key] = valor;
+    });
+    return {
+      nome: obj.nome || '',
+      descricao: obj.descricao || '',
+      empresaId: obj.empresaId ?? null,
+      produtoSoftwareIds: Array.isArray(obj.produtoSoftwareIds) ? obj.produtoSoftwareIds : [],
+      dataInicio: obj.dataInicio ?? null,
+      dataFim: obj.dataFim ?? null,
+      status: obj.status || '',
+      observacoes: obj.observacoes || '',
+    };
+  };
+
+  const executarImportacao = async () => {
+    if (!arquivoPreview?.rows?.length) return;
+    setImportando(true);
+    setResultadoImportacao(null);
+    try {
+      const items = arquivoPreview.rows.map((valores) =>
+        processarLinhaParaPayload(arquivoPreview.headers, valores, listasAux)
+      );
+      const resultado = await projetosApi.importarBulk(items);
+      setResultadoImportacao(resultado);
+      if (resultado.criados > 0) carregar();
+    } catch (e) {
+      setResultadoImportacao({ criados: 0, erros: [e.message] });
+    } finally {
+      setImportando(false);
+    }
+  };
+
+  const fecharModalImportar = () => {
+    setModalImportarAberto(false);
+    setArquivoPreview(null);
+    setResultadoImportacao(null);
   };
 
   const termoBusca = normalizarTexto(busca).trim();
@@ -83,6 +258,11 @@ export default function ProjetosList() {
             aria-label="Buscar"
           />
           <button type="button" className="btn btn-secondary btn-config-colunas" onClick={() => setConfigColunasAberto(true)} title="Escolher e ordenar colunas">⚙ Colunas</button>
+          {can('projetos', 'criar') && (
+            <button type="button" className="btn btn-outline" onClick={() => setModalImportarAberto(true)}>
+              Importar CSV
+            </button>
+          )}
           <Link to="/projetos/novo" className="btn btn-primary">Novo projeto</Link>
         </div>
       </div>
@@ -127,6 +307,71 @@ export default function ProjetosList() {
         </table>
       </div>
       <ConfigColunasModal open={configColunasAberto} onClose={() => setConfigColunasAberto(false)} allColumns={allColumns} visibleIds={visibleIds} onSave={setVisibleIds} />
+
+      <input
+        ref={inputFileRef}
+        type="file"
+        accept=".csv,text/csv,application/csv"
+        onChange={handleArquivoChange}
+        style={{ display: 'none' }}
+      />
+
+      {modalImportarAberto && (
+        <div className="modal-overlay" onClick={fecharModalImportar} role="dialog" aria-modal="true">
+          <div className="modal-box modal-importar-csv" onClick={(e) => e.stopPropagation()}>
+            <h2 className="modal-titulo">Importar projetos (CSV)</h2>
+            <p className="modal-desc">
+              Selecione um arquivo CSV com a primeira linha contendo os nomes das colunas. Use vírgula ou ponto e vírgula como separador.
+              Coluna <strong>Nome</strong> e <strong>Sistemas</strong> são obrigatórias. Em Sistemas, use vírgula ou ponto e vírgula para separar os nomes dos sistemas.
+            </p>
+            <p className="modal-desc">
+              <a href="/exemplo-projetos.csv" download className="link-download">Baixar CSV de exemplo</a>
+            </p>
+            {!arquivoPreview ? (
+              <button type="button" className="btn btn-primary" onClick={abrirSeletorArquivo}>
+                Escolher arquivo CSV
+              </button>
+            ) : (
+              <div className="importar-preview">
+                <p><strong>Arquivo:</strong> {arquivoPreview.nome}</p>
+                <p><strong>Linhas a importar:</strong> {arquivoPreview.rows.length}</p>
+                {resultadoImportacao ? (
+                  <div className="importar-resultado">
+                    <p className="sucesso-msg">{resultadoImportacao.criados} registro(s) importado(s) com sucesso.</p>
+                    {resultadoImportacao.erros?.length > 0 && (
+                      <div className="importar-erros">
+                        <strong>Erros:</strong>
+                        <ul>
+                          {resultadoImportacao.erros.slice(0, 10).map((err, i) => (
+                            <li key={i}>{err}</li>
+                          ))}
+                          {resultadoImportacao.erros.length > 10 && (
+                            <li>... e mais {resultadoImportacao.erros.length - 10} erro(s)</li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="importar-acoes">
+                    <button type="button" className="btn btn-secondary" onClick={abrirSeletorArquivo}>
+                      Trocar arquivo
+                    </button>
+                    <button type="button" className="btn btn-primary" onClick={executarImportacao} disabled={importando}>
+                      {importando ? 'Importando...' : `Importar ${arquivoPreview.rows.length} linha(s)`}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+            <div className="modal-acoes">
+              <button type="button" className="btn btn-secondary" onClick={fecharModalImportar}>
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -11,7 +11,9 @@ const ENTIDADE_LABEL = {
   hospedagens: 'Hospedagens',
   'formas-acesso': 'Formas de Acesso',
   times: 'Times',
-  'produtos-software': 'Projetos',
+  'marcas-atendidas': 'Marcas Atendidas',
+  pessoas: 'Pessoas',
+  'produtos-software': 'Sistemas',
   capex: 'Capex / Opex',
   empresas: 'Empresas',
 };

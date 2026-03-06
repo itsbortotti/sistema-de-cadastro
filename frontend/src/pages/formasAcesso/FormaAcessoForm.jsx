@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import BtnVoltarHeader from '../../components/BtnVoltarHeader';
 import { formasAcessoApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
 import '../CadastroFormLayout.css';
@@ -50,10 +51,8 @@ export default function FormaAcessoForm({ somenteLeitura = false }) {
   return (
     <div className="cadastro-page form-cadastro-page">
       <div className="page-header">
-        <h1>{readOnly ? 'Ver forma de acesso' : isEdicao ? 'Editar forma de acesso' : 'Nova forma de acesso'}</h1>
-        <div className="page-header-actions">
-          <Link to="/formas-acesso" className="btn btn-secondary">Voltar</Link>
-        </div>
+        <BtnVoltarHeader to="/formas-acesso" />
+        <h1>{readOnly ? 'Ver forma de acesso' : isEdicao ? 'Editar forma de acesso' : ''}</h1>
       </div>
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}

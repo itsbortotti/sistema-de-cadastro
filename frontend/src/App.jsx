@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ConfiguracoesGeralProvider, FaviconUpdater } from './context/ConfiguracoesGeralContext';
 import { PermissoesProvider } from './context/PermissoesContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Login from './pages/Login';
@@ -15,6 +16,10 @@ import HospedagensList from './pages/hospedagens/HospedagensList';
 import HospedagemForm from './pages/hospedagens/HospedagemForm';
 import FormasAcessoList from './pages/formasAcesso/FormasAcessoList';
 import FormaAcessoForm from './pages/formasAcesso/FormaAcessoForm';
+import MarcasAtendidasList from './pages/marcasAtendidas/MarcasAtendidasList';
+import MarcaAtendidaForm from './pages/marcasAtendidas/MarcaAtendidaForm';
+import PessoasList from './pages/pessoas/PessoasList';
+import PessoaForm from './pages/pessoas/PessoaForm';
 import ProdutosSoftwareList from './pages/produtosSoftware/ProdutosSoftwareList';
 import ProdutoSoftwareForm from './pages/produtosSoftware/ProdutoSoftwareForm';
 import ProjetosList from './pages/projetos/ProjetosList';
@@ -23,7 +28,11 @@ import CapexList from './pages/capex/CapexList';
 import CapexForm from './pages/capex/CapexForm';
 import EmpresasList from './pages/empresas/EmpresasList';
 import EmpresaForm from './pages/empresas/EmpresaForm';
-import PermissoesPage from './pages/configuracoes/PermissoesPage';
+import PerfisListPage from './pages/configuracoes/PerfisListPage';
+import PerfilEditPage from './pages/configuracoes/PerfilEditPage';
+import LogsPage from './pages/configuracoes/LogsPage';
+import ConfiguracoesGeralPage from './pages/configuracoes/ConfiguracoesGeralPage';
+import ManualPage from './pages/configuracoes/ManualPage';
 
 function PrivateRoute({ children }) {
   const { usuario, carregando } = useAuth();
@@ -70,6 +79,14 @@ function AppRoutes() {
         <Route path="formas-acesso/novo" element={<FormaAcessoForm />} />
         <Route path="formas-acesso/ver/:id" element={<FormaAcessoForm somenteLeitura />} />
         <Route path="formas-acesso/editar/:id" element={<FormaAcessoForm />} />
+        <Route path="marcas-atendidas" element={<MarcasAtendidasList />} />
+        <Route path="marcas-atendidas/novo" element={<MarcaAtendidaForm />} />
+        <Route path="marcas-atendidas/ver/:id" element={<MarcaAtendidaForm somenteLeitura />} />
+        <Route path="marcas-atendidas/editar/:id" element={<MarcaAtendidaForm />} />
+        <Route path="pessoas" element={<PessoasList />} />
+        <Route path="pessoas/novo" element={<PessoaForm />} />
+        <Route path="pessoas/ver/:id" element={<PessoaForm somenteLeitura />} />
+        <Route path="pessoas/editar/:id" element={<PessoaForm />} />
         <Route path="sistemas" element={<ProdutosSoftwareList />} />
         <Route path="sistemas/novo" element={<ProdutoSoftwareForm />} />
         <Route path="sistemas/ver/:id" element={<ProdutoSoftwareForm somenteLeitura />} />
@@ -93,7 +110,12 @@ function AppRoutes() {
         <Route path="empresas/novo" element={<EmpresaForm />} />
         <Route path="empresas/ver/:id" element={<EmpresaForm somenteLeitura />} />
         <Route path="empresas/editar/:id" element={<EmpresaForm />} />
-        <Route path="configuracoes" element={<PermissoesPage />} />
+        <Route path="perfis" element={<PerfisListPage />} />
+        <Route path="perfis/:id" element={<PerfilEditPage />} />
+        <Route path="logs" element={<LogsPage />} />
+        <Route path="geral" element={<ConfiguracoesGeralPage />} />
+        <Route path="manual" element={<ManualPage />} />
+        <Route path="configuracoes" element={<Navigate to="/geral" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -104,9 +126,12 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <PermissoesProvider>
-          <AppRoutes />
-        </PermissoesProvider>
+        <ConfiguracoesGeralProvider>
+          <FaviconUpdater />
+          <PermissoesProvider>
+            <AppRoutes />
+          </PermissoesProvider>
+        </ConfiguracoesGeralProvider>
       </AuthProvider>
     </ThemeProvider>
   );

@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import BtnVoltarHeader from '../../components/BtnVoltarHeader';
 import {
   produtosSoftwareApi,
   fornecedoresApi,
   areasApi,
-  usuariosApi,
+  pessoasApi,
   hospedagensApi,
   formasAcessoApi,
   empresasApi,
+  marcasAtendidasApi,
 } from '../../api/client';
 import '../usuarios/Usuarios.css';
 import '../CadastroFormLayout.css';
@@ -20,6 +22,14 @@ const GRAUS = [
   { value: '3', label: '3 - Neutro' },
   { value: '4', label: '4 - Satisfeito' },
   { value: '5', label: '5 - Muito satisfeito' },
+];
+
+const TI_ME_OPCOES = [
+  { value: '', label: '— Selecione —' },
+  { value: 'tolerar', label: 'Tolerar' },
+  { value: 'investir', label: 'Investir' },
+  { value: 'migrar', label: 'Migrar' },
+  { value: 'eliminar', label: 'Eliminar' },
 ];
 
 function ModalNovo({ titulo, labelCampo = 'Nome', aberto, onFechar, onSalvar, salvando }) {
@@ -92,20 +102,21 @@ export default function ProdutoSoftwareForm({ somenteLeitura = false }) {
   const [fornecedores, setFornecedores] = useState([]);
   const [areas, setAreas] = useState([]);
   const [empresas, setEmpresas] = useState([]);
-  const [usuarios, setUsuarios] = useState([]);
+  const [pessoas, setPessoas] = useState([]);
   const [hospedagens, setHospedagens] = useState([]);
   const [formasAcesso, setFormasAcesso] = useState([]);
+  const [marcasAtendidasList, setMarcasAtendidasList] = useState([]);
+  const [marcasAtendidasIds, setMarcasAtendidasIds] = useState([]);
 
   const [nomeSistema, setNomeSistema] = useState('');
   const [empresaId, setEmpresaId] = useState('');
   const [fornecedorId, setFornecedorId] = useState('');
   const [finalidadePrincipal, setFinalidadePrincipal] = useState('');
   const [breveDescritivo, setBreveDescritivo] = useState('');
-  const [marcasAtendidas, setMarcasAtendidas] = useState('');
   const [usuariosQtdAproximada, setUsuariosQtdAproximada] = useState('');
   const [areaId, setAreaId] = useState('');
-  const [responsavelTiId, setResponsavelTiId] = useState('');
-  const [usuarioNegocioId, setUsuarioNegocioId] = useState('');
+  const [responsavelTiPessoaId, setResponsavelTiPessoaId] = useState('');
+  const [responsavelNegocioPessoaId, setResponsavelNegocioPessoaId] = useState('');
   const [hospedagemId, setHospedagemId] = useState('');
   const [onPremisesSites, setOnPremisesSites] = useState('');
   const [formaAcessoId, setFormaAcessoId] = useState('');
@@ -113,6 +124,7 @@ export default function ProdutoSoftwareForm({ somenteLeitura = false }) {
   const [controleAcessoPorUsuario, setControleAcessoPorUsuario] = useState(false);
   const [autenticacaoAdSso, setAutenticacaoAdSso] = useState(false);
   const [grauSatisfacao, setGrauSatisfacao] = useState('');
+  const [tiMe, setTiMe] = useState('');
   const [problemasEnfrentados, setProblemasEnfrentados] = useState('');
   const [custoMensalSistema, setCustoMensalSistema] = useState('');
   const [custoMensalInfraestrutura, setCustoMensalInfraestrutura] = useState('');
@@ -129,22 +141,29 @@ export default function ProdutoSoftwareForm({ somenteLeitura = false }) {
       fornecedoresApi.listar(),
       areasApi.listar(),
       empresasApi.listar(),
-      usuariosApi.listar(),
+      pessoasApi.listar(),
       hospedagensApi.listar(),
       formasAcessoApi.listar(),
+      marcasAtendidasApi.listar(),
     ])
-      .then(([f, a, emp, u, h, fa]) => {
+      .then(([f, a, emp, pes, h, fa, marcas]) => {
         setFornecedores(f);
-        setAreas(a);
+        setAreas(Array.isArray(a) ? a : []);
         setEmpresas(Array.isArray(emp) ? emp : []);
-        setUsuarios(u);
+        setPessoas(Array.isArray(pes) ? pes : []);
         setHospedagens(h);
         setFormasAcesso(fa);
+        setMarcasAtendidasList(Array.isArray(marcas) ? marcas : []);
       })
       .catch((e) => setErro(e.message));
   };
 
   useEffect(() => carregarListas(), []);
+
+  const areaTiId = useMemo(() => areas.find((x) => (x.nome || '').trim().toLowerCase() === 'ti')?.id, [areas]);
+  const areaNegocioId = useMemo(() => areas.find((x) => /neg[oó]cio(s)?/i.test((x.nome || '').trim()))?.id, [areas]);
+  const pessoasAreaTi = useMemo(() => pessoas.filter((p) => p.areaId === areaTiId), [pessoas, areaTiId]);
+  const pessoasAreaNegocio = useMemo(() => pessoas.filter((p) => p.areaId === areaNegocioId), [pessoas, areaNegocioId]);
 
   useEffect(() => {
     if (isEdicao && id) {
@@ -156,11 +175,11 @@ export default function ProdutoSoftwareForm({ somenteLeitura = false }) {
           setFornecedorId(p.fornecedorId || '');
           setFinalidadePrincipal(p.finalidadePrincipal || '');
           setBreveDescritivo(p.breveDescritivo || '');
-          setMarcasAtendidas(p.marcasAtendidas || '');
+          setMarcasAtendidasIds(Array.isArray(p.marcasAtendidas) ? p.marcasAtendidas.map((m) => m.id) : []);
           setUsuariosQtdAproximada(p.usuariosQtdAproximada != null ? String(p.usuariosQtdAproximada) : '');
           setAreaId(p.areaId || '');
-          setResponsavelTiId(p.responsavelTiId || '');
-          setUsuarioNegocioId(p.usuarioNegocioId || '');
+          setResponsavelTiPessoaId(p.responsavelTiPessoaId || '');
+          setResponsavelNegocioPessoaId(p.responsavelNegocioPessoaId || '');
           setHospedagemId(p.hospedagemId || '');
           setOnPremisesSites(p.onPremisesSites || '');
           setFormaAcessoId(p.formaAcessoId || '');
@@ -168,6 +187,7 @@ export default function ProdutoSoftwareForm({ somenteLeitura = false }) {
           setControleAcessoPorUsuario(Boolean(p.controleAcessoPorUsuario));
           setAutenticacaoAdSso(Boolean(p.autenticacaoAdSso));
           setGrauSatisfacao(p.grauSatisfacao != null ? String(p.grauSatisfacao) : '');
+          setTiMe(p.tiMe || '');
           setProblemasEnfrentados(p.problemasEnfrentados || '');
           setCustoMensalSistema(p.custoMensalSistema != null ? String(p.custoMensalSistema) : '');
           setCustoMensalInfraestrutura(p.custoMensalInfraestrutura != null ? String(p.custoMensalInfraestrutura) : '');
@@ -203,6 +223,28 @@ export default function ProdutoSoftwareForm({ somenteLeitura = false }) {
         const novo = await formasAcessoApi.criar({ nome: nome.trim() });
         setFormasAcesso((prev) => [...prev, novo]);
         setFormaAcessoId(novo.id);
+      } else if (popupTipo === 'marcaAtendida') {
+        const novo = await marcasAtendidasApi.criar({ nome: nome.trim() });
+        setMarcasAtendidasList((prev) => [...prev, novo]);
+        setMarcasAtendidasIds((prev) => [...prev, novo.id]);
+      } else if (popupTipo === 'pessoaTi') {
+        let areaTi = areas.find((x) => (x.nome || '').trim().toLowerCase() === 'ti');
+        if (!areaTi) {
+          areaTi = await areasApi.criar({ nome: 'TI' });
+          setAreas((prev) => [...prev, areaTi]);
+        }
+        const novo = await pessoasApi.criar({ nome: nome.trim(), areaId: areaTi.id });
+        setPessoas((prev) => [...prev, novo]);
+        setResponsavelTiPessoaId(novo.id);
+      } else if (popupTipo === 'pessoaNegocio') {
+        let areaNeg = areas.find((x) => /neg[oó]cio(s)?/i.test((x.nome || '').trim()));
+        if (!areaNeg) {
+          areaNeg = await areasApi.criar({ nome: 'Negócios' });
+          setAreas((prev) => [...prev, areaNeg]);
+        }
+        const novo = await pessoasApi.criar({ nome: nome.trim(), areaId: areaNeg.id });
+        setPessoas((prev) => [...prev, novo]);
+        setResponsavelNegocioPessoaId(novo.id);
       }
     } catch (e) {
       setErro(e.message);
@@ -221,11 +263,11 @@ export default function ProdutoSoftwareForm({ somenteLeitura = false }) {
       fornecedorId: fornecedorId || null,
       finalidadePrincipal,
       breveDescritivo,
-      marcasAtendidas,
+      marcasAtendidasIds,
       usuariosQtdAproximada: usuariosQtdAproximada === '' ? null : Number(usuariosQtdAproximada),
       areaId: areaId || null,
-      responsavelTiId: responsavelTiId || null,
-      usuarioNegocioId: usuarioNegocioId || null,
+      responsavelTiPessoaId: responsavelTiPessoaId || null,
+      responsavelNegocioPessoaId: responsavelNegocioPessoaId || null,
       hospedagemId: hospedagemId || null,
       onPremisesSites,
       formaAcessoId: formaAcessoId || null,
@@ -233,6 +275,7 @@ export default function ProdutoSoftwareForm({ somenteLeitura = false }) {
       controleAcessoPorUsuario,
       autenticacaoAdSso,
       grauSatisfacao: grauSatisfacao || null,
+      tiMe: tiMe || null,
       problemasEnfrentados,
       custoMensalSistema: custoMensalSistema === '' ? null : Number(custoMensalSistema),
       custoMensalInfraestrutura: custoMensalInfraestrutura === '' ? null : Number(custoMensalInfraestrutura),
@@ -256,15 +299,22 @@ export default function ProdutoSoftwareForm({ somenteLeitura = false }) {
     area: 'Nova Área',
     hospedagem: 'Nova Hospedagem',
     formaAcesso: 'Nova Forma de Acesso',
+    marcaAtendida: 'Nova Marca Atendida',
+    pessoaTi: 'Nova pessoa (área TI)',
+    pessoaNegocio: 'Nova pessoa (área Negócios)',
+  };
+
+  const toggleMarcaAtendida = (marcaId) => {
+    setMarcasAtendidasIds((prev) =>
+      prev.includes(marcaId) ? prev.filter((id) => id !== marcaId) : [...prev, marcaId]
+    );
   };
 
   return (
     <div className="cadastro-page form-cadastro-page">
       <div className="page-header">
-        <h1>{readOnly ? 'Ver Sistema' : isEdicao ? 'Editar Sistema' : 'Novo Sistema'}</h1>
-        <div className="page-header-actions">
-          <Link to="/sistemas" className="btn btn-secondary">Voltar</Link>
-        </div>
+        <BtnVoltarHeader to="/sistemas" />
+        <h1>{readOnly ? 'Ver Sistema' : isEdicao ? 'Editar Sistema' : ''}</h1>
       </div>
 
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
@@ -303,10 +353,29 @@ export default function ProdutoSoftwareForm({ somenteLeitura = false }) {
 
         <section className="form-secao">
           <h2 className="form-secao-titulo">Uso e abrangência</h2>
-          <label className="form-group">
+          <div className="form-group">
             <span className="form-label">Marcas Atendidas</span>
-            <input type="text" value={marcasAtendidas} onChange={(e) => setMarcasAtendidas(e.target.value)} placeholder="Marcas ou unidades atendidas" />
-          </label>
+            <div className="select-com-novo" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div className="marcas-atendidas-checkboxes" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem 1rem', alignItems: 'center' }}>
+                {marcasAtendidasList.map((m) => (
+                  <label key={m.id} className="label-checkbox" style={{ margin: 0 }}>
+                    <input
+                      type="checkbox"
+                      checked={marcasAtendidasIds.includes(m.id)}
+                      onChange={() => toggleMarcaAtendida(m.id)}
+                      disabled={readOnly}
+                    />
+                    <span>{m.nome}</span>
+                  </label>
+                ))}
+              </div>
+              {!readOnly && (
+                <button type="button" className="btn btn-novo-item" onClick={() => setPopupTipo('marcaAtendida')} title="Cadastrar nova Marca Atendida">
+                  + Nova marca
+                </button>
+              )}
+            </div>
+          </div>
           <label className="form-group">
             <span className="form-label">Usuários (quantidade aproximada)</span>
             <input type="number" min={0} value={usuariosQtdAproximada} onChange={(e) => setUsuariosQtdAproximada(e.target.value)} placeholder="Ex.: 50" />
@@ -318,24 +387,22 @@ export default function ProdutoSoftwareForm({ somenteLeitura = false }) {
             opcoes={areas}
             onAbrirNovo={() => setPopupTipo('area')}
           />
-          <label className="form-group">
-            <span className="form-label">Responsável TI</span>
-            <select value={responsavelTiId} onChange={(e) => setResponsavelTiId(e.target.value)}>
-              <option value="">— Selecione —</option>
-              {usuarios.map((u) => (
-                <option key={u.id} value={u.id}>{u.nome}</option>
-              ))}
-            </select>
-          </label>
-          <label className="form-group">
-            <span className="form-label">Usuário Negócio</span>
-            <select value={usuarioNegocioId} onChange={(e) => setUsuarioNegocioId(e.target.value)}>
-              <option value="">— Selecione —</option>
-              {usuarios.map((u) => (
-                <option key={u.id} value={u.id}>{u.nome}</option>
-              ))}
-            </select>
-          </label>
+          <SelectComNovo
+            label="Responsável TI"
+            value={responsavelTiPessoaId}
+            onChange={setResponsavelTiPessoaId}
+            opcoes={pessoasAreaTi.map((p) => ({ id: p.id, nome: p.nome || p.id }))}
+            onAbrirNovo={() => setPopupTipo('pessoaTi')}
+            placeholder="— Selecione uma pessoa da área TI —"
+          />
+          <SelectComNovo
+            label="Responsável Negócio"
+            value={responsavelNegocioPessoaId}
+            onChange={setResponsavelNegocioPessoaId}
+            opcoes={pessoasAreaNegocio.map((p) => ({ id: p.id, nome: p.nome || p.id }))}
+            onAbrirNovo={() => setPopupTipo('pessoaNegocio')}
+            placeholder="— Selecione uma pessoa da área Negócios —"
+          />
         </section>
 
         <section className="form-secao">
@@ -379,6 +446,14 @@ export default function ProdutoSoftwareForm({ somenteLeitura = false }) {
             <select value={grauSatisfacao} onChange={(e) => setGrauSatisfacao(e.target.value)}>
               {GRAUS.map((g) => (
                 <option key={g.value} value={g.value}>{g.label}</option>
+              ))}
+            </select>
+          </label>
+          <label className="form-group">
+            <span className="form-label">TI ME</span>
+            <select value={tiMe} onChange={(e) => setTiMe(e.target.value)} aria-label="TI ME: Tolerar, Investir, Migrar, Eliminar">
+              {TI_ME_OPCOES.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
           </label>

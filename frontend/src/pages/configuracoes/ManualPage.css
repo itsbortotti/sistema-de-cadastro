@@ -1,0 +1,63 @@
+.manual-page .manual-intro {
+  margin-bottom: 1.5rem;
+  font-size: var(--ts-body);
+  color: var(--ts-cinza-escuro);
+}
+
+.manual-card {
+  background: var(--ts-branco);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--ts-cinza);
+  padding: 1.5rem 2rem;
+  max-width: 720px;
+}
+
+.manual-secao {
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--ts-cinza);
+}
+
+.manual-secao:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.manual-titulo {
+  font-size: var(--ts-h3);
+  font-weight: 700;
+  color: var(--ts-azul);
+  margin: 0 0 0.75rem 0;
+}
+
+.manual-secao p {
+  margin: 0 0 0.75rem 0;
+  line-height: 1.5;
+  color: var(--ts-cinza-escuro);
+}
+
+.manual-secao p:last-child {
+  margin-bottom: 0;
+}
+
+.manual-secao ul {
+  margin: 0 0 0.75rem 0;
+  padding-left: 1.5rem;
+  line-height: 1.6;
+  color: var(--ts-cinza-escuro);
+}
+
+.manual-secao li {
+  margin-bottom: 0.35rem;
+}
+
+.manual-secao li:last-child {
+  margin-bottom: 0;
+}
+
+.manual-secao strong {
+  color: var(--ts-azul);
+  font-weight: 700;
+}

@@ -20,6 +20,44 @@
   padding: 1.5rem 2rem;
 }
 
+/* Nome do perfil — bloco destacado no topo do card */
+.perfil-edit-nome-wrap {
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--ts-cinza);
+}
+.perfil-edit-nome-label {
+  display: block;
+  font-size: var(--ts-label);
+  font-weight: 600;
+  color: var(--ts-cinza-escuro);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.02em;
+}
+.perfil-edit-nome-input {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  padding: 0.65rem 0.9rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--ts-azul);
+  border: 1px solid var(--ts-cinza);
+  border-radius: 8px;
+  background: var(--ts-branco);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+.perfil-edit-nome-input::placeholder {
+  color: var(--ts-cinza);
+  font-weight: 400;
+}
+.perfil-edit-nome-input:focus {
+  outline: none;
+  border-color: var(--ts-azul);
+  box-shadow: 0 0 0 3px rgba(0, 82, 155, 0.12);
+}
+
 .permissoes-card-title {
   margin: 0 0 1rem 0;
   padding-bottom: 0.5rem;

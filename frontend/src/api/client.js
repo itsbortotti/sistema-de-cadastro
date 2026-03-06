@@ -5,12 +5,13 @@ const defaultOptions = {
   headers: { 'Content-Type': 'application/json' },
 };
 
-/** Mensagens padrão para o usuário (ui-guidelines — Tratamento de Erros) */
+/** Mensagens padrão para o usuário (docs/PADRAO-PROJETO-IA.md — Tratamento de Erros) */
 const MENSAGENS_ERRO = {
   401: 'Sua sessão expirou. Faça login novamente.',
   403: 'Você não tem permissão para realizar esta ação.',
   404: 'O registro solicitado não foi encontrado.',
   500: 'Ocorreu um erro inesperado. Tente novamente.',
+  503: 'Serviço temporariamente indisponível. Tente novamente em instantes.',
   network: 'Não foi possível conectar ao servidor. Verifique sua conexão.',
 };
 
@@ -52,18 +53,35 @@ export const areasApi = crudApi('areas');
 export const hospedagensApi = crudApi('hospedagens');
 export const formasAcessoApi = crudApi('formas-acesso');
 export const timesApi = crudApi('times');
+export const marcasAtendidasApi = crudApi('marcas-atendidas');
+export const pessoasApi = crudApi('pessoas');
 export const produtosSoftwareApi = {
   ...crudApi('produtos-software'),
   importarBulk: (items) => api('/produtos-software/bulk', { method: 'POST', body: JSON.stringify({ items }) }),
 };
 export const capexApi = crudApi('capex');
 export const empresasApi = crudApi('empresas');
-export const projetosApi = crudApi('projetos');
+export const projetosApi = {
+  ...crudApi('projetos'),
+  importarBulk: (items) => api('/projetos/bulk', { method: 'POST', body: JSON.stringify({ items }) }),
+};
 
 export const permissoesApi = {
-  listar: () => api('/permissoes'),
   listarMe: () => api('/permissoes/me'),
-  salvar: (regras) => api('/permissoes', { method: 'PUT', body: JSON.stringify(regras) }),
-  tipos: () => api('/permissoes/tipos'),
-  entidades: () => api('/permissoes/entidades'),
+};
+
+export const perfisApi = {
+  listar: () => api('/perfis'),
+  buscar: (id) => api(`/perfis/${id}`),
+  criar: (body) => api('/perfis', { method: 'POST', body: JSON.stringify(body) }),
+  atualizar: (id, body) => api(`/perfis/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  remover: (id) => api(`/perfis/${id}`, { method: 'DELETE' }),
+  entidades: () => api('/perfis/entidades'),
+};
+
+export const logsApi = {
+  listar: (params) => {
+    const q = new URLSearchParams(params || {}).toString();
+    return api(`/logs${q ? `?${q}` : ''}`);
+  },
 };

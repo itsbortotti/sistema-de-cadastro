@@ -1,51 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-
-const FILE = path.join(__dirname, 'capex.json');
+const { prisma } = require('../lib/prisma');
 
 const CLASSIFICACOES_VALIDAS = ['capex', 'opex'];
-
-function read() {
-  try {
-    const data = JSON.parse(fs.readFileSync(FILE, 'utf8'));
-    return Array.isArray(data) ? data : [];
-  } catch {
-    fs.writeFileSync(FILE, '[]');
-    return [];
-  }
-}
-
-function normalizarItem(item) {
-  const u = { ...item };
-  if (!CLASSIFICACOES_VALIDAS.includes(u.classificacao)) u.classificacao = 'capex';
-  if (!Array.isArray(u.entradas)) u.entradas = [];
-  u.entradas = u.entradas.map((e) => ({
-    id: e.id || String(Date.now()) + Math.random().toString(36).slice(2),
-    valor: e.valor != null && e.valor !== '' ? Number(e.valor) : 0,
-    periodo: e.periodo != null ? String(e.periodo).trim() : '',
-  }));
-  u.produtoSoftwareIds = normalizarIds(u.produtoSoftwareIds);
-  u.projetoIds = normalizarIds(u.projetoIds);
-  return u;
-}
-
-function somaEntradas(entradas) {
-  if (!Array.isArray(entradas)) return 0;
-  return entradas.reduce((acc, e) => acc + (Number(e.valor) || 0), 0);
-}
-
-function write(data) {
-  fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
-}
-
-function listar() {
-  return read().map(normalizarItem);
-}
-
-function getById(id) {
-  const item = read().find((x) => x.id === id) || null;
-  return item ? normalizarItem({ ...item }) : null;
-}
 
 function normalizarIds(v) {
   if (Array.isArray(v)) return v.filter((id) => id != null && String(id).trim() !== '').map((id) => String(id).trim());
@@ -60,9 +15,60 @@ function normalizarIds(v) {
   return [];
 }
 
-function criar(dados) {
-  const lista = read();
-  const id = String(Date.now());
+function somaEntradas(entradas) {
+  if (!Array.isArray(entradas)) return 0;
+  return entradas.reduce((acc, e) => acc + (Number(e.valor) || 0), 0);
+}
+
+function toResponse(c) {
+  if (!c) return null;
+  const entradas = (c.entradas || []).map((e) => ({
+    id: e.id,
+    valor: e.valor,
+    periodo: e.periodo || '',
+  }));
+  const projetoIds = (c.projetos || []).map((p) => p.id);
+  const produtoSoftwareIds = (c.produtosSoftware || []).map((p) => p.id);
+  return {
+    id: c.id,
+    areaId: c.areaId,
+    classificacao: c.classificacao,
+    fornecedorId: c.fornecedorId,
+    valor: c.valor,
+    dataInicio: c.dataInicio,
+    dataFim: c.dataFim,
+    observacoes: c.observacoes || '',
+    entradas,
+    projetoIds,
+    produtoSoftwareIds,
+  };
+}
+
+async function listar() {
+  const rows = await prisma.capex.findMany({
+    include: {
+      entradas: true,
+      projetos: { select: { id: true } },
+      produtosSoftware: { select: { id: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+  return rows.map(toResponse);
+}
+
+async function getById(id) {
+  const r = await prisma.capex.findUnique({
+    where: { id },
+    include: {
+      entradas: true,
+      projetos: { select: { id: true } },
+      produtosSoftware: { select: { id: true } },
+    },
+  });
+  return toResponse(r);
+}
+
+async function criar(dados) {
   const areaId = dados.areaId && String(dados.areaId).trim() ? String(dados.areaId).trim() : null;
   const classificacao = CLASSIFICACOES_VALIDAS.includes(dados.classificacao) ? dados.classificacao : 'capex';
   const fornecedorId = dados.fornecedorId && String(dados.fornecedorId).trim() ? String(dados.fornecedorId).trim() : null;
@@ -73,59 +79,87 @@ function criar(dados) {
   const projetoIds = normalizarIds(dados.projetoIds || []);
   const observacoes = dados.observacoes != null ? String(dados.observacoes).trim() : '';
 
-  const novo = {
-    id,
-    areaId,
-    classificacao,
-    fornecedorId,
-    valor,
-    dataInicio,
-    dataFim,
-    produtoSoftwareIds,
-    projetoIds,
-    observacoes,
-    entradas: [],
-  };
-  lista.push(novo);
-  write(lista);
-  return normalizarItem(novo);
+  const novo = await prisma.capex.create({
+    data: {
+      areaId,
+      classificacao,
+      fornecedorId,
+      valor,
+      dataInicio,
+      dataFim,
+      observacoes,
+      projetos: projetoIds.length ? { connect: projetoIds.map((id) => ({ id })) } : undefined,
+      produtosSoftware: produtoSoftwareIds.length ? { connect: produtoSoftwareIds.map((id) => ({ id })) } : undefined,
+    },
+    include: {
+      entradas: true,
+      projetos: { select: { id: true } },
+      produtosSoftware: { select: { id: true } },
+    },
+  });
+  return toResponse(novo);
 }
 
-function atualizar(id, dados) {
-  const lista = read();
-  const idx = lista.findIndex((x) => x.id === id);
-  if (idx === -1) return null;
-  const atual = lista[idx];
+async function atualizar(id, dados) {
+  const existente = await prisma.capex.findUnique({
+    where: { id },
+    include: { entradas: true, projetos: true, produtosSoftware: true },
+  });
+  if (!existente) return null;
 
-  if (dados.areaId !== undefined) atual.areaId = dados.areaId && String(dados.areaId).trim() ? String(dados.areaId).trim() : null;
-  if (dados.classificacao !== undefined && CLASSIFICACOES_VALIDAS.includes(dados.classificacao)) atual.classificacao = dados.classificacao;
-  if (dados.fornecedorId !== undefined) atual.fornecedorId = dados.fornecedorId && String(dados.fornecedorId).trim() ? String(dados.fornecedorId).trim() : null;
-  if (dados.valor !== undefined) atual.valor = dados.valor !== '' && dados.valor != null ? Number(dados.valor) : null;
-  if (dados.dataInicio !== undefined) atual.dataInicio = dados.dataInicio && String(dados.dataInicio).trim() ? String(dados.dataInicio).trim() : null;
-  if (dados.dataFim !== undefined) atual.dataFim = dados.dataFim && String(dados.dataFim).trim() ? String(dados.dataFim).trim() : null;
-  if (dados.produtoSoftwareIds !== undefined) atual.produtoSoftwareIds = normalizarIds(dados.produtoSoftwareIds);
-  if (dados.projetoIds !== undefined) atual.projetoIds = normalizarIds(dados.projetoIds);
-  if (dados.observacoes !== undefined) atual.observacoes = String(dados.observacoes).trim();
+  const updateData = {};
+  if (dados.areaId !== undefined) updateData.areaId = dados.areaId && String(dados.areaId).trim() ? String(dados.areaId).trim() : null;
+  if (dados.classificacao !== undefined && CLASSIFICACOES_VALIDAS.includes(dados.classificacao)) updateData.classificacao = dados.classificacao;
+  if (dados.fornecedorId !== undefined) updateData.fornecedorId = dados.fornecedorId && String(dados.fornecedorId).trim() ? String(dados.fornecedorId).trim() : null;
+  if (dados.valor !== undefined) updateData.valor = dados.valor !== '' && dados.valor != null ? Number(dados.valor) : null;
+  if (dados.dataInicio !== undefined) updateData.dataInicio = dados.dataInicio && String(dados.dataInicio).trim() ? String(dados.dataInicio).trim() : null;
+  if (dados.dataFim !== undefined) updateData.dataFim = dados.dataFim && String(dados.dataFim).trim() ? String(dados.dataFim).trim() : null;
+  if (dados.observacoes !== undefined) updateData.observacoes = String(dados.observacoes).trim();
+  if (dados.produtoSoftwareIds !== undefined) {
+    const ids = normalizarIds(dados.produtoSoftwareIds);
+    updateData.produtosSoftware = { set: ids.map((id) => ({ id })) };
+  }
+  if (dados.projetoIds !== undefined) {
+    const ids = normalizarIds(dados.projetoIds);
+    updateData.projetos = { set: ids.map((id) => ({ id })) };
+  }
   if (Array.isArray(dados.entradas)) {
-    atual.entradas = dados.entradas.map((e) => ({
-      id: e.id || String(Date.now()) + Math.random().toString(36).slice(2),
-      valor: e.valor != null && e.valor !== '' ? Number(e.valor) : 0,
-      periodo: e.periodo != null ? String(e.periodo).trim() : '',
-    }));
-    const soma = somaEntradas(atual.entradas);
-    const valorMax = Number(atual.valor) || 0;
-    if (soma > valorMax) throw new Error(`A soma das entradas (${soma.toFixed(2)}) não pode superar o valor total do Capex/Opex (${valorMax.toFixed(2)}).`);
+    const valorMax = Number(updateData.valor ?? existente.valor) || 0;
+    const soma = dados.entradas.reduce((acc, e) => acc + (Number(e.valor) || 0), 0);
+    if (soma > valorMax) {
+      throw new Error(`A soma das entradas (${soma.toFixed(2)}) não pode superar o valor total do Capex/Opex (${valorMax.toFixed(2)}).`);
+    }
+    await prisma.capexEntrada.deleteMany({ where: { capexId: id } });
+    if (dados.entradas.length > 0) {
+      await prisma.capexEntrada.createMany({
+        data: dados.entradas.map((e) => ({
+          capexId: id,
+          valor: e.valor != null && e.valor !== '' ? Number(e.valor) : 0,
+          periodo: e.periodo != null ? String(e.periodo).trim() : '',
+        })),
+      });
+    }
   }
 
-  write(lista);
-  return normalizarItem(atual);
+  const atualizado = await prisma.capex.update({
+    where: { id },
+    data: updateData,
+    include: {
+      entradas: true,
+      projetos: { select: { id: true } },
+      produtosSoftware: { select: { id: true } },
+    },
+  });
+  return toResponse(atualizado);
 }
 
-function remover(id) {
-  const lista = read().filter((x) => x.id !== id);
-  if (lista.length === read().length) return false;
-  write(lista);
-  return true;
+async function remover(id) {
+  try {
+    await prisma.capex.delete({ where: { id } });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 module.exports = { listar, getById, criar, atualizar, remover };

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { permissoesApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
@@ -19,7 +18,10 @@ const ENTIDADES_ORDEM = [
   'hospedagens',
   'formas-acesso',
   'times',
+  'marcas-atendidas',
+  'pessoas',
   'produtos-software',
+  'projetos',
   'capex',
   'empresas',
 ];
@@ -30,7 +32,10 @@ const ENTIDADE_LABEL = {
   hospedagens: 'Hospedagens',
   'formas-acesso': 'Formas de Acesso',
   times: 'Times',
-  'produtos-software': 'Projetos',
+  'marcas-atendidas': 'Marcas Atendidas',
+  pessoas: 'Pessoas',
+  'produtos-software': 'Sistemas',
+  projetos: 'Projetos',
   capex: 'Capex / Opex',
   empresas: 'Empresas',
 };
@@ -139,16 +144,13 @@ export default function PermissoesPage() {
   };
 
   if (!usuario) return null;
-  if (carregando) return <p className="page-loading">Carregando permissões...</p>;
+  if (carregando) return <p className="page-loading">Carregando perfis...</p>;
   if (acessoNegado) {
     return (
       <div className="usuarios-page permissoes-page">
-        <div className="page-header">
-          <Link to="/" className="btn btn-secondary">Voltar ao início</Link>
-        </div>
         <div className="permissoes-acesso-negado">
           <p className="erro-msg">Você não tem permissão para realizar esta ação.</p>
-          <p className="page-desc">Se você é administrador, faça logout e login novamente para atualizar suas permissões.</p>
+          <p className="page-desc">Apenas administradores podem gerenciar perfis. Faça logout e login novamente se for o caso.</p>
         </div>
       </div>
     );
@@ -156,9 +158,6 @@ export default function PermissoesPage() {
   if (erro && regras.length === 0) {
     return (
       <div className="usuarios-page permissoes-page">
-        <div className="page-header">
-          <Link to="/" className="btn btn-secondary">Voltar ao início</Link>
-        </div>
         <p className="erro-msg">{erro}</p>
       </div>
     );
@@ -166,31 +165,27 @@ export default function PermissoesPage() {
 
   return (
     <div className="usuarios-page permissoes-page">
-      <div className="page-header">
-        <Link to="/" className="btn btn-secondary">Voltar ao início</Link>
-      </div>
       <p className="page-desc">
-        Altere as permissões de cada tipo de usuário por cadastro. Marque o que cada tipo pode fazer:
-        <strong> Ver</strong> (ver lista e detalhes), <strong>Editar</strong>, <strong>Criar</strong> e <strong>Excluir</strong>.
+        Nesta aba você cria e configura os <strong>perfis de usuário</strong>. Para cada perfil, defina em quais <strong>abas</strong> do sistema o usuário pode <strong>Ver</strong> (lista e detalhes), <strong>Editar</strong>, <strong>Criar</strong> e <strong>Excluir</strong>.
       </p>
 
       {erro && <p className="erro-msg">{erro}</p>}
-      {salvo && <p className="sucesso-msg">Permissões salvas com sucesso.</p>}
+      {salvo && <p className="sucesso-msg">Perfis atualizados com sucesso.</p>}
 
       <form onSubmit={handleSalvar} className="permissoes-form">
         {TIPOS_ORDEM.map((tipo) => (
           <section key={tipo} className="permissoes-card">
-            <h2 className="permissoes-card-title">{TIPO_LABEL[tipo]}</h2>
+            <h2 className="permissoes-card-title">Perfil: {TIPO_LABEL[tipo]}</h2>
             <p className="permissoes-card-desc">
-              {tipo === 'admin' && 'Usuários administradores têm acesso total; você pode restringir por cadastro se desejar.'}
-              {tipo === 'membro' && 'Membros podem ter permissão para editar e criar, mas não necessariamente excluir.'}
-              {tipo === 'visualizacao' && 'Usuários com apenas visualização só podem ver listas e detalhes, sem alterar dados.'}
+              {tipo === 'admin' && 'Usuários com perfil Administrador têm acesso total; você pode restringir por aba se desejar.'}
+              {tipo === 'membro' && 'Usuários com perfil Membro podem ter permissão para editar e criar em determinadas abas, mas não necessariamente excluir.'}
+              {tipo === 'visualizacao' && 'Usuários com perfil Apenas visualização só podem ver listas e detalhes nas abas permitidas, sem alterar dados.'}
             </p>
             <div className="table-wrap">
               <table className="table table-permissoes">
                 <thead>
                   <tr>
-                    <th>Cadastro</th>
+                    <th>Aba</th>
                     {ACOES.map((a) => (
                       <th key={a.key}>{a.label}</th>
                     ))}
@@ -225,7 +220,7 @@ export default function PermissoesPage() {
 
         <div className="form-actions permissoes-actions">
           <button type="submit" className="btn btn-primary" disabled={salvando}>
-            {salvando ? 'Salvando...' : 'Salvar permissões'}
+            {salvando ? 'Salvando...' : 'Salvar perfis'}
           </button>
         </div>
       </form>

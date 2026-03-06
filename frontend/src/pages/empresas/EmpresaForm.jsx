@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import BtnVoltarHeader from '../../components/BtnVoltarHeader';
 import { empresasApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
 import '../CadastroFormLayout.css';
 import './Empresas.css';
-
-const PORTES = ['', 'MEI', 'ME', 'EPP', 'Demais'];
-const SITUACOES = ['', 'Ativa', 'Baixada', 'Inapta', 'Nula', 'Suspensa', 'Inconsistente'];
 
 export default function EmpresaForm({ somenteLeitura = false }) {
   const { id } = useParams();
@@ -18,14 +16,6 @@ export default function EmpresaForm({ somenteLeitura = false }) {
   const [razaoSocial, setRazaoSocial] = useState('');
   const [nomeFantasia, setNomeFantasia] = useState('');
   const [dataAbertura, setDataAbertura] = useState('');
-  const [naturezaJuridicaCodigo, setNaturezaJuridicaCodigo] = useState('');
-  const [naturezaJuridicaDescricao, setNaturezaJuridicaDescricao] = useState('');
-  const [atividadePrincipalCodigo, setAtividadePrincipalCodigo] = useState('');
-  const [atividadePrincipalDescricao, setAtividadePrincipalDescricao] = useState('');
-  const [atividadesSecundarias, setAtividadesSecundarias] = useState('');
-  const [situacaoCadastral, setSituacaoCadastral] = useState('');
-  const [dataSituacaoCadastral, setDataSituacaoCadastral] = useState('');
-  const [motivoSituacaoCadastral, setMotivoSituacaoCadastral] = useState('');
   const [logradouro, setLogradouro] = useState('');
   const [numero, setNumero] = useState('');
   const [complemento, setComplemento] = useState('');
@@ -35,8 +25,6 @@ export default function EmpresaForm({ somenteLeitura = false }) {
   const [cep, setCep] = useState('');
   const [telefone, setTelefone] = useState('');
   const [email, setEmail] = useState('');
-  const [capitalSocial, setCapitalSocial] = useState('');
-  const [porte, setPorte] = useState('');
   const [inscricaoEstadual, setInscricaoEstadual] = useState('');
   const [inscricaoMunicipal, setInscricaoMunicipal] = useState('');
   const [nomeResponsavel, setNomeResponsavel] = useState('');
@@ -44,6 +32,37 @@ export default function EmpresaForm({ somenteLeitura = false }) {
 
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
+  const [buscandoCep, setBuscandoCep] = useState(false);
+  const [erroCep, setErroCep] = useState('');
+
+  const VIA_CEP_URL = 'https://viacep.com.br/ws';
+
+  const buscarEnderecoPorCep = async () => {
+    const apenasDigitos = (cep || '').replace(/\D/g, '');
+    if (apenasDigitos.length !== 8) {
+      setErroCep(apenasDigitos.length > 0 ? 'CEP deve ter 8 dígitos.' : '');
+      return;
+    }
+    setErroCep('');
+    setBuscandoCep(true);
+    try {
+      const res = await fetch(`${VIA_CEP_URL}/${apenasDigitos}/json/`);
+      const data = await res.json();
+      if (data.erro) {
+        setErroCep('CEP não encontrado.');
+        return;
+      }
+      setLogradouro(data.logradouro || '');
+      setBairro(data.bairro || '');
+      setCidade(data.localidade || '');
+      setUf((data.uf || '').toUpperCase().slice(0, 2));
+      if (data.cep) setCep(data.cep);
+    } catch (_e) {
+      setErroCep('Não foi possível buscar o CEP. Verifique a conexão.');
+    } finally {
+      setBuscandoCep(false);
+    }
+  };
 
   useEffect(() => {
     if (isEdicao && id) {
@@ -54,14 +73,6 @@ export default function EmpresaForm({ somenteLeitura = false }) {
           setRazaoSocial(e.razaoSocial || '');
           setNomeFantasia(e.nomeFantasia || '');
           setDataAbertura(e.dataAbertura || '');
-          setNaturezaJuridicaCodigo(e.naturezaJuridicaCodigo || '');
-          setNaturezaJuridicaDescricao(e.naturezaJuridicaDescricao || '');
-          setAtividadePrincipalCodigo(e.atividadePrincipalCodigo || '');
-          setAtividadePrincipalDescricao(e.atividadePrincipalDescricao || '');
-          setAtividadesSecundarias(e.atividadesSecundarias || '');
-          setSituacaoCadastral(e.situacaoCadastral || '');
-          setDataSituacaoCadastral(e.dataSituacaoCadastral || '');
-          setMotivoSituacaoCadastral(e.motivoSituacaoCadastral || '');
           setLogradouro(e.logradouro || '');
           setNumero(e.numero || '');
           setComplemento(e.complemento || '');
@@ -71,8 +82,6 @@ export default function EmpresaForm({ somenteLeitura = false }) {
           setCep(e.cep || '');
           setTelefone(e.telefone || '');
           setEmail(e.email || '');
-          setCapitalSocial(e.capitalSocial ?? '');
-          setPorte(e.porte || '');
           setInscricaoEstadual(e.inscricaoEstadual || '');
           setInscricaoMunicipal(e.inscricaoMunicipal || '');
           setNomeResponsavel(e.nomeResponsavel || '');
@@ -96,14 +105,14 @@ export default function EmpresaForm({ somenteLeitura = false }) {
         razaoSocial: razaoSocial.trim(),
         nomeFantasia,
         dataAbertura,
-        naturezaJuridicaCodigo,
-        naturezaJuridicaDescricao,
-        atividadePrincipalCodigo,
-        atividadePrincipalDescricao,
-        atividadesSecundarias,
-        situacaoCadastral,
-        dataSituacaoCadastral,
-        motivoSituacaoCadastral,
+        naturezaJuridicaCodigo: '',
+        naturezaJuridicaDescricao: '',
+        atividadePrincipalCodigo: '',
+        atividadePrincipalDescricao: '',
+        atividadesSecundarias: '',
+        situacaoCadastral: '',
+        dataSituacaoCadastral: '',
+        motivoSituacaoCadastral: '',
         logradouro,
         numero,
         complemento,
@@ -113,8 +122,8 @@ export default function EmpresaForm({ somenteLeitura = false }) {
         cep,
         telefone,
         email,
-        capitalSocial: capitalSocial === '' ? '' : String(capitalSocial),
-        porte,
+        capitalSocial: '',
+        porte: '',
         inscricaoEstadual,
         inscricaoMunicipal,
         nomeResponsavel,
@@ -133,10 +142,8 @@ export default function EmpresaForm({ somenteLeitura = false }) {
   return (
     <div className="cadastro-page form-cadastro-page empresas-form-page">
       <div className="page-header">
-        <h1>{readOnly ? 'Ver empresa' : isEdicao ? 'Editar empresa' : 'Nova empresa'}</h1>
-        <div className="page-header-actions">
-          <Link to="/empresas" className="btn btn-secondary">Voltar</Link>
-        </div>
+        <BtnVoltarHeader to="/empresas" />
+        <h1>{readOnly ? 'Ver empresa' : isEdicao ? 'Editar empresa' : ''}</h1>
       </div>
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}
@@ -161,56 +168,35 @@ export default function EmpresaForm({ somenteLeitura = false }) {
           </label>
         </section>
 
-        <section className="form-secao">
-          <h2 className="form-secao-titulo">Natureza jurídica e atividades</h2>
-          <label className="form-group form-group-inline">
-            <span className="form-label">Código natureza jurídica</span>
-            <input type="text" value={naturezaJuridicaCodigo} onChange={(e) => setNaturezaJuridicaCodigo(e.target.value)} placeholder="Ex.: 2063" />
-          </label>
-          <label className="form-group">
-            <span className="form-label">Descrição natureza jurídica</span>
-            <input type="text" value={naturezaJuridicaDescricao} onChange={(e) => setNaturezaJuridicaDescricao(e.target.value)} placeholder="Ex.: Sociedade Empresária Limitada" />
-          </label>
-          <label className="form-group form-group-inline">
-            <span className="form-label">CNAE principal (código)</span>
-            <input type="text" value={atividadePrincipalCodigo} onChange={(e) => setAtividadePrincipalCodigo(e.target.value)} placeholder="Ex.: 6201-5/00" />
-          </label>
-          <label className="form-group">
-            <span className="form-label">Descrição atividade principal</span>
-            <input type="text" value={atividadePrincipalDescricao} onChange={(e) => setAtividadePrincipalDescricao(e.target.value)} placeholder="Descrição do CNAE principal" />
-          </label>
-          <label className="form-group">
-            <span className="form-label">Atividades secundárias (CNAEs)</span>
-            <textarea value={atividadesSecundarias} onChange={(e) => setAtividadesSecundarias(e.target.value)} placeholder="Lista de CNAEs secundários (um por linha ou separados por vírgula)" rows={3} />
-          </label>
-        </section>
-
-        <section className="form-secao form-secao-situacao">
-          <h2 className="form-secao-titulo">Situação cadastral</h2>
-          <label className="form-group">
-            <span className="form-label">Situação cadastral</span>
-            <select value={situacaoCadastral} onChange={(e) => setSituacaoCadastral(e.target.value)}>
-              {SITUACOES.map((s) => (
-                <option key={s || 'vazio'} value={s}>{s || '— Selecione —'}</option>
-              ))}
-            </select>
-          </label>
-          <label className="form-group form-group-inline">
-            <span className="form-label">Data situação cadastral</span>
-            <input type="date" value={dataSituacaoCadastral} onChange={(e) => setDataSituacaoCadastral(e.target.value)} />
-          </label>
-          <label className="form-group">
-            <span className="form-label">Motivo situação cadastral</span>
-            <input type="text" value={motivoSituacaoCadastral} onChange={(e) => setMotivoSituacaoCadastral(e.target.value)} placeholder="Motivo (quando aplicável)" />
-          </label>
-        </section>
-
         <section className="form-secao form-secao-endereco">
           <h2 className="form-secao-titulo">Endereço</h2>
-          <label className="form-group form-group-cep">
+          <div className="form-group form-group-cep">
             <span className="form-label">CEP</span>
-            <input type="text" value={cep} onChange={(e) => setCep(e.target.value)} placeholder="00000-000" maxLength={9} />
-          </label>
+            <div className="cep-busca-wrap">
+              <input
+                type="text"
+                value={cep}
+                onChange={(e) => setCep(e.target.value)}
+                onBlur={() => !readOnly && (cep || '').replace(/\D/g, '').length === 8 && buscarEnderecoPorCep()}
+                placeholder="00000-000"
+                maxLength={9}
+                disabled={readOnly}
+                aria-describedby={erroCep ? 'erro-cep' : undefined}
+              />
+              {!readOnly && (
+                <button
+                  type="button"
+                  className="btn btn-buscar-cep"
+                  onClick={buscarEnderecoPorCep}
+                  disabled={buscandoCep || (cep || '').replace(/\D/g, '').length !== 8}
+                  title="Buscar endereço pelo CEP"
+                >
+                  {buscandoCep ? 'Buscando...' : 'Buscar'}
+                </button>
+              )}
+            </div>
+            {erroCep && <p id="erro-cep" className="form-hint form-hint-erro">{erroCep}</p>}
+          </div>
           <label className="form-group form-group-logradouro">
             <span className="form-label">Logradouro</span>
             <input type="text" value={logradouro} onChange={(e) => setLogradouro(e.target.value)} placeholder="Rua, avenida..." />
@@ -250,22 +236,6 @@ export default function EmpresaForm({ somenteLeitura = false }) {
           <label className="form-group form-group-responsavel">
             <span className="form-label">Nome do responsável</span>
             <input type="text" value={nomeResponsavel} onChange={(e) => setNomeResponsavel(e.target.value)} placeholder="Responsável legal ou contato" />
-          </label>
-        </section>
-
-        <section className="form-secao form-secao-capital">
-          <h2 className="form-secao-titulo">Capital social e porte</h2>
-          <label className="form-group">
-            <span className="form-label">Capital social (R$)</span>
-            <input type="number" step="0.01" min={0} value={capitalSocial} onChange={(e) => setCapitalSocial(e.target.value)} placeholder="0,00" />
-          </label>
-          <label className="form-group">
-            <span className="form-label">Porte da empresa</span>
-            <select value={porte} onChange={(e) => setPorte(e.target.value)}>
-              {PORTES.map((p) => (
-                <option key={p || 'vazio'} value={p}>{p || '— Selecione —'}</option>
-              ))}
-            </select>
           </label>
         </section>
 

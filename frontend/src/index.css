@@ -303,6 +303,22 @@ body.dark-mode .form-label {
   color: #cbd5e1;
 }
 
+body.dark-mode .perfil-edit-nome-label {
+  color: #cbd5e1;
+}
+body.dark-mode .perfil-edit-nome-input {
+  background: #0f172a;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+body.dark-mode .perfil-edit-nome-input:focus {
+  border-color: #02b0c6;
+  box-shadow: 0 0 0 3px rgba(2, 176, 198, 0.2);
+}
+body.dark-mode .perfil-edit-nome-wrap {
+  border-bottom-color: #334155;
+}
+
 body.dark-mode .form-cadastro input,
 body.dark-mode .form-cadastro select,
 body.dark-mode .form-cadastro textarea,

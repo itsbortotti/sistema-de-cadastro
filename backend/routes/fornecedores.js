@@ -1,13 +1,9 @@
 const express = require('express');
 const { listar, getById, criar, atualizar, remover } = require('../data/fornecedores');
+const { validateIdParam } = require('../middleware/validateId');
 
 const router = express.Router();
-
-function requireAuth(req, res, next) {
-  if (!req.session?.usuario) return res.status(401).json({ erro: 'Não autenticado' });
-  next();
-}
-router.use(requireAuth);
+router.param('id', validateIdParam);
 
 /**
  * @swagger
@@ -18,7 +14,14 @@ router.use(requireAuth);
  *     responses:
  *       200: { description: Lista de fornecedores }
  */
-router.get('/', (req, res) => res.json(listar()));
+router.get('/', async (req, res, next) => {
+  try {
+    const lista = await listar();
+    res.json(lista);
+  } catch (err) {
+    next(err);
+  }
+});
 
 /**
  * @swagger
@@ -35,10 +38,14 @@ router.get('/', (req, res) => res.json(listar()));
  *       200: { description: Fornecedor encontrado }
  *       404: { description: Não encontrado }
  */
-router.get('/:id', (req, res) => {
-  const item = getById(req.params.id);
-  if (!item) return res.status(404).json({ erro: 'Não encontrado' });
-  res.json(item);
+router.get('/:id', async (req, res, next) => {
+  try {
+    const item = await getById(req.params.id);
+    if (!item) return res.status(404).json({ erro: 'Não encontrado' });
+    res.json(item);
+  } catch (err) {
+    next(err);
+  }
 });
 
 /**
@@ -77,10 +84,15 @@ router.get('/:id', (req, res) => {
  *       201: { description: Fornecedor criado }
  *       400: { description: Nome é obrigatório }
  */
-router.post('/', (req, res) => {
-  const body = req.body || {};
-  if (!body.nome || !String(body.nome).trim()) return res.status(400).json({ erro: 'Nome é obrigatório' });
-  res.status(201).json(criar(body));
+router.post('/', async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    if (!body.nome || !String(body.nome).trim()) return res.status(400).json({ erro: 'Nome é obrigatório' });
+    const item = await criar(body);
+    res.status(201).json(item);
+  } catch (err) {
+    next(err);
+  }
 });
 
 /**
@@ -122,10 +134,14 @@ router.post('/', (req, res) => {
  *       200: { description: Fornecedor atualizado }
  *       404: { description: Não encontrado }
  */
-router.put('/:id', (req, res) => {
-  const item = atualizar(req.params.id, req.body || {});
-  if (!item) return res.status(404).json({ erro: 'Não encontrado' });
-  res.json(item);
+router.put('/:id', async (req, res, next) => {
+  try {
+    const item = await atualizar(req.params.id, req.body || {});
+    if (!item) return res.status(404).json({ erro: 'Não encontrado' });
+    res.json(item);
+  } catch (err) {
+    next(err);
+  }
 });
 
 /**
@@ -143,9 +159,13 @@ router.put('/:id', (req, res) => {
  *       200: { description: Fornecedor removido }
  *       404: { description: Não encontrado }
  */
-router.delete('/:id', (req, res) => {
-  if (!remover(req.params.id)) return res.status(404).json({ erro: 'Não encontrado' });
-  res.json({ ok: true });
+router.delete('/:id', async (req, res, next) => {
+  try {
+    if (!(await remover(req.params.id))) return res.status(404).json({ erro: 'Não encontrado' });
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
 });
 
 module.exports = router;

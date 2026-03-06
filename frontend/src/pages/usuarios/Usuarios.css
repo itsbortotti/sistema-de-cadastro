@@ -18,6 +18,11 @@
   margin-bottom: 1.5rem;
 }
 
+/* Botão Voltar à esquerda: título da tela fica logo em seguida (ex.: Projetos) */
+.page-header:has(.btn-voltar-header) {
+  justify-content: flex-start;
+}
+
 .page-header h1 {
   font-size: var(--ts-h2);
   color: var(--ts-laranja);
@@ -30,6 +35,33 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
+}
+
+/* Botão Voltar com ícone no canto esquerdo do cabeçalho */
+.btn-voltar-header {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  margin-right: 0.75rem;
+  border-radius: 8px;
+  color: var(--ts-azul);
+  background: transparent;
+  border: 1px solid var(--ts-cinza);
+  cursor: pointer;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+.btn-voltar-header:hover {
+  background: rgba(19, 27, 113, 0.08);
+  border-color: var(--ts-azul);
+  color: var(--ts-azul);
+}
+.btn-voltar-header svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .page-toolbar {

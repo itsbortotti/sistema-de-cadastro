@@ -1,6 +1,8 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const { getUsuarios, getById } = require('../data/usuarios');
+const { getByLogin, getById } = require('../data/usuarios');
+const { registrarLog } = require('../lib/logHelper');
+const { validateLogin } = require('../validators/auth');
 
 const router = express.Router();
 
@@ -24,23 +26,26 @@ const router = express.Router();
  *       200: { description: Login realizado com sucesso }
  *       401: { description: Credenciais inválidas }
  */
-router.post('/login', (req, res) => {
-  const { login, senha } = req.body || {};
-  if (!login || !senha) {
-    return res.status(400).json({ erro: 'Login e senha são obrigatórios' });
+router.post('/login', validateLogin(), async (req, res, next) => {
+  try {
+    const { login, senha } = req.body;
+    const usuario = await getByLogin(login);
+    if (!usuario || !bcrypt.compareSync(senha, usuario.senhaHash)) {
+      return res.status(401).json({ erro: 'Login ou senha inválidos' });
+    }
+    const tipo = usuario.perfil?.nome === 'Administrador' ? 'admin' : usuario.perfil?.nome === 'Apenas visualização' ? 'visualizacao' : 'membro';
+    req.session.usuario = {
+      id: usuario.id,
+      nome: usuario.nome,
+      login: usuario.login,
+      tipo,
+      perfilId: usuario.perfilId,
+    };
+    registrarLog('login', `Login: ${usuario.login} (${usuario.nome})`, usuario.id).catch(() => {});
+    return res.json({ ok: true, usuario: req.session.usuario });
+  } catch (err) {
+    next(err);
   }
-  const usuarios = getUsuarios();
-  const usuario = usuarios.find(u => u.login === login);
-  if (!usuario || !bcrypt.compareSync(senha, usuario.senhaHash)) {
-    return res.status(401).json({ erro: 'Login ou senha inválidos' });
-  }
-  req.session.usuario = {
-    id: usuario.id,
-    nome: usuario.nome,
-    login: usuario.login,
-    tipo: usuario.tipo || 'membro',
-  };
-  return res.json({ ok: true, usuario: req.session.usuario });
 });
 
 /**
@@ -67,23 +72,28 @@ router.post('/logout', (req, res) => {
  *       200: { description: Usuário logado }
  *       401: { description: Não autenticado }
  */
-router.get('/sessao', (req, res) => {
-  if (!req.session?.usuario) {
-    return res.status(401).json({ erro: 'Não autenticado' });
+router.get('/sessao', async (req, res, next) => {
+  try {
+    if (!req.session?.usuario) {
+      return res.status(401).json({ erro: 'Não autenticado' });
+    }
+    const u = await getById(req.session.usuario.id);
+    if (!u) {
+      req.session.destroy();
+      return res.status(401).json({ erro: 'Usuário não encontrado' });
+    }
+    const usuario = {
+      id: u.id,
+      nome: u.nome,
+      login: u.login,
+      tipo: u.tipo || 'membro',
+      perfilId: u.perfilId,
+    };
+    req.session.usuario = usuario;
+    res.json(usuario);
+  } catch (err) {
+    next(err);
   }
-  const u = getById(req.session.usuario.id);
-  if (!u) {
-    req.session.destroy();
-    return res.status(401).json({ erro: 'Usuário não encontrado' });
-  }
-  const usuario = {
-    id: u.id,
-    nome: u.nome,
-    login: u.login,
-    tipo: u.tipo || 'membro',
-  };
-  req.session.usuario = usuario;
-  res.json(usuario);
 });
 
 module.exports = router;

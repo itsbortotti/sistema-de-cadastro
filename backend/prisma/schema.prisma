@@ -1,0 +1,290 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Perfil {
+  id         String   @id @default(cuid())
+  nome       String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  usuarios    Usuario[]
+  permissoes  Permissao[]
+}
+
+model Usuario {
+  id        String   @id @default(cuid())
+  nome      String
+  login     String   @unique
+  email     String   @default("")
+  senhaHash String
+  perfilId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  perfil                        Perfil               @relation(fields: [perfilId], references: [id], onDelete: Restrict)
+  produtoSoftwareResponsavelTi   ProdutoSoftware[]   @relation("ResponsavelTi")
+  produtoSoftwareUsuarioNegocio  ProdutoSoftware[]    @relation("UsuarioNegocio")
+  logs                          Log[]
+}
+
+model Permissao {
+  id         String  @id @default(cuid())
+  perfilId   String
+  entidade   String
+  visualizar Boolean @default(true)
+  editar     Boolean @default(false)
+  criar      Boolean @default(false)
+  excluir    Boolean @default(false)
+
+  perfil Perfil @relation(fields: [perfilId], references: [id], onDelete: Cascade)
+
+  @@unique([perfilId, entidade])
+}
+
+model Log {
+  id        String   @id @default(cuid())
+  tipo      String   // login | edicao | criacao | exclusao
+  descricao String   @default("")
+  usuarioId String?
+  createdAt DateTime @default(now())
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+}
+
+model Empresa {
+  id                        String   @id @default(cuid())
+  cnpj                      String   @default("")
+  razaoSocial               String   @default("")
+  nomeFantasia              String   @default("")
+  dataAbertura              String   @default("")
+  naturezaJuridicaCodigo    String   @default("")
+  naturezaJuridicaDescricao String   @default("")
+  atividadePrincipalCodigo String   @default("")
+  atividadePrincipalDescricao String @default("")
+  atividadesSecundarias    String   @default("")
+  situacaoCadastral         String   @default("")
+  dataSituacaoCadastral     String   @default("")
+  motivoSituacaoCadastral   String   @default("")
+  logradouro               String   @default("")
+  numero                   String   @default("")
+  complemento              String   @default("")
+  bairro                   String   @default("")
+  cidade                   String   @default("")
+  uf                       String   @default("")
+  cep                      String   @default("")
+  telefone                 String   @default("")
+  email                    String   @default("")
+  capitalSocial            String   @default("")
+  porte                    String   @default("")
+  inscricaoEstadual        String   @default("")
+  inscricaoMunicipal       String   @default("")
+  nomeResponsavel          String   @default("")
+  observacoes              String   @default("")
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  projetos         Projeto[]
+  produtosSoftware ProdutoSoftware[]
+}
+
+model Fornecedor {
+  id           String   @id @default(cuid())
+  nome         String   @default("")
+  razaoSocial  String   @default("")
+  nomeFantasia String   @default("")
+  cnpj         String   @default("")
+  cpf          String   @default("")
+  email        String   @default("")
+  telefone     String   @default("")
+  celular      String   @default("")
+  endereco     String   @default("")
+  numero       String   @default("")
+  complemento  String   @default("")
+  bairro       String   @default("")
+  cidade       String   @default("")
+  estado       String   @default("")
+  cep          String   @default("")
+  site         String   @default("")
+  contato      String   @default("")
+  observacoes  String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  capex            Capex[]
+  produtosSoftware ProdutoSoftware[]
+}
+
+model Area {
+  id             String   @id @default(cuid())
+  nome           String   @default("")
+  codigo         String   @default("")
+  descricao      String   @default("")
+  responsavel    String   @default("")  // legado; preferir responsavelId
+  responsavelId  String?
+  observacoes    String   @default("")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  responsavelPessoa Pessoa?   @relation("AreaResponsavel", fields: [responsavelId], references: [id], onDelete: SetNull)
+  pessoas           Pessoa[]
+  capex             Capex[]
+  produtosSoftware  ProdutoSoftware[]
+}
+
+model Pessoa {
+  id             String   @id @default(cuid())
+  nome           String   @default("")
+  dataNascimento String   @default("")  // YYYY-MM-DD
+  areaId         String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  area                          Area?             @relation(fields: [areaId], references: [id], onDelete: SetNull)
+  areasComoResponsavel          Area[]             @relation("AreaResponsavel")
+  produtoSoftwareComoResponsavelTi    ProdutoSoftware[] @relation("ResponsavelTi")
+  produtoSoftwareComoResponsavelNegocio ProdutoSoftware[] @relation("ResponsavelNegocio")
+}
+
+model Hospedagem {
+  id           String   @id @default(cuid())
+  nome         String   @default("")
+  tipo         String   @default("")
+  provedor     String   @default("")
+  descricao    String   @default("")
+  observacoes  String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  produtosSoftware ProdutoSoftware[]
+}
+
+model FormaAcesso {
+  id           String   @id @default(cuid())
+  nome         String   @default("")
+  descricao    String   @default("")
+  tipo         String   @default("")
+  observacoes  String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  produtosSoftware ProdutoSoftware[]
+}
+
+model Time {
+  id           String   @id @default(cuid())
+  nome         String   @default("")
+  descricao    String   @default("")
+  lider        String   @default("")
+  email        String   @default("")
+  observacoes  String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  produtosSoftware ProdutoSoftware[]
+}
+
+model MarcaAtendida {
+  id        String   @id @default(cuid())
+  nome      String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  produtosSoftware ProdutoSoftware[]
+}
+
+model ProdutoSoftware {
+  id                      String    @id @default(cuid())
+  nomeSistema              String    @default("")
+  empresaId               String?
+  fornecedorId            String?
+  finalidadePrincipal     String    @default("")
+  breveDescritivo         String    @default("")
+  usuariosQtdAproximada   Int?
+  areaId                  String?
+  responsavelTiId         String?
+  usuarioNegocioId        String?
+  responsavelTiPessoaId   String?
+  responsavelNegocioPessoaId String?
+  hospedagemId            String?
+  onPremisesSites         String    @default("")
+  formaAcessoId           String?
+  integracoes             String    @default("")
+  controleAcessoPorUsuario Boolean  @default(false)
+  autenticacaoAdSso       Boolean   @default(false)
+  grauSatisfacao          String?
+  tiMe                    String?   // Tolerar | Investir | Migrar | Eliminar (TI ME)
+  problemasEnfrentados    String    @default("")
+  custoMensalSistema       Float?
+  custoMensalInfraestrutura Float?
+  timeId                  String?
+  dataInicio              String?
+  dataFim                 String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  empresa         Empresa?      @relation(fields: [empresaId], references: [id], onDelete: SetNull)
+  fornecedor      Fornecedor?   @relation(fields: [fornecedorId], references: [id], onDelete: SetNull)
+  area                     Area?         @relation(fields: [areaId], references: [id], onDelete: SetNull)
+  responsavelTi           Usuario?      @relation("ResponsavelTi", fields: [responsavelTiId], references: [id], onDelete: SetNull)
+  usuarioNegocio          Usuario?      @relation("UsuarioNegocio", fields: [usuarioNegocioId], references: [id], onDelete: SetNull)
+  responsavelTiPessoa     Pessoa?       @relation("ResponsavelTi", fields: [responsavelTiPessoaId], references: [id], onDelete: SetNull)
+  responsavelNegocioPessoa Pessoa?      @relation("ResponsavelNegocio", fields: [responsavelNegocioPessoaId], references: [id], onDelete: SetNull)
+  hospedagem              Hospedagem?   @relation(fields: [hospedagemId], references: [id], onDelete: SetNull)
+  formaAcesso    FormaAcesso?  @relation(fields: [formaAcessoId], references: [id], onDelete: SetNull)
+  time           Time?         @relation(fields: [timeId], references: [id], onDelete: SetNull)
+  marcasAtendidas MarcaAtendida[]
+
+  projetos Projeto[]
+  capex   Capex[]
+}
+
+model Projeto {
+  id               String   @id @default(cuid())
+  nome             String   @default("")
+  descricao        String   @default("")
+  empresaId        String?
+  dataInicio       String?
+  dataFim          String?
+  status           String   @default("")
+  observacoes      String   @default("")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  empresa          Empresa?          @relation(fields: [empresaId], references: [id], onDelete: SetNull)
+  produtosSoftware ProdutoSoftware[]
+  capex            Capex[]
+}
+
+model CapexEntrada {
+  id      String  @id @default(cuid())
+  capexId String
+  valor   Float   @default(0)
+  periodo String @default("")
+
+  capex Capex @relation(fields: [capexId], references: [id], onDelete: Cascade)
+}
+
+model Capex {
+  id             String   @id @default(cuid())
+  areaId         String?
+  classificacao  String   @default("capex") // capex | opex
+  fornecedorId   String?
+  valor          Float?
+  dataInicio     String?
+  dataFim        String?
+  observacoes    String   @default("")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  area         Area?          @relation(fields: [areaId], references: [id], onDelete: SetNull)
+  fornecedor   Fornecedor?    @relation(fields: [fornecedorId], references: [id], onDelete: SetNull)
+  entradas     CapexEntrada[]
+  projetos     Projeto[]
+  produtosSoftware ProdutoSoftware[]
+}

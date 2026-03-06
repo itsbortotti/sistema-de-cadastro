@@ -1,0 +1,70 @@
+.perfis-list-page .page-header {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  justify-content: flex-end;
+}
+
+.perfis-list-page .perfil-link {
+  font-weight: 600;
+  color: var(--ts-azul);
+  text-decoration: none;
+}
+.perfis-list-page .perfil-link:hover {
+  text-decoration: underline;
+}
+.perfis-list-page .empty-cell {
+  color: var(--ts-cinza-escuro);
+  font-style: italic;
+  padding: 1.5rem;
+}
+.perfis-list-page .btn-small {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: var(--ts-branco);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+.modal-title {
+  margin: 0 0 1rem 0;
+  font-size: var(--ts-h3);
+  color: var(--ts-azul);
+}
+.modal-content .form-label {
+  display: block;
+  margin-bottom: 1rem;
+}
+.modal-content .form-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--ts-cinza);
+  border-radius: 8px;
+  font-size: var(--ts-body);
+  margin-top: 0.25rem;
+  box-sizing: border-box;
+}
+.modal-content .form-input:focus {
+  outline: none;
+  border-color: var(--ts-azul);
+}
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}

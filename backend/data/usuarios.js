@@ -1,84 +1,78 @@
-const fs = require('fs');
-const path = require('path');
 const bcrypt = require('bcryptjs');
+const { prisma } = require('../lib/prisma');
 
-const FILE = path.join(__dirname, 'usuarios.json');
-
-function read() {
-  try {
-    const data = fs.readFileSync(FILE, 'utf8');
-    return JSON.parse(data);
-  } catch {
-    const initial = [
-      {
-        id: '1',
-        nome: 'Administrador',
-        login: 'admin',
-        email: '',
-        senhaHash: bcrypt.hashSync('admin', 10),
-        tipo: 'admin',
-      },
-    ];
-    fs.writeFileSync(FILE, JSON.stringify(initial, null, 2));
-    return initial;
-  }
+function toUsuario(u) {
+  if (!u) return null;
+  const { senhaHash, ...rest } = u;
+  const tipo = u.perfil?.nome ? (u.perfil.nome === 'Administrador' ? 'admin' : u.perfil.nome === 'Apenas visualização' ? 'visualizacao' : 'membro') : 'membro';
+  return { ...rest, tipo, perfilId: u.perfilId, perfilNome: u.perfil?.nome, email: rest.email || '' };
 }
 
-function write(usuarios) {
-  fs.writeFileSync(FILE, JSON.stringify(usuarios, null, 2));
+async function getUsuarios() {
+  const list = await prisma.usuario.findMany({
+    orderBy: { nome: 'asc' },
+    include: { perfil: true },
+  });
+  return list.map(toUsuario);
 }
 
-function getUsuarios() {
-  return read();
+async function getById(id) {
+  const u = await prisma.usuario.findUnique({
+    where: { id },
+    include: { perfil: true },
+  });
+  return u ? toUsuario(u) : null;
 }
 
-function getById(id) {
-  return read().find(u => u.id === id);
+async function getByLogin(login, excludeId = null) {
+  const u = await prisma.usuario.findFirst({
+    where: { login, ...(excludeId ? { id: { not: excludeId } } : {}) },
+    include: { perfil: true },
+  });
+  return u;
 }
 
-function getByLogin(login, excludeId = null) {
-  return read().find(u => u.login === login && u.id !== excludeId);
-}
-
-const TIPOS_VALIDOS = ['admin', 'membro', 'visualizacao'];
-
-function criar(dados) {
-  const usuarios = read();
-  const id = String(Date.now());
-  const tipo = TIPOS_VALIDOS.includes(dados.tipo) ? dados.tipo : 'membro';
+async function criar(dados) {
+  const perfilId = dados.perfilId || (await prisma.perfil.findFirst({ where: { nome: 'Membro' } }))?.id;
+  if (!perfilId) throw new Error('Perfil inválido');
   const senhaHash = bcrypt.hashSync(dados.senha || '123456', 10);
-  const novo = {
-    id,
-    nome: dados.nome,
-    login: dados.login,
-    email: dados.email != null ? String(dados.email).trim() : '',
-    senhaHash,
-    tipo,
-  };
-  usuarios.push(novo);
-  write(usuarios);
-  return { ...novo, senhaHash: undefined };
+  const novo = await prisma.usuario.create({
+    data: {
+      nome: dados.nome,
+      login: dados.login,
+      email: dados.email != null ? String(dados.email).trim() : '',
+      senhaHash,
+      perfilId,
+    },
+    include: { perfil: true },
+  });
+  return toUsuario(novo);
 }
 
-function atualizar(id, dados) {
-  const usuarios = read();
-  const idx = usuarios.findIndex(u => u.id === id);
-  if (idx === -1) return null;
-  usuarios[idx].nome = dados.nome ?? usuarios[idx].nome;
-  usuarios[idx].login = dados.login ?? usuarios[idx].login;
-  if (dados.email !== undefined) usuarios[idx].email = String(dados.email).trim();
-  if (TIPOS_VALIDOS.includes(dados.tipo)) usuarios[idx].tipo = dados.tipo;
-  if (dados.senha) usuarios[idx].senhaHash = bcrypt.hashSync(dados.senha, 10);
-  write(usuarios);
-  const { senhaHash, ...rest } = usuarios[idx];
-  return rest;
+async function atualizar(id, dados) {
+  const existente = await prisma.usuario.findUnique({ where: { id } });
+  if (!existente) return null;
+  const updateData = {};
+  if (dados.nome !== undefined) updateData.nome = dados.nome;
+  if (dados.login !== undefined) updateData.login = dados.login;
+  if (dados.email !== undefined) updateData.email = String(dados.email).trim();
+  if (dados.perfilId !== undefined) updateData.perfilId = dados.perfilId;
+  if (dados.senha) updateData.senhaHash = bcrypt.hashSync(dados.senha, 10);
+  const u = await prisma.usuario.update({
+    where: { id },
+    data: updateData,
+    include: { perfil: true },
+  });
+  return toUsuario(u);
 }
 
-function remover(id) {
-  const usuarios = read().filter(u => u.id !== id);
-  if (usuarios.length === read().length) return false;
-  write(usuarios);
-  return true;
+async function remover(id) {
+  try {
+    await prisma.usuario.delete({ where: { id } });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 module.exports = {

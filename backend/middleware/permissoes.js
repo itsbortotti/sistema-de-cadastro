@@ -8,30 +8,33 @@ function requireAuth(req, res, next) {
   next();
 }
 
-function tipoAtual(req) {
+async function perfilIdAtual(req) {
   const uid = req.session?.usuario?.id;
-  if (!uid) return 'membro';
-  const u = getUsuarioById(uid);
-  return u?.tipo || req.session?.usuario?.tipo || 'membro';
+  if (!uid) return null;
+  const u = await getUsuarioById(uid);
+  return u?.perfilId || req.session?.usuario?.perfilId || null;
 }
 
 function requirePermissao(entidade, acao) {
-  return (req, res, next) => {
-    const tipo = tipoAtual(req);
-    if (pode(tipo, entidade, acao)) return next();
+  return async (req, res, next) => {
+    const perfilId = await perfilIdAtual(req);
+    if (!perfilId) return res.status(403).json({ erro: 'Você não tem permissão para realizar esta ação.' });
+    const permitido = await pode(perfilId, entidade, acao);
+    if (permitido) return next();
     return res.status(403).json({ erro: 'Você não tem permissão para realizar esta ação.' });
   };
 }
 
 function requirePermissaoPorMetodo(entidade) {
-  return (req, res, next) => {
-    const tipo = tipoAtual(req);
-    if (tipo === 'admin') return next();
+  return async (req, res, next) => {
+    const perfilId = await perfilIdAtual(req);
+    if (!perfilId) return res.status(403).json({ erro: 'Você não tem permissão para realizar esta ação.' });
     let acao = 'visualizar';
     if (req.method === 'POST') acao = 'criar';
     else if (req.method === 'PUT' || req.method === 'PATCH') acao = 'editar';
     else if (req.method === 'DELETE') acao = 'excluir';
-    if (pode(tipo, entidade, acao)) return next();
+    const permitido = await pode(perfilId, entidade, acao);
+    if (permitido) return next();
     return res.status(403).json({ erro: 'Você não tem permissão para realizar esta ação.' });
   };
 }

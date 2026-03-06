@@ -1,0 +1,268 @@
+# Governança Financeira de Projetos - CI/CD
+#
+# Fluxo:
+#   feature/*  → testes + build → cria PR para dev
+#   dev (merge)→ testes + build → cria PR para hml
+#   hml (merge)→ testes + build → cria PR para main
+#   main (merge)→ testes + build → artefatos (release-*.tar.gz) + tag (vN.0.0)
+#
+# Variáveis: Repository settings → Pipelines → Repository variables (ver docs/PADRAO-PROJETO-IA.md).
+#   BITBUCKET_APP_PASSWORD (Secured): App Password do Bitbucket com permissão "Pull requests: Write"
+#   BITBUCKET_USER (opcional): usuário; se omitido, usa BITBUCKET_REPO_OWNER
+#   SONAR_TOKEN (Secured, opcional): token SonarCloud/SonarQube; se definido, roda análise Sonar após build
+#   SONAR_ORGANIZATION (opcional): organização SonarCloud (ex.: my-org)
+#   SONAR_PROJECT_KEY (opcional): chave do projeto (ex.: meu-repo); obrigatório se SONAR_TOKEN estiver definido
+#
+# Containers: node:18-alpine, curlimages/curl, sonarsource/sonar-scanner-cli. Pipeline falha se qualquer teste ou build falhar.
+#
+# Branches: dev, hml e main precisam existir no repositório (commitar não as cria). Merge de PR: mínimo de 1 aprovação em Branch restrictions. Ver docs/PADRAO-PROJETO-IA.md.
+
+definitions:
+  services:
+    node:
+      image: node:18-alpine
+
+  # Reutilizável: instala dependências backend + frontend
+  caches:
+    backend-node: backend/node_modules
+    frontend-node: frontend/node_modules
+
+  # Step compartilhado: lint (verifica sintaxe e formatação básica)
+  steps:
+    - step: &lint
+        name: Lint
+        image: node:18-alpine
+        caches:
+          - backend-node
+          - frontend-node
+        script:
+          - cd backend && npm ci --ignore-scripts 2>/dev/null || (npm install --no-audit --no-fund)
+          - cd ../frontend && npm ci --ignore-scripts 2>/dev/null || (npm install --no-audit --no-fund)
+          # Lint backend (se existir script lint)
+          - cd ../backend && (npm run lint 2>/dev/null || true)
+          # Lint frontend (se existir script lint)
+          - cd ../frontend && (npm run lint 2>/dev/null || true)
+
+    # Testes unitários backend (Jest)
+    - step: &test-backend
+        name: Testes unitários (backend)
+        image: node:18-alpine
+        caches:
+          - backend-node
+        script:
+          - cd backend
+          - npm ci --ignore-scripts 2>/dev/null || npm install --no-audit --no-fund
+          - npx prisma generate
+          - npm test
+
+    # Testes unitários frontend (Vitest)
+    - step: &test-frontend
+        name: Testes unitários (frontend)
+        image: node:18-alpine
+        caches:
+          - frontend-node
+        script:
+          - cd frontend
+          - npm ci --ignore-scripts 2>/dev/null || npm install --no-audit --no-fund
+          - npm run test:run
+
+    # Build backend (apenas verifica que o projeto sobe; opcional)
+    - step: &build-backend
+        name: Build backend
+        image: node:18-alpine
+        caches:
+          - backend-node
+        script:
+          - cd backend
+          - npm ci --ignore-scripts 2>/dev/null || npm install --no-audit --no-fund
+          - npx prisma generate
+          # Build = gerar cliente Prisma e checar require
+          - node -e "require('./lib/prisma'); console.log('Backend OK');"
+
+    # Build frontend (Vite)
+    - step: &build-frontend
+        name: Build frontend
+        image: node:18-alpine
+        caches:
+          - frontend-node
+        script:
+          - cd frontend
+          - npm ci --ignore-scripts 2>/dev/null || npm install --no-audit --no-fund
+          - npm run build
+        artifacts:
+          - frontend/dist/**
+
+    # Sonar: só executa se SONAR_TOKEN estiver definido; senão pula com sucesso
+    - step: &sonar
+        name: Sonar (análise de qualidade)
+        image: sonarsource/sonar-scanner-cli:latest
+        script:
+          - |
+            if [ -z "${SONAR_TOKEN}" ]; then
+              echo "SONAR_TOKEN não definido; pulando análise Sonar."
+              exit 0
+            fi
+            if [ -z "${SONAR_ORGANIZATION}" ] || [ -z "${SONAR_PROJECT_KEY}" ]; then
+              echo "Sonar configurado mas SONAR_ORGANIZATION ou SONAR_PROJECT_KEY ausente; pulando."
+              exit 0
+            fi
+            sonar-scanner \
+              -Dsonar.token="${SONAR_TOKEN}" \
+              -Dsonar.organization="${SONAR_ORGANIZATION}" \
+              -Dsonar.projectKey="${SONAR_PROJECT_KEY}" \
+              -Dsonar.sources=backend,frontend/src \
+              -Dsonar.exclusions="**/node_modules/**,**/dist/**,**/coverage/**,**/*.test.js,**/*.test.jsx,**/test/**"
+
+    # Base para criar PR via API Bitbucket (cada branch sobrescreve script com source/destination)
+    - step: &create-pr
+        name: Criar Pull Request
+        image: curlimages/curl:latest
+        script:
+          - echo "Configure script no step que usa create-pr (source/destination)."
+
+# --- Pipelines por branch ---
+
+pipelines:
+  # Branches feature/*: commit dispara testes, build e PR para dev
+  branches:
+    'feature/*':
+      - step: *lint
+      - step: *test-backend
+      - step: *test-frontend
+      - step: *build-backend
+      - step: *build-frontend
+      - step: *sonar
+      - step:
+          <<: *create-pr
+          name: Criar PR para dev
+          script:
+            - |
+              REPO="${BITBUCKET_REPO_FULL_NAME}"
+              SOURCE="${BITBUCKET_BRANCH}"
+              DEST="dev"
+              TITLE="[Pipeline] ${SOURCE} → dev"
+              USER="${BITBUCKET_USER:-$BITBUCKET_REPO_OWNER}"
+              PASS="${BITBUCKET_APP_PASSWORD}"
+              if [ -z "$PASS" ]; then echo "BITBUCKET_APP_PASSWORD não definido; pulando criação de PR."; exit 0; fi
+              BODY="PR automático após testes e build (feature → dev)."
+              curl -s -w "\n%{http_code}" -X POST "https://api.bitbucket.org/2.0/repositories/${REPO}/pullrequests" \
+                -u "${USER}:${PASS}" \
+                -H "Content-Type: application/json" \
+                -d "{\"title\":\"${TITLE}\",\"source\":{\"branch\":{\"name\":\"${SOURCE}\"}},\"destination\":{\"branch\":{\"name\":\"${DEST}\"}},\"description\":\"${BODY}\"}" | tee /tmp/out
+              CODE=$(tail -n1 /tmp/out)
+              if [ "$CODE" = "201" ] || [ "$CODE" = "200" ]; then echo "PR criado."; exit 0; fi
+              if [ "$CODE" = "400" ]; then echo "PR já pode existir ou branch destino inexistente."; exit 0; fi
+              exit 1
+
+    # Branch dev: merge dispara testes, build e PR para hml
+    dev:
+      - step: *lint
+      - step: *test-backend
+      - step: *test-frontend
+      - step: *build-backend
+      - step: *build-frontend
+      - step: *sonar
+      - step:
+          <<: *create-pr
+          name: Criar PR para hml
+          script:
+            - |
+              REPO="${BITBUCKET_REPO_FULL_NAME}"
+              SOURCE="dev"
+              DEST="hml"
+              TITLE="[Pipeline] dev → hml"
+              USER="${BITBUCKET_USER:-$BITBUCKET_REPO_OWNER}"
+              PASS="${BITBUCKET_APP_PASSWORD}"
+              if [ -z "$PASS" ]; then echo "BITBUCKET_APP_PASSWORD não definido; pulando criação de PR."; exit 0; fi
+              BODY="PR automático após testes e build (dev → hml)."
+              curl -s -w "\n%{http_code}" -X POST "https://api.bitbucket.org/2.0/repositories/${REPO}/pullrequests" \
+                -u "${USER}:${PASS}" \
+                -H "Content-Type: application/json" \
+                -d "{\"title\":\"${TITLE}\",\"source\":{\"branch\":{\"name\":\"${SOURCE}\"}},\"destination\":{\"branch\":{\"name\":\"${DEST}\"}},\"description\":\"${BODY}\"}" | tee /tmp/out
+              CODE=$(tail -n1 /tmp/out)
+              if [ "$CODE" = "201" ] || [ "$CODE" = "200" ]; then echo "PR criado."; exit 0; fi
+              if [ "$CODE" = "400" ]; then echo "PR já pode existir ou branch destino inexistente."; exit 0; fi
+              exit 1
+
+    # Branch hml: merge dispara testes/build de homologação e PR para main
+    hml:
+      - step: *lint
+      - step: *test-backend
+      - step: *test-frontend
+      - step: *build-backend
+      - step: *build-frontend
+      - step: *sonar
+      - step:
+          <<: *create-pr
+          name: Criar PR para main
+          script:
+            - |
+              REPO="${BITBUCKET_REPO_FULL_NAME}"
+              SOURCE="hml"
+              DEST="main"
+              TITLE="[Pipeline] hml → main (release)"
+              USER="${BITBUCKET_USER:-$BITBUCKET_REPO_OWNER}"
+              PASS="${BITBUCKET_APP_PASSWORD}"
+              if [ -z "$PASS" ]; then echo "BITBUCKET_APP_PASSWORD não definido; pulando criação de PR."; exit 0; fi
+              BODY="PR automático para release (hml → main)."
+              curl -s -w "\n%{http_code}" -X POST "https://api.bitbucket.org/2.0/repositories/${REPO}/pullrequests" \
+                -u "${USER}:${PASS}" \
+                -H "Content-Type: application/json" \
+                -d "{\"title\":\"${TITLE}\",\"source\":{\"branch\":{\"name\":\"${SOURCE}\"}},\"destination\":{\"branch\":{\"name\":\"${DEST}\"}},\"description\":\"${BODY}\"}" | tee /tmp/out
+              CODE=$(tail -n1 /tmp/out)
+              if [ "$CODE" = "201" ] || [ "$CODE" = "200" ]; then echo "PR criado."; exit 0; fi
+              if [ "$CODE" = "400" ]; then echo "PR já pode existir ou branch destino inexistente."; exit 0; fi
+              exit 1
+
+    # Branch main: merge dispara testes finais, build de release, artefatos e tag
+    main:
+      - step: *lint
+      - step: *test-backend
+      - step: *test-frontend
+      - step: *build-backend
+      - step: *build-frontend
+      - step: *sonar
+      - step:
+          name: Artefatos e release
+          image: node:18-alpine
+          caches:
+            - backend-node
+            - frontend-node
+          script:
+            - cd backend && (npm ci --ignore-scripts 2>/dev/null || npm install --no-audit --no-fund) && npx prisma generate
+            - cd ../frontend && (npm ci --ignore-scripts 2>/dev/null || npm install --no-audit --no-fund) && npm run build
+            - cd ..
+            - export RELEASE_VER="${BITBUCKET_BUILD_NUMBER:-0}"
+            - mkdir -p dist
+            - cp -r frontend/dist dist/frontend 2>/dev/null || true
+            - tar -czvf "release-${RELEASE_VER}.tar.gz" backend frontend dist 2>/dev/null || tar -czvf "release-${RELEASE_VER}.tar.gz" backend frontend
+          artifacts:
+            - release-*.tar.gz
+      - step:
+          name: Tag e release (Bitbucket)
+          image: curlimages/curl:latest
+          script:
+            - |
+              REPO="${BITBUCKET_REPO_FULL_NAME}"
+              TAG="v${BITBUCKET_BUILD_NUMBER:-0}.0.0"
+              USER="${BITBUCKET_USER:-$BITBUCKET_REPO_OWNER}"
+              PASS="${BITBUCKET_APP_PASSWORD}"
+              if [ -z "$PASS" ]; then echo "BITBUCKET_APP_PASSWORD não definido; pulando tag."; exit 0; fi
+              # Criar tag via API
+              curl -s -w "\n%{http_code}" -X POST "https://api.bitbucket.org/2.0/repositories/${REPO}/refs/tags" \
+                -u "${USER}:${PASS}" \
+                -H "Content-Type: application/json" \
+                -d "{\"name\":\"${TAG}\",\"target\":{\"hash\":\"${BITBUCKET_COMMIT}\"}}" | tee /tmp/out
+              CODE=$(tail -n1 /tmp/out)
+              if [ "$CODE" = "201" ] || [ "$CODE" = "200" ]; then echo "Tag ${TAG} criada."; exit 0; fi
+              echo "Resposta da API (pode ser tag já existente):"; head -n -1 /tmp/out
+              exit 0
+
+  # Pipeline padrão (ex.: outras branches): só testes e build
+  default:
+    - step: *lint
+    - step: *test-backend
+    - step: *test-frontend
+    - step: *build-backend
+    - step: *build-frontend
+    - step: *sonar

@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { usePermissoes } from '../context/PermissoesContext';
 import { produtosSoftwareApi, capexApi, projetosApi, empresasApi } from '../api/client';
 import {
   BarChart,
@@ -35,13 +37,13 @@ const CORES_CAPEX = {
 };
 
 const PERIODOS = [
-  { id: 'semanal', label: 'Semanal', multiplicador: 1 / 4, descricao: 'Custo semanal (média)' },
   { id: 'mensal', label: 'Mensal', multiplicador: 1, descricao: 'Custo mensal' },
   { id: 'anual', label: 'Anual', multiplicador: 12, descricao: 'Custo anual' },
 ];
 
 export default function Dashboard() {
   const { usuario } = useAuth();
+  const { can } = usePermissoes();
   const [produtos, setProdutos] = useState([]);
   const [projetos, setProjetos] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -487,6 +489,16 @@ export default function Dashboard() {
       <div className="dashboard">
         <h1>Bem-vindo, {usuario?.nome || usuario?.login}</h1>
         <p style={{ color: '#dc2626' }}>{erro}</p>
+      </div>
+    );
+  }
+
+  if (!can('dashboard', 'visualizar')) {
+    return (
+      <div className="dashboard">
+        <p className="erro-msg">Você não tem permissão para acessar o Dashboard.</p>
+        <p className="page-desc">Solicite ao administrador a permissão na aba &quot;Dashboard&quot; do seu perfil.</p>
+        <Link to="/usuarios" className="btn btn-secondary">Ir para Usuários</Link>
       </div>
     );
   }

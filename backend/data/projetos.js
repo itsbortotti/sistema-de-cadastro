@@ -1,8 +1,4 @@
-const fs = require('fs');
-const path = require('path');
-
-const FILE = path.join(__dirname, 'projetos.json');
-const CAMPOS = ['nome', 'descricao', 'empresaId', 'dataInicio', 'dataFim', 'status', 'observacoes', 'produtoSoftwareIds'];
+const { prisma } = require('../lib/prisma');
 
 function defaults() {
   return {
@@ -17,75 +13,107 @@ function defaults() {
   };
 }
 
-function normalizar(item) {
+function normalizar(dados) {
   const d = defaults();
-  if (!item || typeof item !== 'object') return d;
-  if (item.nome !== undefined && item.nome !== null) d.nome = String(item.nome).trim();
-  if (item.descricao !== undefined && item.descricao !== null) d.descricao = String(item.descricao).trim();
-  if (item.empresaId !== undefined && item.empresaId !== null && String(item.empresaId).trim()) d.empresaId = String(item.empresaId).trim();
+  if (!dados || typeof dados !== 'object') return d;
+  if (dados.nome !== undefined && dados.nome !== null) d.nome = String(dados.nome).trim();
+  if (dados.descricao !== undefined && dados.descricao !== null) d.descricao = String(dados.descricao).trim();
+  if (dados.empresaId !== undefined && dados.empresaId !== null && String(dados.empresaId).trim()) d.empresaId = String(dados.empresaId).trim();
   else d.empresaId = null;
-  if (item.dataInicio !== undefined && item.dataInicio !== null && String(item.dataInicio).trim()) d.dataInicio = String(item.dataInicio).trim();
+  if (dados.dataInicio !== undefined && dados.dataInicio !== null && String(dados.dataInicio).trim()) d.dataInicio = String(dados.dataInicio).trim();
   else d.dataInicio = null;
-  if (item.dataFim !== undefined && item.dataFim !== null && String(item.dataFim).trim()) d.dataFim = String(item.dataFim).trim();
+  if (dados.dataFim !== undefined && dados.dataFim !== null && String(dados.dataFim).trim()) d.dataFim = String(dados.dataFim).trim();
   else d.dataFim = null;
-  if (item.status !== undefined && item.status !== null) d.status = String(item.status).trim();
-  if (item.observacoes !== undefined && item.observacoes !== null) d.observacoes = String(item.observacoes).trim();
-  if (Array.isArray(item.produtoSoftwareIds)) {
-    d.produtoSoftwareIds = item.produtoSoftwareIds.map((x) => String(x).trim()).filter(Boolean);
+  if (dados.status !== undefined && dados.status !== null) d.status = String(dados.status).trim();
+  if (dados.observacoes !== undefined && dados.observacoes !== null) d.observacoes = String(dados.observacoes).trim();
+  if (Array.isArray(dados.produtoSoftwareIds)) {
+    d.produtoSoftwareIds = dados.produtoSoftwareIds.map((x) => String(x).trim()).filter(Boolean);
   } else {
     d.produtoSoftwareIds = [];
   }
   return d;
 }
 
-function read() {
+function toResponse(projeto) {
+  if (!projeto) return null;
+  const psIds = projeto.produtosSoftware ? projeto.produtosSoftware.map((p) => p.id) : [];
+  return {
+    id: projeto.id,
+    nome: projeto.nome,
+    descricao: projeto.descricao,
+    empresaId: projeto.empresaId,
+    dataInicio: projeto.dataInicio,
+    dataFim: projeto.dataFim,
+    status: projeto.status,
+    observacoes: projeto.observacoes,
+    produtoSoftwareIds: psIds,
+  };
+}
+
+async function listar() {
+  const rows = await prisma.projeto.findMany({
+    include: { produtosSoftware: { select: { id: true } } },
+    orderBy: { nome: 'asc' },
+  });
+  return rows.map(toResponse);
+}
+
+async function getById(id) {
+  const r = await prisma.projeto.findUnique({
+    where: { id },
+    include: { produtosSoftware: { select: { id: true } } },
+  });
+  return toResponse(r);
+}
+
+async function criar(dados) {
+  const d = normalizar(dados);
+  const novo = await prisma.projeto.create({
+    data: {
+      nome: d.nome,
+      descricao: d.descricao,
+      empresaId: d.empresaId,
+      dataInicio: d.dataInicio,
+      dataFim: d.dataFim,
+      status: d.status,
+      observacoes: d.observacoes,
+      produtosSoftware: d.produtoSoftwareIds.length
+        ? { connect: d.produtoSoftwareIds.map((id) => ({ id })) }
+        : undefined,
+    },
+    include: { produtosSoftware: { select: { id: true } } },
+  });
+  return toResponse(novo);
+}
+
+async function atualizar(id, dados) {
+  const existente = await prisma.projeto.findUnique({ where: { id }, include: { produtosSoftware: true } });
+  if (!existente) return null;
+  const d = normalizar({ ...existente, produtoSoftwareIds: existente.produtosSoftware?.map((p) => p.id) || [], ...dados });
+  const atualizado = await prisma.projeto.update({
+    where: { id },
+    data: {
+      nome: d.nome,
+      descricao: d.descricao,
+      empresaId: d.empresaId,
+      dataInicio: d.dataInicio,
+      dataFim: d.dataFim,
+      status: d.status,
+      observacoes: d.observacoes,
+      produtosSoftware: { set: d.produtoSoftwareIds.map((id) => ({ id })) },
+    },
+    include: { produtosSoftware: { select: { id: true } } },
+  });
+  return toResponse(atualizado);
+}
+
+async function remover(id) {
   try {
-    const data = JSON.parse(fs.readFileSync(FILE, 'utf8'));
-    return Array.isArray(data) ? data.map((x) => ({ ...defaults(), ...x, ...normalizar(x) })) : [];
+    await prisma.projeto.delete({ where: { id } });
+    return true;
   } catch {
-    fs.writeFileSync(FILE, '[]');
-    return [];
+    return false;
   }
-}
-
-function write(data) {
-  fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
-}
-
-function listar() {
-  return read();
-}
-
-function getById(id) {
-  const item = read().find((x) => x.id === id);
-  return item ? { ...defaults(), ...item, ...normalizar(item) } : null;
-}
-
-function criar(dados) {
-  const lista = read();
-  const id = String(Date.now());
-  const novo = { id, ...defaults(), ...normalizar(dados) };
-  lista.push(novo);
-  write(lista);
-  return novo;
-}
-
-function atualizar(id, dados) {
-  const lista = read();
-  const idx = lista.findIndex((x) => x.id === id);
-  if (idx === -1) return null;
-  const atual = lista[idx];
-  const atualizado = { ...atual, ...normalizar(dados) };
-  lista[idx] = atualizado;
-  write(lista);
-  return { ...defaults(), ...atualizado };
-}
-
-function remover(id) {
-  const lista = read().filter((x) => x.id !== id);
-  if (lista.length === read().length) return false;
-  write(lista);
-  return true;
 }
 
 module.exports = { listar, getById, criar, atualizar, remover };

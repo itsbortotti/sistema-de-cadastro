@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import BtnVoltarHeader from '../../components/BtnVoltarHeader';
 import { timesApi } from '../../api/client';
 import '../usuarios/Usuarios.css';
 import '../CadastroFormLayout.css';
@@ -51,10 +52,8 @@ export default function TimeForm() {
   return (
     <div className="cadastro-page form-cadastro-page">
       <div className="page-header">
-        <h1>{isEdicao ? 'Editar time' : 'Novo time'}</h1>
-        <div className="page-header-actions">
-          <Link to="/times" className="btn btn-secondary">Voltar</Link>
-        </div>
+        <BtnVoltarHeader to="/times" />
+        <h1>{isEdicao ? 'Editar time' : ''}</h1>
       </div>
       <form className="form-card form-cadastro" onSubmit={handleSubmit}>
         {erro && <p className="erro-msg">{erro}</p>}

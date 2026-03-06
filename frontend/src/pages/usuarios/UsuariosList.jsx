@@ -54,8 +54,7 @@ export default function UsuariosList() {
   const termoBusca = normalizarTexto(busca).trim();
   const listaFiltrada = termoBusca
     ? lista.filter((u) => {
-        const tipoStr = u.tipo === 'admin' ? 'administrador' : u.tipo === 'membro' ? 'membro' : u.tipo === 'visualizacao' ? 'visualizacao' : String(u.tipo || '');
-        const texto = [u.nome, u.login, u.email, tipoStr].join(' ');
+        const texto = [u.nome, u.login, u.email, u.perfilNome || ''].join(' ');
         return normalizarTexto(texto).includes(termoBusca);
       })
     : lista;
@@ -108,10 +107,7 @@ export default function UsuariosList() {
                     if (id === 'nome') return <td key={id} className="td-texto" title={u.nome}>{v(u.nome)}</td>;
                     if (id === 'login') return <td key={id}>{v(u.login)}</td>;
                     if (id === 'email') return <td key={id} className="td-texto" title={u.email}>{v(u.email)}</td>;
-                    if (id === 'perfil') {
-                      const perfil = u.tipo === 'admin' ? 'Administrador' : u.tipo === 'membro' ? 'Membro' : u.tipo === 'visualizacao' ? 'Apenas visualização' : (u.tipo || 'Membro');
-                      return <td key={id}>{perfil}</td>;
-                    }
+                    if (id === 'perfil') return <td key={id}>{v(u.perfilNome)}</td>;
                     return null;
                   })}
                   <td className="td-acoes">
