@@ -57,7 +57,7 @@ export default function ManualPage() {
           <h2 className="manual-titulo">Configurações</h2>
           <p>Em <strong>Configurações</strong> estão:</p>
           <ul>
-            <li><strong>Geral</strong> — alterar a logo do menu lateral e o favicon da aplicação (ícone da aba). As alterações são salvas no navegador.</li>
+            <li><strong>Geral</strong> — alterar a logo do menu lateral e o favicon da aplicação. As alterações são salvas nos arquivos do projeto (public e assets).</li>
             <li><strong>Perfis</strong> — criar e editar perfis de acesso. Em cada perfil é possível definir em quais abas os usuários podem Ver, Editar, Criar e Excluir.</li>
             <li><strong>Logs</strong> — consultar registros de login, edição, criação e exclusão no sistema (conforme permissão).</li>
             <li><strong>Manual</strong> — esta página com o descritivo de uso do sistema.</li>

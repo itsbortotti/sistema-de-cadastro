@@ -1,37 +1,49 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
-
-const STORAGE_LOGO = 'app_config_logo_header';
-const STORAGE_FAVICON = 'app_config_favicon';
+import { configuracoesApi } from '../api/client';
 
 const ConfiguracoesGeralContext = createContext(null);
 
 export function ConfiguracoesGeralProvider({ children }) {
-  const [logoHeader, setLogoHeaderState] = useState(() => localStorage.getItem(STORAGE_LOGO));
-  const [favicon, setFaviconState] = useState(() => localStorage.getItem(STORAGE_FAVICON));
+  const [logoHeader, setLogoHeaderState] = useState(null);
+  const [favicon, setFaviconState] = useState(null);
+  const [loaded, setLoaded] = useState(false);
 
-  const setLogoHeader = useCallback((dataUrlOrNull) => {
+  useEffect(() => {
+    configuracoesApi
+      .getCustomAssets()
+      .then(({ logo, favicon: fav }) => {
+        setLogoHeaderState(logo ? 'custom' : null);
+        setFaviconState(fav ? 'custom' : null);
+      })
+      .catch(() => {})
+      .finally(() => setLoaded(true));
+  }, []);
+
+  const setLogoHeader = useCallback(async (dataUrlOrNull) => {
     if (dataUrlOrNull == null || dataUrlOrNull === '') {
-      localStorage.removeItem(STORAGE_LOGO);
+      await configuracoesApi.removeLogo().catch(() => {});
       setLogoHeaderState(null);
     } else {
-      localStorage.setItem(STORAGE_LOGO, dataUrlOrNull);
-      setLogoHeaderState(dataUrlOrNull);
+      await configuracoesApi.saveLogo(dataUrlOrNull);
+      setLogoHeaderState('custom');
     }
   }, []);
 
-  const setFavicon = useCallback((dataUrlOrNull) => {
+  const setFavicon = useCallback(async (dataUrlOrNull) => {
     if (dataUrlOrNull == null || dataUrlOrNull === '') {
-      localStorage.removeItem(STORAGE_FAVICON);
+      await configuracoesApi.removeFavicon().catch(() => {});
       setFaviconState(null);
     } else {
-      localStorage.setItem(STORAGE_FAVICON, dataUrlOrNull);
-      setFaviconState(dataUrlOrNull);
+      await configuracoesApi.saveFavicon(dataUrlOrNull);
+      setFaviconState('custom');
     }
   }, []);
 
-  const restoreDefaults = useCallback(() => {
-    localStorage.removeItem(STORAGE_LOGO);
-    localStorage.removeItem(STORAGE_FAVICON);
+  const restoreDefaults = useCallback(async () => {
+    await Promise.all([
+      configuracoesApi.removeLogo().catch(() => {}),
+      configuracoesApi.removeFavicon().catch(() => {}),
+    ]);
     setLogoHeaderState(null);
     setFaviconState(null);
   }, []);
@@ -41,6 +53,7 @@ export function ConfiguracoesGeralProvider({ children }) {
       value={{
         logoHeader: logoHeader || null,
         favicon: favicon || null,
+        loaded,
         setLogoHeader,
         setFavicon,
         restoreDefaults,
@@ -62,6 +75,11 @@ export function useConfiguracoesGeralOptional() {
   return useContext(ConfiguracoesGeralContext);
 }
 
+/** URL da logo do header: arquivo no servidor se custom, senão null (Layout usa default). */
+export function getLogoHeaderUrl(logoHeader) {
+  return logoHeader === 'custom' ? '/logo_header.png' : null;
+}
+
 /** Atualiza o <link rel="icon"> no head conforme o contexto */
 export function FaviconUpdater() {
   const { favicon } = useConfiguracoesGeral();
@@ -73,7 +91,7 @@ export function FaviconUpdater() {
       link.id = 'app-favicon';
       document.head.appendChild(link);
     }
-    link.href = favicon || '/favicon.ico';
+    link.href = favicon === 'custom' ? '/favicon.ico' : '/favicon.ico';
   }, [favicon]);
   return null;
 }

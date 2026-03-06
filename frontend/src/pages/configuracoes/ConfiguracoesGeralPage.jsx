@@ -23,9 +23,10 @@ export default function ConfiguracoesGeralPage() {
     if (!file || !file.type.startsWith('image/')) return;
     try {
       const dataUrl = await readFileAsDataUrl(file);
-      setLogoHeader(dataUrl);
+      await setLogoHeader(dataUrl);
     } catch (err) {
       console.error(err);
+      alert(err?.message || 'Falha ao salvar a logo.');
     }
     e.target.value = '';
   };
@@ -35,17 +36,23 @@ export default function ConfiguracoesGeralPage() {
     if (!file || !file.type.startsWith('image/')) return;
     try {
       const dataUrl = await readFileAsDataUrl(file);
-      setFavicon(dataUrl);
+      await setFavicon(dataUrl);
     } catch (err) {
       console.error(err);
+      alert(err?.message || 'Falha ao salvar o favicon.');
     }
     e.target.value = '';
   };
 
-  const handleRestoreDefaults = () => {
-    restoreDefaults();
-    if (logoInputRef.current) logoInputRef.current.value = '';
-    if (faviconInputRef.current) faviconInputRef.current.value = '';
+  const handleRestoreDefaults = async () => {
+    try {
+      await restoreDefaults();
+      if (logoInputRef.current) logoInputRef.current.value = '';
+      if (faviconInputRef.current) faviconInputRef.current.value = '';
+    } catch (err) {
+      console.error(err);
+      alert(err?.message || 'Falha ao restaurar.');
+    }
   };
 
   return (
@@ -55,7 +62,7 @@ export default function ConfiguracoesGeralPage() {
         <h1>Geral</h1>
       </div>
       <p className="page-desc">
-        Altere a <strong>logo do menu lateral</strong> e o <strong>favicon</strong> da aplicação. As alterações são salvas no navegador.
+        Altere a <strong>logo do menu lateral</strong> e o <strong>favicon</strong> da aplicação. As alterações são salvas nos arquivos do projeto (public e assets).
       </p>
 
       <div className="config-geral-card">
@@ -64,7 +71,7 @@ export default function ConfiguracoesGeralPage() {
           <div className="config-geral-preview-wrap">
             <div className="config-geral-preview config-geral-preview-logo">
               {logoHeader ? (
-                <img src={logoHeader} alt="Logo atual" className="config-geral-logo-img" />
+                <img src="/logo_header.png" alt="Logo atual" className="config-geral-logo-img" />
               ) : (
                 <span className="config-geral-placeholder">Logo padrão em uso</span>
               )}
@@ -95,7 +102,7 @@ export default function ConfiguracoesGeralPage() {
           <div className="config-geral-preview-wrap">
             <div className="config-geral-preview config-geral-preview-favicon">
               {favicon ? (
-                <img src={favicon} alt="Favicon atual" className="config-geral-favicon-img" />
+                <img src="/favicon.ico" alt="Favicon atual" className="config-geral-favicon-img" />
               ) : (
                 <span className="config-geral-placeholder">Favicon padrão em uso</span>
               )}

@@ -85,3 +85,11 @@ export const logsApi = {
     return api(`/logs${q ? `?${q}` : ''}`);
   },
 };
+
+export const configuracoesApi = {
+  getCustomAssets: () => api('/configuracoes/custom-assets'),
+  saveLogo: (dataUrl) => api('/configuracoes/logo', { method: 'POST', body: JSON.stringify({ logo: dataUrl }) }),
+  removeLogo: () => api('/configuracoes/logo', { method: 'DELETE' }),
+  saveFavicon: (dataUrl) => api('/configuracoes/favicon', { method: 'POST', body: JSON.stringify({ favicon: dataUrl }) }),
+  removeFavicon: () => api('/configuracoes/favicon', { method: 'DELETE' }),
+};

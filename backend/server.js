@@ -27,6 +27,7 @@ const empresasRoutes = require('./routes/empresas');
 const permissoesRoutes = require('./routes/permissoes');
 const perfisRoutes = require('./routes/perfis');
 const logsRoutes = require('./routes/logs');
+const configuracoesRoutes = require('./routes/configuracoes');
 const { requireAuth, requirePermissaoPorMetodo } = require('./middleware/permissoes');
 
 if (process.env.NODE_ENV === 'production' && !config.session.secret) {
@@ -98,6 +99,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/permissoes', requireAuth, permissoesRoutes);
 app.use('/api/perfis', requireAuth, requirePermissaoPorMetodo('perfis'), perfisRoutes);
 app.use('/api/logs', requireAuth, requirePermissaoPorMetodo('logs'), logsRoutes);
+app.use('/api/configuracoes', (req, res, next) => {
+  if (req.path === '/custom-assets' && req.method === 'GET') return next();
+  requireAuth(req, res, () => {
+    requirePermissaoPorMetodo('configuracoes')(req, res, next);
+  });
+}, configuracoesRoutes);
 app.use('/api/usuarios', requireAuth, requirePermissaoPorMetodo('usuarios'), usuariosRoutes);
 app.use('/api/fornecedores', requireAuth, requirePermissaoPorMetodo('fornecedores'), fornecedoresRoutes);
 app.use('/api/areas', requireAuth, requirePermissaoPorMetodo('areas'), areasRoutes);

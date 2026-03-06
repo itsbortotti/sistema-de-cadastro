@@ -6,7 +6,6 @@ import { useTheme } from '../context/ThemeContext';
 import { useConfiguracoesGeralOptional } from '../context/ConfiguracoesGeralContext';
 import { ErrorBoundary } from './ErrorBoundary';
 import logoPrincipalBranco from '../../assets/images/logo_principal_branco.png';
-import logoBlocoAzul from '../../assets/images/logo_bloco_azul.png';
 import './Layout.css';
 
 const iconDashboard = (
@@ -162,7 +161,7 @@ export default function Layout() {
   const { can, isAdmin } = usePermissoes();
   const { isDark, toggleTheme } = useTheme();
   const configuracoesGeral = useConfiguracoesGeralOptional();
-  const logoUrl = configuracoesGeral?.logoHeader || logoPrincipalBranco;
+  const logoUrl = (configuracoesGeral?.logoHeader === 'custom' ? '/logo_header.png' : null) || logoPrincipalBranco;
   const navigate = useNavigate();
   const location = useLocation();
   const [menuAberto, setMenuAberto] = useState(false);
@@ -335,9 +334,6 @@ export default function Layout() {
         <div className="sidebar-footer">
           <div className="sidebar-footer-powered">
             <p className="sidebar-powered-text">Powered by</p>
-            <div className="sidebar-powered-logo-wrap">
-              <img src={logoUrl} alt="Tecnosolve" className="sidebar-powered-logo-img" />
-            </div>
             <button
               type="button"
               className="btn-chevron-sidebar"
